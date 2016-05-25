@@ -10,4 +10,5 @@ public class RepositoryInfo
     @XmlElement public String user;
     @XmlElement public String password;
     @XmlElement public String manifestPath;
+    @XmlElement public String description;
 }

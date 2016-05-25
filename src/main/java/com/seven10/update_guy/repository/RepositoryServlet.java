@@ -26,7 +26,7 @@ public class RepositoryServlet
 	
 	public RepositoryServlet()
 	{
-		repoInfoMgr = new RepositoryInfoMgr();
+		repoInfoMgr = new RepositoryInfoMgr("repos.dat");
 	}
 
 	@GET
@@ -38,6 +38,7 @@ public class RepositoryServlet
 		// download manifest file
 		// render as manifest object
 		// return manifest object
+		return new Manifest("");
 	}
 	
 	@GET
@@ -49,6 +50,7 @@ public class RepositoryServlet
 		// get VersionEntry from manifest
 		// download to cache each file
 		// return result
+		return Response.ok().build();
 	}
 	
 	@GET
@@ -57,9 +59,10 @@ public class RepositoryServlet
 	public Response showRepos()
 	{
 		Map<Integer, RepositoryInfo> repoMap = repoInfoMgr.getRepoMap();
-		repoMap.forEach((repoId,repoInfo)->resp);
+		//repoMap.forEach((repoId,repoInfo)->resp);
 		
-		return Response.ok(json, MediaType.APPLICATION_JSON).build();
+		//return Response.ok(json, MediaType.APPLICATION_JSON).build();
+		return Response.ok().build();
 		
 	}
 	

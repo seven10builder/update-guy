@@ -13,13 +13,15 @@ import com.seven10.update_guy.exceptions.RepositoryException;
 
 public class RepositoryInfoMgr
 {
-	private static final String repositoryStorePath = "repos.dat";
+	private final String repositoryStorePath;
+	
 	Map<Integer, RepositoryInfo> repoMap;
 
-	public RepositoryInfoMgr()
+	public RepositoryInfoMgr(String repositoryStorePath)
 	{
+		this.repositoryStorePath = repositoryStorePath;
 		repoMap = new HashMap<Integer, RepositoryInfo>();
-		RepositoryInfo[] repos = loadRepos();
+		RepositoryInfo[] repos = loadRepos(repositoryStorePath);
 		for (RepositoryInfo repo : repos)
 		{
 			repoMap.put(repo.hashCode(), repo);
@@ -35,7 +37,7 @@ public class RepositoryInfoMgr
 		}
 		// store repositoryInfo list
 		repoMap.put(hash, repoInfo);
-		writeRepos(repoMap.values());
+		writeRepos(repositoryStorePath, repoMap.values());
 	}
 
 	public void deleteRepository(int repositoryId) throws RepositoryException
@@ -47,15 +49,15 @@ public class RepositoryInfoMgr
 		}
 		// remove repositoryInfo object from list
 		repoMap.remove(repositoryId);
-		writeRepos(repoMap.values());
+		writeRepos(repositoryStorePath, repoMap.values());
 	}
 
-	public static void writeRepos(Collection<RepositoryInfo> repos) throws RepositoryException
+	public static void writeRepos(String repoStorePath, Collection<RepositoryInfo> repos) throws RepositoryException
 	{
 		ObjectOutputStream oos = null;
 		try
 		{
-			oos = new ObjectOutputStream(new FileOutputStream(repositoryStorePath));
+			oos = new ObjectOutputStream(new FileOutputStream(repoStorePath));
 			for (RepositoryInfo repo : repos)
 			{
 				oos.writeObject(repo);
@@ -63,7 +65,7 @@ public class RepositoryInfoMgr
 		}
 		catch (IOException e)
 		{
-			throw new RepositoryException("Error writing repository information to file '%s': %s", repositoryStorePath, e.getMessage());
+			throw new RepositoryException("Error writing repository information to file '%s': %s", repoStorePath, e.getMessage());
 		}
 		finally
 		{
@@ -77,23 +79,23 @@ public class RepositoryInfoMgr
 			}
 			catch(IOException e)
 			{
-				throw new RepositoryException("Error closing repository information file '%s': %s", repositoryStorePath, e.getMessage());
+				throw new RepositoryException("Error closing repository information file '%s': %s", repoStorePath, e.getMessage());
 			}
 		}
 	}
 
-	public static RepositoryInfo[] loadRepos()
+	public static RepositoryInfo[] loadRepos(String repoStorePath)
 	{
 		ObjectInputStream ois = null;
 		RepositoryInfo[] repos;
 		try
 		{
-			ois = new ObjectInputStream(new FileInputStream(repositoryStorePath));
+			ois = new ObjectInputStream(new FileInputStream(repoStorePath));
 			repos = (RepositoryInfo[]) ois.readObject();
 		}
 		catch (IOException|ClassNotFoundException e)
 		{
-			// TODO: log this => ("Error reading repository information to file '%s': %s", repositoryStorePath, e.getMessage());
+			// TODO: log this => ("Error reading repository information to file '%s': %s", getRepositoryStorePath(), e.getMessage());
 			repos = new RepositoryInfo[0];
 		}
 		finally
@@ -108,7 +110,7 @@ public class RepositoryInfoMgr
 			}
 			catch(IOException e)
 			{
-				// TODO: log this => ("Error closing repository information file '%s': %s", repositoryStorePath, e.getMessage());
+				// TODO: log this => ("Error closing repository information file '%s': %s", getRepositoryStorePath(), e.getMessage());
 			}
 		}
 		return repos;
