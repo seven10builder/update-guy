@@ -17,7 +17,7 @@ import com.seven10.update_guy.exceptions.RepositoryException;
 public class RepositoryInfoMgr
 {
 	private final String repositoryStorePath;
-	Map<Integer, RepositoryInfo> repoMap;
+	private Map<Integer, RepositoryInfo> repoMap;
 
 	public RepositoryInfoMgr(String repositoryStorePath)
 	{
@@ -151,5 +151,6 @@ public class RepositoryInfoMgr
 	{
 		return repoMap;
 	}
+
 
 }

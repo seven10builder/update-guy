@@ -1,29 +1,23 @@
 /**
  * 
  */
-package com.seven10.update_guy.repository.test;
+package com.seven10.update_guy.repository;
 
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.input.AutoCloseInputStream;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+
+import com.seven10.update_guy.TestHelpers;
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.repository.RepositoryInfo;
 import com.seven10.update_guy.repository.RepositoryInfoMgr;
@@ -41,53 +35,7 @@ public class RepositoryInfoMgrTest
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
 
-	private List<RepositoryInfo> createRepoList(int repoCount)
-	{
-		List<RepositoryInfo> repos = new ArrayList<RepositoryInfo>();
-		for (int i = 1; i <= repoCount; i++)
-		{
-			RepositoryInfo repo = createDummyRepoInfo(String.valueOf(i));
-			repos.add(repo);
-		}
-		return repos;
-	}
-
-	private void createDummyFile(String repoStorePath, int repoCount) throws FileNotFoundException, IOException
-	{
-		ObjectOutputStream oos = null;
-		try
-		{
-			oos = new ObjectOutputStream(new FileOutputStream(repoStorePath));
-			List<RepositoryInfo> repos = createRepoList(repoCount);
-			for (RepositoryInfo repo : repos)
-			{
-				oos.writeObject(repo);
-			}
-		}
-		finally
-		{
-			oos.close();
-		}
-
-	}
-
-	private RepositoryInfo createDummyRepoInfo(String id)
-	{
-		RepositoryInfo repo = new RepositoryInfo();
-		repo.description = String.format("repo index = %s", id);
-		repo.manifestPath = String.format("/manifest_path_%s", id);
-		repo.user = String.format("user_%s", id);
-		repo.password = String.format("password_%s", id);
-		repo.repoAddress = String.format("repoAddress.%s", id);
-		return repo;
-	}
-
-	private String hashFile(File storeFile) throws NoSuchAlgorithmException, IOException
-	{
-		final InputStream fis = new AutoCloseInputStream(new FileInputStream(storeFile));
-		return new String(Hex.encodeHex(DigestUtils.md5(fis)));
-	}
-
+	
 	/**
 	 * Test method for
 	 * {@link com.seven10.update_guy.repository.RepositoryInfoMgr#RepositoryInfoMgr()}
@@ -152,7 +100,7 @@ public class RepositoryInfoMgrTest
 		{
 			String fileName = String.format("ManyRepoList%d.dat", i);
 			String storePath = folder.newFile(fileName).getAbsolutePath();
-			createDummyFile(storePath, i);
+			TestHelpers.createMockedFile(storePath, i);
 			RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
 			assertEquals(mgr.getRepoMap().keySet().size(), i);
 		}
@@ -175,11 +123,11 @@ public class RepositoryInfoMgrTest
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storeFile.getAbsolutePath());
 
 		// get sha of config to compare later
-		String originalHash = hashFile(storeFile);
+		String originalHash = TestHelpers.hashFile(storeFile);
 
-		RepositoryInfo actual = createDummyRepoInfo("valid_no_entries");
+		RepositoryInfo actual = TestHelpers.createMockedRepoInfo("valid_no_entries");
 		mgr.addRepository(actual);
-		String modifiedHash = hashFile(storeFile);
+		String modifiedHash = TestHelpers.hashFile(storeFile);
 
 		// there should be only one item
 		assertEquals(mgr.getRepoMap().keySet().size(), 1);
@@ -203,15 +151,15 @@ public class RepositoryInfoMgrTest
 
 		File storeFile = folder.newFile("addRepo-venc.dat");
 		String storePath = storeFile.getAbsolutePath();
-		createDummyFile(storePath, maxNumberOfRepos - 1);
+		TestHelpers.createMockedFile(storePath, maxNumberOfRepos - 1);
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
 
 		// get sha of config to compare later
-		String originalHash = hashFile(storeFile);
+		String originalHash = TestHelpers.hashFile(storeFile);
 
-		RepositoryInfo actual = createDummyRepoInfo("addRepo-venc");
+		RepositoryInfo actual = TestHelpers.createMockedRepoInfo("addRepo-venc");
 		mgr.addRepository(actual);
-		String modifiedHash = hashFile(storeFile);
+		String modifiedHash = TestHelpers.hashFile(storeFile);
 
 		// there should be only one item
 		assertEquals(mgr.getRepoMap().keySet().size(), maxNumberOfRepos);
@@ -234,13 +182,13 @@ public class RepositoryInfoMgrTest
 
 		File storeFile = folder.newFile("addRepo-vec.dat");
 		String storePath = storeFile.getAbsolutePath();
-		createDummyFile(storePath, 1);
+		TestHelpers.createMockedFile(storePath, 1);
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
 
 		// get sha of config to compare later
-		String originalHash = hashFile(storeFile);
+		String originalHash = TestHelpers.hashFile(storeFile);
 
-		RepositoryInfo actual = createDummyRepoInfo("1"); // see createDummyFile
+		RepositoryInfo actual = TestHelpers.createMockedRepoInfo("1"); // see createDummyFile
 															// for why this is 1
 		try
 		{
@@ -251,7 +199,7 @@ public class RepositoryInfoMgrTest
 		{
 			assertTrue(e.getMessage().contains(expectedCollisionMsg));
 		}
-		String modifiedHash = hashFile(storeFile);
+		String modifiedHash = TestHelpers.hashFile(storeFile);
 
 		// there should still be only one item
 		assertEquals(mgr.getRepoMap().keySet().size(), 1);
@@ -274,11 +222,11 @@ public class RepositoryInfoMgrTest
 
 		File storeFile = folder.newFile("addRepo-ne.dat");
 		String storePath = storeFile.getAbsolutePath();
-		createDummyFile(storePath, 1);
+		TestHelpers.createMockedFile(storePath, 1);
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
 
 		// get sha of config to compare later
-		String originalHash = hashFile(storeFile);
+		String originalHash = TestHelpers.hashFile(storeFile);
 
 		RepositoryInfo actual = null;
 		try
@@ -289,7 +237,7 @@ public class RepositoryInfoMgrTest
 		catch (IllegalArgumentException e)
 		{
 		}
-		String modifiedHash = hashFile(storeFile);
+		String modifiedHash = TestHelpers.hashFile(storeFile);
 
 		// there should still be only one item
 		assertEquals(mgr.getRepoMap().keySet().size(), 1);
@@ -313,16 +261,16 @@ public class RepositoryInfoMgrTest
 	{
 		File storeFile = folder.newFile("delRepo-ve.dat");
 		String storePath = storeFile.getAbsolutePath();
-		createDummyFile(storePath, 1);
+		TestHelpers.createMockedFile(storePath, 1);
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
 
 		// get sha of config to compare later
-		String originalHash = hashFile(storeFile);
+		String originalHash = TestHelpers.hashFile(storeFile);
 
 		// get the id for the repo
-		int actual = createDummyRepoInfo("1").hashCode();
+		int actual = TestHelpers.createMockedRepoInfo("1").hashCode();
 		mgr.deleteRepository(actual);
-		String modifiedHash = hashFile(storeFile);
+		String modifiedHash = TestHelpers.hashFile(storeFile);
 
 		// there should be zero items
 		assertEquals(mgr.getRepoMap().keySet().size(), 0);
@@ -346,14 +294,14 @@ public class RepositoryInfoMgrTest
 	{
 		File storeFile = folder.newFile("delRepo-vne.dat");
 		String storePath = storeFile.getAbsolutePath();
-		createDummyFile(storePath, 1);
+		TestHelpers.createMockedFile(storePath, 1);
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
 
 		// get sha of config to compare later
-		String originalHash = hashFile(storeFile);
+		String originalHash = TestHelpers.hashFile(storeFile);
 
 		// get the id for the repo
-		int actual = createDummyRepoInfo("delRepo-vne").hashCode();
+		int actual = TestHelpers.createMockedRepoInfo("delRepo-vne").hashCode();
 		try
 		{
 			mgr.deleteRepository(actual);
@@ -363,7 +311,7 @@ public class RepositoryInfoMgrTest
 		{
 			assertTrue(e.getMessage().contains(expectedNotExistMsg));
 		}
-		String modifiedHash = hashFile(storeFile);
+		String modifiedHash = TestHelpers.hashFile(storeFile);
 
 		// nothing should have been deleted
 		assertEquals(mgr.getRepoMap().keySet().size(), 1);
@@ -387,17 +335,17 @@ public class RepositoryInfoMgrTest
 		File storeFile = folder.newFile(fileName);
 		String storePath = storeFile.getAbsolutePath();
 
-		List<RepositoryInfo> expectedRepos = createRepoList(maxNumberOfRepos);
+		List<RepositoryInfo> expectedRepos = TestHelpers.createMockedRepoList(maxNumberOfRepos);
 		RepositoryInfoMgr.writeRepos(storePath, expectedRepos);
 
 		// file should be created
 		assertTrue(Files.exists(storeFile.toPath()));
 		// store hash for comparison for later
-		String hashAfterWrite = hashFile(storeFile);
+		String hashAfterWrite = TestHelpers.hashFile(storeFile);
 
 		// read the file back, testing loadRepos
 		List<RepositoryInfo> actualRepos = RepositoryInfoMgr.loadRepos(storePath);
-		String hashAfterLoad = hashFile(storeFile);
+		String hashAfterLoad = TestHelpers.hashFile(storeFile);
 
 		// loading should not change the file
 		assertEquals(hashAfterWrite, hashAfterLoad);
@@ -419,7 +367,7 @@ public class RepositoryInfoMgrTest
 	public void testWrite_nullPath() throws IOException, RepositoryException, NoSuchAlgorithmException
 	{
 		String storePath = null;
-		List<RepositoryInfo> expectedRepos = createRepoList(maxNumberOfRepos);
+		List<RepositoryInfo> expectedRepos = TestHelpers.createMockedRepoList(maxNumberOfRepos);
 		RepositoryInfoMgr.writeRepos(storePath, expectedRepos);
 	}
 
@@ -436,7 +384,7 @@ public class RepositoryInfoMgrTest
 	public void testWrite_emptyPath() throws IOException, RepositoryException, NoSuchAlgorithmException
 	{
 		String storePath = "";
-		List<RepositoryInfo> expectedRepos = createRepoList(maxNumberOfRepos);
+		List<RepositoryInfo> expectedRepos = TestHelpers.createMockedRepoList(maxNumberOfRepos);
 		RepositoryInfoMgr.writeRepos(storePath, expectedRepos);
 	}
 
@@ -473,17 +421,17 @@ public class RepositoryInfoMgrTest
 		File storeFile = folder.newFile(fileName);
 		String storePath = storeFile.getAbsolutePath();
 
-		List<RepositoryInfo> expectedRepos = createRepoList(0);
+		List<RepositoryInfo> expectedRepos = TestHelpers.createMockedRepoList(0);
 		RepositoryInfoMgr.writeRepos(storePath, expectedRepos);
 
 		// file should be created
 		assertTrue(Files.exists(storeFile.toPath()));
 		// store hash for comparison for later
-		String hashAfterWrite = hashFile(storeFile);
+		String hashAfterWrite = TestHelpers.hashFile(storeFile);
 
 		// read the file back, testing loadRepos
 		List<RepositoryInfo> actualRepos = RepositoryInfoMgr.loadRepos(storePath);
-		String hashAfterLoad = hashFile(storeFile);
+		String hashAfterLoad = TestHelpers.hashFile(storeFile);
 
 		// loading should not change the file
 		assertEquals(hashAfterWrite, hashAfterLoad);
