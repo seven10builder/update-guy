@@ -16,8 +16,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.seven10.update_guy.TestHelpers;
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.manifest.Manifest;
@@ -74,10 +74,13 @@ public class LocalRepoConnectionTest
 	 * @throws IOException
 	 */
 	private void prepareManifestFile(String releaseFamily, Path srcFile)
-			throws RepositoryException, JsonGenerationException, JsonMappingException, IOException
+			throws RepositoryException,  IOException
 	{
 		Manifest manifest = TestHelpers.createValidManifest(releaseFamily, folder.newFile().toPath());
-		TestHelpers.createValidManifestFile(manifest, srcFile);
+		GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+	String json = gson.toJson(manifest);
+	FileUtils.writeStringToFile(srcFile.toFile(), json, "UTF-8");
 	}
 	
 	/**

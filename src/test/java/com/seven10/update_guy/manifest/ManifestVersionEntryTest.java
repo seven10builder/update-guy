@@ -122,7 +122,7 @@ public class ManifestVersionEntryTest
 	/**
 	 * Test method for {@link com.seven10.update_guy.manifest.ManifestVersionEntry#getPath(java.lang.String)}.
 	 */
-	@Test()
+	@Test
 	public void testGetPath_keyNotFound()
 	{
 		ManifestVersionEntry versionEntry = new ManifestVersionEntry();

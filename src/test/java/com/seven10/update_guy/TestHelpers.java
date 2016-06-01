@@ -19,15 +19,14 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.AutoCloseInputStream;
 
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.seven10.update_guy.exceptions.RepositoryException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.seven10.update_guy.manifest.Manifest;
 import com.seven10.update_guy.manifest.ManifestVersionEntry;
 import com.seven10.update_guy.repository.RepositoryInfo;
@@ -129,20 +128,15 @@ public class TestHelpers
 		return map;
 	}
 
-	public static void createValidManifestFile(Manifest manifest, Path filePath) throws RepositoryException, JsonGenerationException, JsonMappingException, IOException
+	public static void createInvalidManifestFile(Path rootFolder) throws   IOException
 	{
-		// JSON from file to Object
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.writeValue(filePath.toFile(), manifest);
-
-	}
-
-	public static void createInvalidManifestFile(Path rootFolder) throws JsonGenerationException, JsonMappingException, IOException
-	{
+		Path destPath = rootFolder.resolve("manifests").resolve("invalid.manifest");
 		Map<String, Path> expected = TestHelpers.createValidRolePaths("invalid_Manifest_file", versionEntryRoleCount, rootFolder);
 		// JSON from file to Object
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.writeValue(rootFolder.toFile(), expected);
+		 GsonBuilder builder = new GsonBuilder();
+	     Gson gson = builder.create();
+		String json = gson.toJson(expected);
+		FileUtils.writeStringToFile(destPath.toFile(), json, "UTF-8");
 	}
 
 	public static Manifest createValidManifest(String releaseFamily, Path rootFolder)

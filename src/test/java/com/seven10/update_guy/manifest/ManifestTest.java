@@ -233,13 +233,17 @@ public class ManifestTest
 	 * @throws RepositoryException 
 	 */
 	@Test
-	public void testLoadFromFile_valid() throws IOException, RepositoryException
+	public void testWriteToLoadFromFile_valid() throws IOException, RepositoryException
 	{
-		Manifest expected = TestHelpers.createMockedManifest("loadFromFile", new Date(), TestHelpers.versionEntryCount);
-		Path filePath = folder.newFile("loadFromFile.manifest").toPath();
-		TestHelpers.createValidManifestFile(expected, filePath);
-		//load from file should be successful
-		Manifest actual = Manifest.loadFromFile(filePath);
+		String releaseFamily = "wt-lf-rvalid";
+		String fileName = releaseFamily+".manifest";
+		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		Path manifestFolder = rootFolder.resolve("manifests").resolve(fileName);
+		
+		Manifest expected = TestHelpers.createValidManifest(releaseFamily, rootFolder.resolve("versions"));		
+		Manifest.writeToFile(manifestFolder, expected);
+		Manifest actual = Manifest.loadFromFile(manifestFolder);
+		
 		assertEquals(expected, actual);
 	}
 
@@ -271,7 +275,7 @@ public class ManifestTest
 	 * @throws RepositoryException 
 	 */
 	@Test(expected=RepositoryException.class)
-	public void testLoadFromFile__path_notFound() throws RepositoryException
+	public void testLoadFromFile_path_notFound() throws RepositoryException
 	{
 		// create path that is known NOT to be good
 		Path filePath = Paths.get("/no_updateguy_here"); 

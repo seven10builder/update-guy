@@ -7,8 +7,12 @@ public class RepoConnectionFactory
 {
 	public static RepoConnection connect(RepositoryInfo activeRepo) throws RepositoryException
 	{
+		if(activeRepo == null)
+		{
+			throw new IllegalArgumentException("activeRepo must not be null");
+		}
 		RepoConnection rval;
-		switch( activeRepo.repoType)
+		switch(activeRepo.repoType)
 		{
 		case local:
 			rval = new LocalRepoConnection(activeRepo);

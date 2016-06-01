@@ -13,12 +13,17 @@ public class ManifestVersionEntry
 	protected String version;
 	protected Date publishDate;
 	protected Map<String, Path> fileMap;
-	
 	public ManifestVersionEntry()
 	{
 		fileMap = new HashMap<String, Path>();
 	}
 
+	@Override
+	public String toString()
+	{
+		return "ManifestVersionEntry [version=" + version + ", publishDate=" + publishDate + ", fileMap=" + fileMap
+				+ "]";
+	}
 	/**
 	 * @return the version
 	 */

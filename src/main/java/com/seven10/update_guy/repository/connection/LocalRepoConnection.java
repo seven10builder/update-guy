@@ -51,8 +51,7 @@ class LocalRepoConnection implements RepoConnection
 		{
 			throw new IllegalArgumentException("releaseFamily must not be null or emptyu");
 		}
-		String fileName = String.format("%s.manifest", releaseFamily);
-		Path filePath = Paths.get(repoPath, fileName);
+		Path filePath = Paths.get(repoPath);
 		return Manifest.loadFromFile(filePath);
 	}
 	@Override
