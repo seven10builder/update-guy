@@ -54,8 +54,7 @@ public class ManifestTest
 	public void testManifest_empty_releaseFamily()
 	{
 		String releaseFamily = "";
-		Manifest manifest = new Manifest(releaseFamily);
-		assertNotNull(manifest);
+		new Manifest(releaseFamily);
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.manifest.Manifest#Manifest(com.seven10.update_guy.manifest.Manifest)}.
@@ -181,7 +180,7 @@ public class ManifestTest
 		Manifest manifest = new Manifest("setRetrieved");
 		Date expected = new Date(TestHelpers.validDateTimestamp);
 		manifest.setRetrieved(expected);
-		Date actual = manifest.getCreated();
+		Date actual = manifest.getRetrieved();
 		assertEquals(expected,actual);
 	}
 	/**

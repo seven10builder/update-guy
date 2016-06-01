@@ -20,6 +20,10 @@ public class Manifest
 	
 	public Manifest(String releaseFamily)
 	{
+		if( releaseFamily == null || releaseFamily.isEmpty())
+		{
+			throw new IllegalArgumentException("releaseFamily must not be null");
+		}
 		this.releaseFamily = releaseFamily;
 		created = new Date();
 		retrieved = new Date();
@@ -28,6 +32,10 @@ public class Manifest
 	
 	public Manifest(Manifest newManifest)
 	{
+		if( newManifest == null)
+		{
+			throw new IllegalArgumentException("newManifest must not be null");
+		}
 		this.releaseFamily = newManifest.releaseFamily;
 		this.created = newManifest.created;
 		this.retrieved = newManifest.retrieved;
@@ -41,6 +49,10 @@ public class Manifest
 	
 	public void setReleaseFamily(String newReleaseFamily)
 	{
+		if( newReleaseFamily == null || newReleaseFamily.isEmpty())
+		{
+			throw new IllegalArgumentException("newReleaseFamily must not be null or empty");
+		}
 		this.releaseFamily = newReleaseFamily;
 	}
 	
@@ -51,6 +63,10 @@ public class Manifest
 	
 	public void setCreated(Date newCreated)
 	{
+		if( newCreated == null)
+		{
+			throw new IllegalArgumentException("newCreated must not be null");
+		}
 		this.created = newCreated;
 	}
 	
@@ -61,6 +77,10 @@ public class Manifest
 	
 	public void setRetrieved(Date newRetrieved)
 	{
+		if( newRetrieved == null)
+		{
+			throw new IllegalArgumentException("newRetrieved must not be null");
+		}
 		this.retrieved = newRetrieved;
 	}
 	
@@ -71,11 +91,19 @@ public class Manifest
 	
 	public void addVersionEntry(ManifestVersionEntry versionEntry)
 	{
+		if( versionEntry == null)
+		{
+			throw new IllegalArgumentException("versionEntry must not be null");
+		}
 		versions.put(versionEntry.version, versionEntry);
 	}
 	
 	public static Manifest loadFromFile(Path filePath) throws RepositoryException
 	{
+		if(filePath == null)
+		{
+			throw new IllegalArgumentException("filePath must not be null");
+		}
 		// JSON from file to Object
 		ObjectMapper mapper = new ObjectMapper();
 		try

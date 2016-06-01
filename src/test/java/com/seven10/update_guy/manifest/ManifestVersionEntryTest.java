@@ -131,7 +131,7 @@ public class ManifestVersionEntryTest
 		Path actual = versionEntry.getPath(expected);
 		assertNull(actual);
 		// add something
-		versionEntry.addPath(expected, Paths.get("notExpected"));
+		versionEntry.addPath("notExpected", Paths.get("notExpected"));
 		actual = versionEntry.getPath(expected);
 		// still not in there
 		assertNull(actual);
@@ -209,7 +209,7 @@ public class ManifestVersionEntryTest
 		roleMap.keySet().forEach(
 				role->
 				{
-					Path actual = versionEntry.getPath(role);
+					Path actual = rootPath.resolve(versionEntry.getPath(role).toAbsolutePath());
 					assertEquals(Paths.get(role), actual);
 				});
 	}
@@ -233,7 +233,7 @@ public class ManifestVersionEntryTest
 		
 		Set<String> actualKeys = actual.stream().map(entry->entry.getKey()).collect(Collectors.toSet());
 		assertEquals(roles.size(), actual.size());
-		assertTrue(actualKeys.contains(roles) && roles.contains(actualKeys));
+ 		assertTrue(roles.contains(actualKeys));
 		actual.forEach(entry->
 				{
 					Path path = versionEntry.getPath(entry.getKey());
@@ -256,6 +256,7 @@ public class ManifestVersionEntryTest
 		
 		Set<Entry<String, Path>> actual = versionEntry.getAllPaths();
 		Set<Entry<String, Path>> expected = roleMap.entrySet();
-		assertTrue(expected.contains(actual) && actual.containsAll(expected));
+		assertTrue(expected.contains(actual));
+		assertTrue(actual.containsAll(expected));
 	}
 }

@@ -32,6 +32,10 @@ public class ManifestVersionEntry
 	 */
 	public void setVersion(String version)
 	{
+		if(version == null || version.isEmpty())
+		{
+			throw new IllegalArgumentException("version must not be null");
+		}
 		this.version = version;
 	}
 
@@ -48,15 +52,31 @@ public class ManifestVersionEntry
 	 */
 	public void setPublishDate(Date publishDate)
 	{
+		if(publishDate == null)
+		{
+			throw new IllegalArgumentException("publishDate must not be null");
+		}
 		this.publishDate = publishDate;
 	}
 	
 	public Path getPath(String fileRole)
 	{
+		if(fileRole == null || fileRole.isEmpty())
+		{
+			throw new IllegalArgumentException("fileRole must not be null");
+		}
 		return fileMap.get(fileRole);
 	}
 	public void addPath(String fileRole, Path filePath)
 	{
+		if(fileRole == null || fileRole.isEmpty())
+		{
+			throw new IllegalArgumentException("fileRole must not be null");
+		}
+		if(filePath == null)
+		{
+			throw new IllegalArgumentException("filePath must not be null");
+		}
 		fileMap.put(fileRole, filePath);
 	}
 	public Set<String> getRoles()

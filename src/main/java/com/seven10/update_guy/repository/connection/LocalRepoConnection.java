@@ -47,6 +47,10 @@ class LocalRepoConnection implements RepoConnection
 	@Override
 	public Manifest downloadManifest(String releaseFamily) throws RepositoryException
 	{
+		if(releaseFamily==null || releaseFamily.isEmpty())
+		{
+			throw new IllegalArgumentException("releaseFamily must not be null or emptyu");
+		}
 		String fileName = String.format("%s.manifest", releaseFamily);
 		Path filePath = Paths.get(repoPath, fileName);
 		return Manifest.loadFromFile(filePath);
@@ -54,6 +58,10 @@ class LocalRepoConnection implements RepoConnection
 	@Override
 	public void downloadRelease(ManifestVersionEntry versionEntry) throws RepositoryException
 	{
+		if(versionEntry==null)
+		{
+			throw new IllegalArgumentException("versionEntry must not be null");
+		}
 		for(Entry<String, Path> entry: versionEntry.getAllPaths())
 		{
 			Path srcPath = entry.getValue();
