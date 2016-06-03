@@ -27,8 +27,10 @@ import static org.mockito.Mockito.*;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.seven10.update_guy.manifest.GsonFactory;
 import com.seven10.update_guy.manifest.Manifest;
 import com.seven10.update_guy.manifest.ManifestVersionEntry;
+import com.seven10.update_guy.manifest.PathConverter;
 import com.seven10.update_guy.repository.RepositoryInfo;
 import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
 
@@ -133,15 +135,15 @@ public class TestHelpers
 		Path destPath = rootFolder.resolve("manifests").resolve("invalid.manifest");
 		Map<String, Path> expected = TestHelpers.createValidRolePaths("invalid_Manifest_file", versionEntryRoleCount, rootFolder);
 		// JSON from file to Object
-		 GsonBuilder builder = new GsonBuilder();
-	     Gson gson = builder.create();
+		Gson gson = GsonFactory.getGson();
 		String json = gson.toJson(expected);
 		FileUtils.writeStringToFile(destPath.toFile(), json, "UTF-8");
 	}
 
 	public static Manifest createValidManifest(String releaseFamily, Path rootFolder)
 	{
-		Manifest manifest = new Manifest(releaseFamily);
+		Manifest manifest = new Manifest();
+		manifest.setReleaseFamily(releaseFamily);
 		manifest.setCreated(new Date());
 		manifest.setRetrieved(new Date());
 		createValidManifestEntries(releaseFamily, versionEntryRoleCount, rootFolder).forEach(entry->manifest.addVersionEntry(entry));

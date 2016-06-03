@@ -14,6 +14,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.google.gson.Gson;
 import com.seven10.update_guy.TestHelpers;
 import com.seven10.update_guy.exceptions.RepositoryException;
 
@@ -33,29 +34,10 @@ public class ManifestTest
 	@Test
 	public void testManifest_valid_releaseFamily()
 	{
-		String releaseFamily = "releaseFamily";
-		Manifest manifest = new Manifest(releaseFamily);
+		Manifest manifest = new Manifest();
 		assertNotNull(manifest);
 	}
-	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.Manifest#Manifest(java.lang.String)}.
-	 */
-	@Test(expected=IllegalArgumentException.class)
-	public void testManifest_null_releaseFamily()
-	{
-		String releaseFamily = null;
-		Manifest manifest = new Manifest(releaseFamily);
-		assertNotNull(manifest);
-	}
-	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.Manifest#Manifest(java.lang.String)}.
-	 */
-	@Test(expected=IllegalArgumentException.class)
-	public void testManifest_empty_releaseFamily()
-	{
-		String releaseFamily = "";
-		new Manifest(releaseFamily);
-	}
+
 	/**
 	 * Test method for {@link com.seven10.update_guy.manifest.Manifest#Manifest(com.seven10.update_guy.manifest.Manifest)}.
 	 */
@@ -77,39 +59,29 @@ public class ManifestTest
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.Manifest#getReleaseFamily()}.
+	 * Test method for {@link com.seven10.update_guy.manifest.Manifest#getReleaseFamily()}
+	 * and {@link com.seven10.update_guy.manifest.Manifest#setReleaseFamily(java.lang.String)}.
 	 */
 	@Test
-	public void testGetReleaseFamily()
+	public void testGetAndSetReleaseFamily()
 	{
 		String expected = "getReleaseFamily";
-		Manifest manifest = new Manifest(expected);
+		Manifest manifest = new Manifest();
 		
+		manifest.setReleaseFamily(expected);
 		String actual = manifest.getReleaseFamily();
+		
 		assertEquals(expected, actual);
 	}
 	
-	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.Manifest#setReleaseFamily(java.lang.String)}.
-	 */
-	@Test
-	public void testSetReleaseFamily_valid()
-	{
-		Manifest manifest = new Manifest("replaceMe");
-		
-		String expected = "setReleaseFamily";
-		manifest.setReleaseFamily(expected);
-		
-		String actual = manifest.getReleaseFamily();
-		assertEquals(expected, actual);
-	}
+
 	/**
 	 * Test method for {@link com.seven10.update_guy.manifest.Manifest#setReleaseFamily(java.lang.String)}.
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testSetReleaseFamily_null()
 	{
-		Manifest manifest = new Manifest("replaceMe");
+		Manifest manifest = new Manifest();
 		
 		String expected = null;
 		manifest.setReleaseFamily(expected);
@@ -120,7 +92,7 @@ public class ManifestTest
 	@Test(expected=IllegalArgumentException.class)
 	public void testSetReleaseFamily_empty()
 	{
-		Manifest manifest = new Manifest("replaceMe");
+		Manifest manifest = new Manifest();
 		
 		String expected = "";
 		manifest.setReleaseFamily(expected);
@@ -131,7 +103,7 @@ public class ManifestTest
 	@Test
 	public void testGetCreated()
 	{
-		Manifest manifest = new Manifest("getCreated");
+		Manifest manifest = new Manifest();
 		Date expected = new Date();
 		Date actual = manifest.getCreated();
 		assertTrue("Dates Should be within a few seconds of each other", (actual.getTime() - expected.getTime()) < 5000);
@@ -143,7 +115,7 @@ public class ManifestTest
 	@Test
 	public void testSetCreated_valid()
 	{
-		Manifest manifest = new Manifest("setCreated");
+		Manifest manifest = new Manifest();
 		Date expected = new Date(TestHelpers.validDateTimestamp);
 		manifest.setCreated(expected);
 		Date actual = manifest.getCreated();
@@ -155,7 +127,7 @@ public class ManifestTest
 	@Test(expected=IllegalArgumentException.class)
 	public void testSetCreated_null_date()
 	{
-		Manifest manifest = new Manifest("setCreated");
+		Manifest manifest = new Manifest();
 		Date expected = null;
 		manifest.setCreated(expected);
 	}
@@ -165,7 +137,7 @@ public class ManifestTest
 	@Test
 	public void testGetRetrieved()
 	{
-			Manifest manifest = new Manifest("getRetrieved");
+			Manifest manifest = new Manifest();
 			Date expected = new Date();
 			Date actual = manifest.getRetrieved();
 			assertTrue("Dates Should be within a few seconds of each other", (actual.getTime() - expected.getTime()) < 5000);
@@ -177,7 +149,7 @@ public class ManifestTest
 	@Test
 	public void testSetRetrieved_valid()
 	{
-		Manifest manifest = new Manifest("setRetrieved");
+		Manifest manifest = new Manifest();
 		Date expected = new Date(TestHelpers.validDateTimestamp);
 		manifest.setRetrieved(expected);
 		Date actual = manifest.getRetrieved();
@@ -189,7 +161,7 @@ public class ManifestTest
 	@Test(expected=IllegalArgumentException.class)
 	public void testSetRetrieved_null_date()
 	{
-		Manifest manifest = new Manifest("setRetrieved");
+		Manifest manifest = new Manifest();
 		Date expected = null;
 		manifest.setRetrieved(expected);
 	}
@@ -204,7 +176,7 @@ public class ManifestTest
 		String releaseFamily = "getVersionEntries";
 		for(int i = 0; i < TestHelpers.versionEntryCount; i++)
 		{
-			Manifest manifest = new Manifest(releaseFamily);
+			Manifest manifest = new Manifest();
 			Collection<ManifestVersionEntry> expected = TestHelpers.createValidManifestEntries(releaseFamily, i, rootPath);
 			expected.forEach(versionEntry ->manifest.addVersionEntry(versionEntry));
 			
@@ -221,8 +193,7 @@ public class ManifestTest
 	@Test(expected=IllegalArgumentException.class)
 	public void testAddVersion_null()
 	{
-		String releaseFamily = "addVersionEntry";
-		Manifest manifest = new Manifest(releaseFamily);
+		Manifest manifest = new Manifest();
 		ManifestVersionEntry expected = null;
 		manifest.addVersionEntry(expected);
 	}
@@ -233,11 +204,39 @@ public class ManifestTest
 	 * @throws RepositoryException 
 	 */
 	@Test
+	public void testSerializeManifest() throws IOException, RepositoryException
+	{
+		String releaseFamily = "serialize";
+		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		
+		Manifest expected = TestHelpers.createValidManifest(releaseFamily, rootFolder.resolve("versions"));		
+		
+		Gson gson = GsonFactory.getGson();
+		
+		String json = gson.toJson(expected);
+		assertNotNull(json);
+		assertFalse(json.isEmpty());
+		
+		Manifest actual = gson.fromJson(json, Manifest.class);	
+		assertNotNull(actual);
+		assertEquals(expected, actual);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.Manifest#loadFromFile(java.nio.file.Path)}.
+	 * @throws IOException 
+	 * @throws RepositoryException 
+	 */
+	@Test
 	public void testWriteToLoadFromFile_valid() throws IOException, RepositoryException
 	{
 		String releaseFamily = "wt-lf-rvalid";
 		String fileName = releaseFamily+".manifest";
-		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		
+		
+		Path rootFolder = Paths.get("."); 
+		
+		
+		//Path rootFolder = folder.newFolder(releaseFamily).toPath();
 		Path manifestFolder = rootFolder.resolve("manifests").resolve(fileName);
 		
 		Manifest expected = TestHelpers.createValidManifest(releaseFamily, rootFolder.resolve("versions"));		
@@ -255,7 +254,7 @@ public class ManifestTest
 	@Test(expected=RepositoryException.class)
 	public void testLoadFromFile_invalid_object() throws RepositoryException, IOException
 	{
-		Path filePath = folder.newFile("loadFromFile_invalid.manifest").toPath();
+		Path filePath = folder.newFolder("loadFromFile_invalid").toPath();
 		//create known bad file
 		TestHelpers.createInvalidManifestFile(filePath);
 		Manifest.loadFromFile(filePath);
@@ -280,5 +279,144 @@ public class ManifestTest
 		// create path that is known NOT to be good
 		Path filePath = Paths.get("/no_updateguy_here"); 
 		Manifest.loadFromFile(filePath);
+	}
+	
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.Manifest#equals(Object)}.
+	 * @throws IOException 
+	 * 
+	 */
+	@Test
+	public void testEquals_self() throws IOException
+	{
+		String releaseFamily = "testEquals-self";
+		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		Manifest expectedManifest = TestHelpers.createValidManifest(releaseFamily, rootFolder);
+		
+		// same should equal
+		boolean actual = expectedManifest.equals(expectedManifest);
+		assertTrue(actual);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.Manifest#equals(Object)}.
+	 * @throws IOException 
+	 * 
+	 */
+	@Test
+	public void testEquals_clone() throws IOException
+	{
+		String releaseFamily = "testEquals-clone";
+		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		Manifest expectedManifest = TestHelpers.createValidManifest(releaseFamily, rootFolder);
+		
+		//clone should be equal
+		Manifest cloneManifest = new Manifest(expectedManifest);
+		boolean isEqual = expectedManifest.equals(cloneManifest);
+		assertTrue(isEqual);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.Manifest#equals(Object)}.
+	 * @throws IOException 
+	 * 
+	 */
+	@Test
+	public void testEquals_createdDiff() throws IOException
+	{
+		String releaseFamily = "testEquals-created";
+		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		Manifest expectedManifest = TestHelpers.createValidManifest(releaseFamily, rootFolder);
+		Manifest cloneManifest = new Manifest(expectedManifest);
+		// different object should be different
+		cloneManifest.setCreated(new Date(31337));
+		
+		boolean isEqual = expectedManifest.equals(cloneManifest);
+		assertFalse(isEqual);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.Manifest#equals(Object)}.
+	 * @throws IOException 
+	 * 
+	 */
+	@Test
+	public void testEquals_releaseFamilyDiff() throws IOException
+	{
+		String releaseFamily = "testEquals-rf";
+		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		Manifest expectedManifest = TestHelpers.createValidManifest(releaseFamily, rootFolder);
+		Manifest cloneManifest = new Manifest(expectedManifest);
+		// different object should be different
+		cloneManifest.setReleaseFamily("somethingelse");
+		
+		boolean isEqual = expectedManifest.equals(cloneManifest);
+		assertFalse(isEqual);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.Manifest#equals(Object)}.
+	 * @throws IOException 
+	 * 
+	 */
+	@Test
+	public void testEquals_retrievedDiff() throws IOException
+	{
+		String releaseFamily = "testEquals-retr";
+		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		Manifest expectedManifest = TestHelpers.createValidManifest(releaseFamily, rootFolder);
+		Manifest cloneManifest = new Manifest(expectedManifest);
+		// different object should be different
+		cloneManifest.setRetrieved(new Date(31337));
+		
+		boolean isEqual = expectedManifest.equals(cloneManifest);
+		assertFalse(isEqual);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.Manifest#equals(Object)}.
+	 * @throws IOException 
+	 * 
+	 */
+	@Test
+	public void testEquals_versionsDiff() throws IOException
+	{
+		String releaseFamily = "testEquals-retr";
+		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		Manifest expectedManifest = TestHelpers.createValidManifest(releaseFamily, rootFolder);
+		Manifest cloneManifest = new Manifest(expectedManifest);
+		// different object should be different
+		ManifestVersionEntry versionEntry = TestHelpers.createValidVersionEntry(releaseFamily, 29, 3, rootFolder);
+		cloneManifest.addVersionEntry(versionEntry);
+		
+		boolean isEqual = expectedManifest.equals(cloneManifest);
+		assertFalse(isEqual);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.Manifest#equals(Object)}.
+	 * @throws IOException 
+	 * 
+	 */
+	@Test
+	public void testEquals_null() throws IOException
+	{
+		String releaseFamily = "testEquals-retr";
+		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		Manifest expectedManifest = TestHelpers.createValidManifest(releaseFamily, rootFolder);
+		// different object should be different
+	
+		boolean isEqual = expectedManifest.equals(null);
+		assertFalse(isEqual);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.Manifest#equals(Object)}.
+	 * @throws IOException 
+	 * 
+	 */
+	@Test
+	public void testEquals_diffClass() throws IOException
+	{
+		String releaseFamily = "testEquals-retr";
+		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		Manifest expectedManifest = TestHelpers.createValidManifest(releaseFamily, rootFolder);
+		// different object should be different
+		ManifestVersionEntry other = TestHelpers.createValidVersionEntry(releaseFamily, 29, 3, rootFolder);
+		boolean isEqual = expectedManifest.equals(other);
+		assertFalse(isEqual);
 	}
 }

@@ -8,14 +8,29 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.gson.annotations.Expose;
+
 public class ManifestVersionEntry
 {
+	@Expose
 	protected String version;
+	@Expose
 	protected Date publishDate;
+	@Expose
 	protected Map<String, Path> fileMap;
+	
 	public ManifestVersionEntry()
 	{
+		version = "unknown";
+		publishDate = new Date();
 		fileMap = new HashMap<String, Path>();
+	}
+
+	public ManifestVersionEntry(ManifestVersionEntry versionEntry)
+	{
+		version = versionEntry.version;
+		publishDate = versionEntry.publishDate;
+		fileMap = new HashMap<String, Path>(versionEntry.fileMap);
 	}
 
 	@Override
@@ -99,5 +114,78 @@ public class ManifestVersionEntry
 	public Set<Entry<String, Path>> getAllPaths()
 	{
 		return getPaths(getRoles());
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((fileMap == null) ? 0 : fileMap.hashCode());
+		result = prime * result + ((publishDate == null) ? 0 : publishDate.hashCode());
+		result = prime * result + ((version == null) ? 0 : version.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+		{
+			return true;
+		}
+		if (obj == null)
+		{
+			return false;
+		}
+		if (!(obj instanceof ManifestVersionEntry))
+		{
+			return false;
+		}
+		ManifestVersionEntry other = (ManifestVersionEntry) obj;
+		if (fileMap == null)
+		{
+			if (other.fileMap != null)
+			{
+				return false;
+			}
+		}
+		else if (fileMap.size() != other.fileMap.size())
+		{
+			return false;
+		}
+		else if( fileMap.entrySet().containsAll(other.fileMap.entrySet()))
+		{
+			return false;
+		}
+		if (publishDate == null)
+		{
+			if (other.publishDate != null)
+			{
+				return false;
+			}
+		}
+		else if (!publishDate.equals(other.publishDate))
+		{
+			return false;
+		}
+		if (version == null)
+		{
+			if (other.version != null)
+			{
+				return false;
+			}
+		}
+		else if (!version.equals(other.version))
+		{
+			return false;
+		}
+		return true;
 	}
 }

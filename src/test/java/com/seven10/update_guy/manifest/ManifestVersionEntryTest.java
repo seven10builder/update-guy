@@ -6,8 +6,10 @@ package com.seven10.update_guy.manifest;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,7 +20,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.seven10.update_guy.TestHelpers;
+import com.seven10.update_guy.exceptions.RepositoryException;
 
 /**
  * @author kmm
@@ -29,6 +35,30 @@ public class ManifestVersionEntryTest
 
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
+	
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.Manifest#loadFromFile(java.nio.file.Path)}.
+	 * @throws IOException 
+	 * @throws RepositoryException 
+	 */
+	@Test
+	public void testSerializeManifestEntry() throws IOException, RepositoryException
+	{
+		String releaseFamily = "serialize-me";
+		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		ManifestVersionEntry expected = TestHelpers.createValidVersionEntry(releaseFamily, 1, TestHelpers.versionEntryCount, rootFolder);
+		
+		Gson gson = new GsonBuilder().registerTypeHierarchyAdapter(Path.class, new PathConverter()).create();
+		
+		String json = gson.toJson(expected);
+		assertNotNull(json);
+		assertFalse(json.isEmpty());
+		
+		ManifestVersionEntry actual = gson.fromJson(json, ManifestVersionEntry.class);	
+		assertNotNull(actual);
+		assertEquals(expected, actual);
+	}
+	
 	/**
 	 * Test method for {@link com.seven10.update_guy.manifest.ManifestVersionEntry#ManifestVersionEntry()}.
 	 */
@@ -210,7 +240,7 @@ public class ManifestVersionEntryTest
 				role->
 				{
 					Path actual = rootPath.resolve(versionEntry.getPath(role).toAbsolutePath());
-					assertEquals(Paths.get(role), actual);
+					assertEquals(rootPath.resolve(role), actual);
 				});
 	}
 	
@@ -258,5 +288,126 @@ public class ManifestVersionEntryTest
 		Set<Entry<String, Path>> expected = roleMap.entrySet();
 		assertTrue(expected.contains(actual));
 		assertTrue(actual.containsAll(expected));
+	}
+	
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.ManifestVersionEntry#equals(Object)}.
+	 * @throws IOException 
+	 * 
+	 */
+	@Test
+	public void testEquals_self() throws IOException
+	{
+		String releaseFamily = "testEquals-self";
+		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		ManifestVersionEntry versionEntry = TestHelpers.createValidVersionEntry(releaseFamily, 1, 3, rootFolder);
+		
+		// same should equal
+		boolean actual = versionEntry.equals(versionEntry);
+		assertTrue(actual);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.ManifestVersionEntry#equals(Object)}.
+	 * @throws IOException 
+	 * 
+	 */
+	@Test
+	public void testEquals_clone() throws IOException
+	{
+		String releaseFamily = "testEquals-clone";
+		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		ManifestVersionEntry versionEntry = TestHelpers.createValidVersionEntry(releaseFamily, 1, 3, rootFolder);
+		
+		//clone should be equal
+		ManifestVersionEntry cloneManifest = new ManifestVersionEntry(versionEntry);
+		boolean isEqual = versionEntry.equals(cloneManifest);
+		assertTrue(isEqual);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.ManifestVersionEntry#equals(Object)}.
+	 * @throws IOException 
+	 * 
+	 */
+	@Test
+	public void testEquals_versionDiff() throws IOException
+	{
+		String releaseFamily = "testEquals-created";
+		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		ManifestVersionEntry versionEntry = TestHelpers.createValidVersionEntry(releaseFamily, 1, 3, rootFolder);
+		ManifestVersionEntry cloneManifest = new ManifestVersionEntry(versionEntry);
+		// different object should be different
+		cloneManifest.setVersion("something_else");
+		
+		boolean isEqual = versionEntry.equals(cloneManifest);
+		assertFalse(isEqual);
+	}
+
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.ManifestVersionEntry#equals(Object)}.
+	 * @throws IOException 
+	 * 
+	 */
+	@Test
+	public void testEquals_publishedDiff() throws IOException
+	{
+		String releaseFamily = "testEquals-retr";
+		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		ManifestVersionEntry versionEntry = TestHelpers.createValidVersionEntry(releaseFamily, 1, 3, rootFolder);
+		ManifestVersionEntry cloneManifest = new ManifestVersionEntry(versionEntry);
+		// different object should be different
+		cloneManifest.setPublishDate(new Date(31337));
+		
+		boolean isEqual = versionEntry.equals(cloneManifest);
+		assertFalse(isEqual);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.ManifestVersionEntry#equals(Object)}.
+	 * @throws IOException 
+	 * 
+	 */
+	@Test
+	public void testEquals_fileMapDiff() throws IOException
+	{
+		String releaseFamily = "testEquals-retr";
+		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		ManifestVersionEntry versionEntry = TestHelpers.createValidVersionEntry(releaseFamily, 1, 3, rootFolder);
+		ManifestVersionEntry cloneManifest = new ManifestVersionEntry(versionEntry);
+		// different object should be different
+		cloneManifest.addPath("some-role", folder.newFolder("jibberish").toPath());
+		
+		boolean isEqual = versionEntry.equals(cloneManifest);
+		assertFalse(isEqual);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.ManifestVersionEntry#equals(Object)}.
+	 * @throws IOException 
+	 * 
+	 */
+	@Test
+	public void testEquals_null() throws IOException
+	{
+		String releaseFamily = "testEquals-retr";
+		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		ManifestVersionEntry versionEntry = TestHelpers.createValidVersionEntry(releaseFamily, 1, 3, rootFolder);
+		// different object should be different
+	
+		boolean isEqual = versionEntry.equals(null);
+		assertFalse(isEqual);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.ManifestVersionEntry#equals(Object)}.
+	 * @throws IOException 
+	 * 
+	 */
+	@Test
+	public void testEquals_diffClass() throws IOException
+	{
+		String releaseFamily = "testEquals-retr";
+		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		ManifestVersionEntry versionEntry = TestHelpers.createValidVersionEntry(releaseFamily, 1, 3, rootFolder);
+		// different object should be different
+		Manifest other =  TestHelpers.createValidManifest(releaseFamily, rootFolder);
+		boolean isEqual = versionEntry.equals(other);
+		assertFalse(isEqual);
 	}
 }

@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.seven10.update_guy.TestHelpers;
 import com.seven10.update_guy.exceptions.RepositoryException;
+import com.seven10.update_guy.manifest.GsonFactory;
 import com.seven10.update_guy.manifest.Manifest;
 import com.seven10.update_guy.manifest.ManifestVersionEntry;
 import com.seven10.update_guy.repository.RepositoryInfo;
@@ -27,7 +28,7 @@ import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
 
 /**
  * @author kmm
- *		
+ * 		
  */
 public class LocalRepoConnectionTest
 {
@@ -61,8 +62,6 @@ public class LocalRepoConnectionTest
 			TestHelpers.createSparseFile(fileName, TestHelpers.testFileLength);
 		});
 	}
-
-	
 	
 	/**
 	 * @param releaseFamily
@@ -73,14 +72,12 @@ public class LocalRepoConnectionTest
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	private void prepareManifestFile(String releaseFamily, Path srcFile)
-			throws RepositoryException,  IOException
+	private void prepareManifestFile(String releaseFamily, Path srcFile) throws RepositoryException, IOException
 	{
 		Manifest manifest = TestHelpers.createValidManifest(releaseFamily, folder.newFile().toPath());
-		GsonBuilder builder = new GsonBuilder();
-        Gson gson = builder.create();
-	String json = gson.toJson(manifest);
-	FileUtils.writeStringToFile(srcFile.toFile(), json, "UTF-8");
+		Gson gson = GsonFactory.getGson();
+		String json = gson.toJson(manifest);
+		FileUtils.writeStringToFile(srcFile.toFile(), json, "UTF-8");
 	}
 	
 	/**
