@@ -1,23 +1,31 @@
 package com.seven10.update_guy.manifest;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.google.gson.annotations.Expose;
+import com.seven10.update_guy.GsonFactory;
 
 public class ManifestVersionEntry
 {
+	private static final Logger logger = LogManager.getFormatterLogger(ManifestVersionEntry.class);
+	
 	@Expose
 	protected String version;
 	@Expose
 	protected Date publishDate;
 	@Expose
-	protected Map<String, Path> fileMap;
+	protected final Map<String, Path> fileMap;
 	
 	public ManifestVersionEntry()
 	{
@@ -25,98 +33,22 @@ public class ManifestVersionEntry
 		publishDate = new Date();
 		fileMap = new HashMap<String, Path>();
 	}
-
+	
 	public ManifestVersionEntry(ManifestVersionEntry versionEntry)
 	{
 		version = versionEntry.version;
 		publishDate = versionEntry.publishDate;
 		fileMap = new HashMap<String, Path>(versionEntry.fileMap);
 	}
-
+	
 	@Override
 	public String toString()
 	{
-		return "ManifestVersionEntry [version=" + version + ", publishDate=" + publishDate + ", fileMap=" + fileMap
-				+ "]";
+		return GsonFactory.getGson().toJson(this);
 	}
-	/**
-	 * @return the version
-	 */
-	public String getVersion()
-	{
-		return version;
-	}
-
-	/**
-	 * @param version the version to set
-	 */
-	public void setVersion(String version)
-	{
-		if(version == null || version.isEmpty())
-		{
-			throw new IllegalArgumentException("version must not be null");
-		}
-		this.version = version;
-	}
-
-	/**
-	 * @return the publishDate
-	 */
-	public Date getPublishDate()
-	{
-		return publishDate;
-	}
-
-	/**
-	 * @param publishDate the publishDate to set
-	 */
-	public void setPublishDate(Date publishDate)
-	{
-		if(publishDate == null)
-		{
-			throw new IllegalArgumentException("publishDate must not be null");
-		}
-		this.publishDate = publishDate;
-	}
-	
-	public Path getPath(String fileRole)
-	{
-		if(fileRole == null || fileRole.isEmpty())
-		{
-			throw new IllegalArgumentException("fileRole must not be null");
-		}
-		return fileMap.get(fileRole);
-	}
-	public void addPath(String fileRole, Path filePath)
-	{
-		if(fileRole == null || fileRole.isEmpty())
-		{
-			throw new IllegalArgumentException("fileRole must not be null");
-		}
-		if(filePath == null)
-		{
-			throw new IllegalArgumentException("filePath must not be null");
-		}
-		fileMap.put(fileRole, filePath);
-	}
-	public Set<String> getRoles()
-	{
-		return fileMap.keySet();
-	}
-	public Set<Entry<String, Path>> getPaths(Set<String> roles)
-	{
-		Set<Entry<String, Path>> selectedValues = fileMap.entrySet().stream()	// convert set all entries into stream of pairs
-		 		.filter(pair->roles.contains(pair.getKey()))	// select the pair if it is one we are interest in
-				.collect(Collectors.toSet());					// convert selected values to set of paths
-		return selectedValues;
-	}
-
-	public Set<Entry<String, Path>> getAllPaths()
-	{
-		return getPaths(getRoles());
-	}
-
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -127,10 +59,13 @@ public class ManifestVersionEntry
 		result = prime * result + ((fileMap == null) ? 0 : fileMap.hashCode());
 		result = prime * result + ((publishDate == null) ? 0 : publishDate.hashCode());
 		result = prime * result + ((version == null) ? 0 : version.hashCode());
+		logger.debug(".hashCode(): result = %s", result);
 		return result;
 	}
-
-	/* (non-Javadoc)
+	
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -138,54 +73,144 @@ public class ManifestVersionEntry
 	{
 		if (this == obj)
 		{
+			logger.debug(".equals(): match = true. other is the same object");
 			return true;
 		}
 		if (obj == null)
 		{
+			logger.debug(".equals(): match = false. other is null");
 			return false;
 		}
 		if (!(obj instanceof ManifestVersionEntry))
 		{
+			logger.debug(".equals(): match = false. other is not a ManifestVersionEntry");
 			return false;
 		}
 		ManifestVersionEntry other = (ManifestVersionEntry) obj;
-		if (fileMap == null)
+		if (fileMap.size() != other.fileMap.size())
 		{
-			if (other.fileMap != null)
-			{
-				return false;
-			}
-		}
-		else if (fileMap.size() != other.fileMap.size())
-		{
+			logger.debug(".equals(): match = false. other size does not match (this = %d, other = %d)", fileMap.size(),
+					other.fileMap.size());
 			return false;
 		}
-		else if( fileMap.entrySet().containsAll(other.fileMap.entrySet()))
+		else if (fileMap.entrySet().containsAll(other.fileMap.entrySet()) == false)
 		{
+			logger.debug(".equals(): match = false. other has entries that are not found in ours");
 			return false;
 		}
-		if (publishDate == null)
+		if (!publishDate.equals(other.publishDate))
 		{
-			if (other.publishDate != null)
-			{
-				return false;
-			}
-		}
-		else if (!publishDate.equals(other.publishDate))
-		{
+			logger.debug(".equals(): match = false. publishDate do not match (this=%d, other=%d)", this.publishDate.getTime(), other.publishDate.getTime());
 			return false;
 		}
-		if (version == null)
+		if (!version.equals(other.version))
 		{
-			if (other.version != null)
-			{
-				return false;
-			}
-		}
-		else if (!version.equals(other.version))
-		{
+			logger.debug(".equals(): match = false. versions do not match (this=%s, other = %s)", this.version, other.version);
 			return false;
 		}
+		
 		return true;
 	}
+	/**
+	 * @return the version
+	 */
+	public String getVersion()
+	{
+		return version;
+	}
+	
+	/**
+	 * @param version
+	 *            the version to set
+	 */
+	public void setVersion(String version)
+	{
+		if (version == null || version.isEmpty())
+		{
+			throw new IllegalArgumentException("version must not be null");
+		}
+		logger.debug(".setVersion(): version=%s", version);
+		this.version = version;
+	}
+	
+	/**
+	 * @return the publishDate
+	 */
+	public Date getPublishDate()
+	{
+		return publishDate;
+	}
+	
+	/**
+	 * @param publishDate
+	 *            the publishDate to set
+	 */
+	public void setPublishDate(Date publishDate)
+	{
+		if (publishDate == null)
+		{
+			throw new IllegalArgumentException("publishDate must not be null");
+		}
+		logger.debug(".setPublishDate(): publishDate=%s", publishDate);
+		this.publishDate = publishDate;
+	}
+	
+	public Path getPath(String fileRole)
+	{
+		if (fileRole == null || fileRole.isEmpty())
+		{
+			throw new IllegalArgumentException("fileRole must not be null");
+		}
+		return fileMap.get(fileRole);
+	}
+	
+	public void addPath(String fileRole, Path filePath)
+	{
+		if (fileRole == null || fileRole.isEmpty())
+		{
+			throw new IllegalArgumentException("fileRole must not be null");
+		}
+		if (filePath == null)
+		{
+			throw new IllegalArgumentException("filePath must not be null");
+		}
+		logger.debug(".addPath(): role=%s, filePath=%s, new map size=%d", fileRole, filePath.toString(), fileMap.size() + 1);
+		fileMap.put(fileRole, filePath);
+	}
+	
+	public List<String> getRoles()
+	{
+		List<String> roleList = new ArrayList<String>();
+		roleList.addAll(fileMap.keySet());
+		return roleList;
+	}
+	
+	public List<Entry<String, Path>> getPaths(List<String> roles)
+	{
+		List<Entry<String, Path>> selectedValues = fileMap.entrySet().stream() // convert all entries into stream of pairs
+				.filter(pair -> filterPaths(roles, pair)) // select the pair if it is one we are interest in
+				.collect(Collectors.toList()); // convert selected values to set of paths
+		return selectedValues;
+	}
+	
+	/**
+	 * @param roles
+	 * @param pair
+	 * @return
+	 */
+	public boolean filterPaths(List<String> roles, Entry<String, Path> pair)
+	{
+		boolean isMatch = roles.contains(pair.getKey());
+		logger.debug(".filterPaths(): roles=%s, pair(k,v)=(%s, %s), isMatch=%s", Arrays.toString(roles.toArray()),
+				pair.getKey(), pair.getValue(), String.valueOf(isMatch));
+		return isMatch;
+	}
+	
+	public List<Entry<String, Path>> getAllPaths()
+	{
+		List<String> roles = getRoles();
+		return getPaths(roles);
+	}
+	
+	
 }

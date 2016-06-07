@@ -2,7 +2,6 @@ package com.seven10.update_guy.repository.connection;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.FileUtils;
@@ -15,8 +14,8 @@ import com.seven10.update_guy.repository.RepositoryInfo;
 class LocalRepoConnection implements RepoConnection
 {
 	
-	private final String repoPath;
-	private String cachePath;
+	private final Path repoPath;
+	private final Path cachePath;
 	
 	private void copyFileToPath(Path srcPath, Path destPath) throws RepositoryException
 	{
@@ -37,7 +36,7 @@ class LocalRepoConnection implements RepoConnection
 	@Override
 	public void connect() throws RepositoryException
 	{
-		return;// already connected!
+		//  no need to connect
 	}
 	@Override
 	public void disconnect() throws RepositoryException
@@ -45,14 +44,15 @@ class LocalRepoConnection implements RepoConnection
 		return;// no need to disconnect!
 	}
 	@Override
-	public Manifest downloadManifest(String releaseFamily) throws RepositoryException
+	public Manifest getManifest(String releaseFamily) throws RepositoryException
 	{
 		if(releaseFamily==null || releaseFamily.isEmpty())
 		{
 			throw new IllegalArgumentException("releaseFamily must not be null or emptyu");
 		}
-		Path filePath = Paths.get(repoPath);
-		return Manifest.loadFromFile(filePath);
+		Path filePath = repoPath.resolve(String.format("%s.manifest", releaseFamily));
+		Manifest manifest = Manifest.loadFromFile(filePath);
+		return manifest;
 	}
 	@Override
 	public void downloadRelease(ManifestVersionEntry versionEntry) throws RepositoryException
@@ -64,7 +64,7 @@ class LocalRepoConnection implements RepoConnection
 		for(Entry<String, Path> entry: versionEntry.getAllPaths())
 		{
 			Path srcPath = entry.getValue();
-			Path destPath = Paths.get(cachePath).resolve(srcPath.getFileName());
+			Path destPath = cachePath.resolve(srcPath.getFileName());
 			copyFileToPath(srcPath, destPath);
 		}
 	}

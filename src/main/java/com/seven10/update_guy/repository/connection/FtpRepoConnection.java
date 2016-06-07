@@ -9,11 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -60,13 +55,14 @@ public class FtpRepoConnection implements RepoConnection
 		this.activeRepo = activeRepo;
 		this.ftpClient = new FTPClient();
 	}
+	
 	/**
 	 * @param fileName
 	 * @return
 	 */
 	public Path buildDestPath(String fileName)
 	{
-		return Paths.get(activeRepo.cachePath, fileName);
+		return activeRepo.cachePath.resolve(fileName);
 	}
 	
 	@Override
@@ -84,6 +80,7 @@ public class FtpRepoConnection implements RepoConnection
 			throw new RepositoryException("Could not connect to ftp client. Reason: %s", ex.getMessage());
 		}
 	}
+	
 	@Override
 	public void disconnect() throws RepositoryException
 	{
@@ -101,11 +98,12 @@ public class FtpRepoConnection implements RepoConnection
 		}
 		
 	}
+	
 	@Override
-	public Manifest downloadManifest(String releaseFamily) throws RepositoryException
+	public Manifest getManifest(String releaseFamily) throws RepositoryException
 	{
 		String manifestFileName = String.format("%s.manifest", releaseFamily);
-		Path srcPath = Paths.get(activeRepo.manifestPath, manifestFileName);
+		Path srcPath = activeRepo.manifestPath.resolve(manifestFileName);
 		Path destPath = buildDestPath(manifestFileName);
 		downloadFile(ftpClient, srcPath, destPath);
 		return Manifest.loadFromFile(destPath);
@@ -118,16 +116,11 @@ public class FtpRepoConnection implements RepoConnection
 	public void downloadRelease(ManifestVersionEntry versionEntry) throws RepositoryException
 	{
 		versionEntry.getPaths(versionEntry.getRoles()) // get all the paths
-				.forEach(entry->
+				.forEach(entry ->
 				{
 					Path srcPath = entry.getValue();
 					Path destPath = buildDestPath(srcPath.getFileName().toString());
 					downloadFile(ftpClient, srcPath, destPath);
 				});
 	}
-
-	
-
-	
-	
 }

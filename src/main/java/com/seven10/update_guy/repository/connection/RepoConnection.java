@@ -8,6 +8,6 @@ public interface RepoConnection
 {
 	public void connect() throws RepositoryException;
 	public void disconnect() throws RepositoryException;
-	public Manifest downloadManifest(String releaseFamily) throws RepositoryException;
+	public Manifest getManifest(String releaseFamily) throws RepositoryException;
 	public void downloadRelease(ManifestVersionEntry versionEntry) throws RepositoryException;
 }

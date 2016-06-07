@@ -14,33 +14,33 @@
 	<dependencies>
 		<!-- http://mvnrepository.com/artifact/com.google.code.gson/gson -->
 		<dependency>
-	    	<groupId>com.google.code.gson</groupId>
-	    	<artifactId>gson</artifactId>
-	    	<version>2.6.2</version>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.6.2</version>
 		</dependency>
 		<!-- http://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
 		<dependency>
-		    <groupId>org.apache.commons</groupId>
-		    <artifactId>commons-lang3</artifactId>
-		    <version>3.0</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.0</version>
 		</dependency>
 		<!-- http://mvnrepository.com/artifact/commons-net/commons-net -->
 		<dependency>
-		    <groupId>commons-net</groupId>
-		    <artifactId>commons-net</artifactId>
-		    <version>2.0</version>
+			<groupId>commons-net</groupId>
+			<artifactId>commons-net</artifactId>
+			<version>2.0</version>
 		</dependency>
 		<!-- http://mvnrepository.com/artifact/commons-codec/commons-codec -->
 		<dependency>
-		    <groupId>commons-codec</groupId>
-		    <artifactId>commons-codec</artifactId>
-		    <version>1.4</version>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.4</version>
 		</dependency>
 		<!-- http://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>
-		    <groupId>commons-io</groupId>
-		    <artifactId>commons-io</artifactId>
-		    <version>2.5</version>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.5</version>
 		</dependency>
 		<!-- http://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
 		<dependency>
@@ -90,7 +90,16 @@
 			<version>${powermock.version}</version>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.6</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<pluginManagement>

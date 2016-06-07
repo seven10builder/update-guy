@@ -6,23 +6,23 @@ package com.seven10.update_guy.manifest;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+import com.seven10.update_guy.GsonFactory;
 import com.seven10.update_guy.TestHelpers;
 import com.seven10.update_guy.exceptions.RepositoryException;
 
@@ -32,7 +32,14 @@ import com.seven10.update_guy.exceptions.RepositoryException;
  */
 public class ManifestVersionEntryTest
 {
-
+	private static final Logger logger = LogManager.getFormatterLogger(ManifestVersionEntryTest.class);
+	
+	private List<String> createTestRoleSubset(Map<String, Path> roleMap)
+	{
+		// filter out keys with odd hashs. This should give us a subset of the keys
+		return roleMap.keySet().stream().filter(key->key.hashCode()%2 == 0).collect(Collectors.toList());
+	}
+	
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
 	
@@ -46,11 +53,11 @@ public class ManifestVersionEntryTest
 	{
 		String releaseFamily = "serialize-me";
 		Path rootFolder = folder.newFolder(releaseFamily).toPath();
+		
 		ManifestVersionEntry expected = TestHelpers.createValidVersionEntry(releaseFamily, 1, TestHelpers.versionEntryCount, rootFolder);
 		
-		Gson gson = new GsonBuilder().registerTypeHierarchyAdapter(Path.class, new PathConverter()).create();
-		
-		String json = gson.toJson(expected);
+		Gson gson = GsonFactory.getGson();		
+		String json = gson.toJson(expected);		
 		assertNotNull(json);
 		assertFalse(json.isEmpty());
 		
@@ -146,7 +153,7 @@ public class ManifestVersionEntryTest
 				role->
 				{
 					Path actual = versionEntry.getPath(role);
-					assertEquals(Paths.get(role), actual);
+					assertEquals(rootPath.resolve(role), actual);
 				});
 	}
 	/**
@@ -256,20 +263,24 @@ public class ManifestVersionEntryTest
 		String expected = "getPaths";
 		Map<String, Path> roleMap = TestHelpers.createValidRolePaths(expected, TestHelpers.versionEntryCount, rootPath);
 		roleMap.forEach((role, path)->versionEntry.addPath(role, path));
-		// filter out keys with odd hashs. This should give us a subset of the keys
-		Set<String> roles = roleMap.keySet().stream().filter(key->key.hashCode()%2 == 0).collect(Collectors.toSet());
+
+		List<String> roles = createTestRoleSubset(roleMap);
+		logger.debug(".testGetPaths(): roles = %s", Arrays.toString(roles.toArray()) ); 
 		
-		Set<Entry<String, Path>> actual = versionEntry.getPaths(roles);
+		List<Entry<String, Path>> actual = versionEntry.getPaths(roles);
 		
-		Set<String> actualKeys = actual.stream().map(entry->entry.getKey()).collect(Collectors.toSet());
-		assertEquals(roles.size(), actual.size());
- 		assertTrue(roles.contains(actualKeys));
+		List<String> actualKeys = actual.stream().map(entry->entry.getKey()).collect(Collectors.toList());
+		logger.debug(".testGetPaths(): actualKeys = %s", Arrays.toString(actualKeys.toArray()) ); 
+		
+		boolean rolesContainsKeys = roles.containsAll(actualKeys);
+ 		assertTrue(rolesContainsKeys);
 		actual.forEach(entry->
 				{
 					Path path = versionEntry.getPath(entry.getKey());
 					assertEquals(path, entry.getValue());
 				});
 	}
+
 	
 	/**
 	 * Test method for {@link com.seven10.update_guy.manifest.ManifestVersionEntry#getAllPaths()}.
@@ -284,9 +295,9 @@ public class ManifestVersionEntryTest
 		Map<String, Path> roleMap = TestHelpers.createValidRolePaths(testName, TestHelpers.versionEntryCount, rootPath);
 		roleMap.forEach((role, path)->versionEntry.addPath(role, path));
 		
-		Set<Entry<String, Path>> actual = versionEntry.getAllPaths();
-		Set<Entry<String, Path>> expected = roleMap.entrySet();
-		assertTrue(expected.contains(actual));
+		List<Entry<String, Path>> actual = versionEntry.getAllPaths();
+		List<Entry<String, Path>> expected = roleMap.entrySet().stream().collect(Collectors.toList());
+		assertTrue(expected.containsAll(actual));
 		assertTrue(actual.containsAll(expected));
 	}
 	
@@ -406,7 +417,7 @@ public class ManifestVersionEntryTest
 		Path rootFolder = folder.newFolder(releaseFamily).toPath();
 		ManifestVersionEntry versionEntry = TestHelpers.createValidVersionEntry(releaseFamily, 1, 3, rootFolder);
 		// different object should be different
-		Manifest other =  TestHelpers.createValidManifest(releaseFamily, rootFolder);
+		ManifestVersionEntryTest other =  new ManifestVersionEntryTest();
 		boolean isEqual = versionEntry.equals(other);
 		assertFalse(isEqual);
 	}

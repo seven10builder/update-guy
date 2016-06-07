@@ -1,32 +1,41 @@
 package com.seven10.update_guy.repository;
 
-import java.io.Serializable;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import com.google.gson.annotations.Expose;
 
-@XmlRootElement
-public class RepositoryInfo implements Serializable
+public class RepositoryInfo
 {
 	public enum RepositoryType
 	{
 		local,
 		ftp
 	}
-   
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 3262800462100466329L;
-	
-	@XmlElement public String repoAddress;
-	@XmlElement	public int port;
-	@XmlElement public String user;
-    @XmlElement public String password;
-    @XmlElement public String manifestPath;
-    @XmlElement public String description;
-    @XmlElement public RepositoryType repoType;
-    @XmlElement	public String cachePath;
+    public RepositoryInfo()
+    {
+    	repoAddress = "";
+    	port = 0;
+    	user = "";
+    	password = "";
+    	manifestPath = Paths.get(".");
+    }
+	@Expose
+	public String repoAddress;
+	@Expose
+	public int port;
+	@Expose
+	public String user;
+	@Expose
+    public String password;
+	@Expose
+    public Path manifestPath;
+	@Expose
+    public String description;
+	@Expose
+    public RepositoryType repoType;
+	@Expose
+    public Path cachePath;
     
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()

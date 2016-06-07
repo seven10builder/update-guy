@@ -1,32 +1,33 @@
 package com.seven10.update_guy.repository;
 
-import java.io.EOFException;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.lang.reflect.Type;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.seven10.update_guy.GsonFactory;
 import com.seven10.update_guy.exceptions.RepositoryException;
 
 public class RepositoryInfoMgr
 {
-	private final String repositoryStorePath;
+	private final Path repositoryStorePath;
 	private Map<Integer, RepositoryInfo> repoMap;
 
-	public RepositoryInfoMgr(String repositoryStorePath)
+	public RepositoryInfoMgr(Path repositoryStorePath) throws RepositoryException
 	{
 		this.repositoryStorePath = repositoryStorePath;
 		repoMap = new HashMap<Integer, RepositoryInfo>();
 		init();
 	}
 	
-	private void init()
+	private void init() throws RepositoryException
 	{
 		List<RepositoryInfo> repos = loadRepos(repositoryStorePath);
 		repos.forEach(repo->repoMap.put(repo.hashCode(), repo));
@@ -45,7 +46,7 @@ public class RepositoryInfoMgr
 		}
 		// store repositoryInfo list
 		repoMap.put(hash, repoInfo);
-		writeRepos(repositoryStorePath, repoMap.values());
+		writeRepos(repositoryStorePath, new ArrayList<RepositoryInfo>(repoMap.values()));
 	}
 
 	public void deleteRepository(int repositoryId) throws RepositoryException
@@ -57,94 +58,57 @@ public class RepositoryInfoMgr
 		}
 		// remove repositoryInfo object from list
 		repoMap.remove(repositoryId);
-		writeRepos(repositoryStorePath, repoMap.values());
+		writeRepos(repositoryStorePath, new ArrayList<RepositoryInfo>(repoMap.values()));
 	}
 
-	public static void writeRepos(String repoStorePath, Collection<RepositoryInfo> repos) throws RepositoryException
+	public static void writeRepos(Path repoStorePath, List<RepositoryInfo> repos) throws RepositoryException
 	{
-		if(repoStorePath == null || repoStorePath.isEmpty())
+		if (repoStorePath == null)
 		{
-			throw new IllegalArgumentException("repoStorePath cannot be null or empty");
+			throw new IllegalArgumentException("repoStorePath must not be null");
 		}
-		if(repos == null)
+		if (repos == null)
 		{
-			throw new IllegalArgumentException("repos cannot be null");
+			throw new IllegalArgumentException("repos must not be null");
 		}
-		ObjectOutputStream oos = null;
+		Gson gson = GsonFactory.getGson();
+		String json = gson.toJson(repos);
 		try
 		{
-			oos = new ObjectOutputStream(new FileOutputStream(repoStorePath, false));
-			for (RepositoryInfo repo : repos)
-			{
-				oos.writeObject(repo);
-			}
+			FileUtils.writeStringToFile(repoStorePath.toFile(), json, GsonFactory.encodingType);
 		}
 		catch (IOException e)
 		{
-			throw new RepositoryException("Error writing repository information to file '%s': %s", repoStorePath, e.getMessage());
-		}
-		finally
-		{
-			try
-			{
-				oos.close();
-			}
-			catch(NullPointerException ex)
-			{
-				// ignore this catch, it was probably never opened or something
-			}
-			catch(IOException e)
-			{
-				throw new RepositoryException("Error closing repository information file '%s': %s", repoStorePath, e.getMessage());
-			}
+			throw new RepositoryException("Could not write file '%s'. Exception: %s", repoStorePath, e.getMessage());
 		}
 	}
 
-	public static List<RepositoryInfo> loadRepos(String repoStorePath)
+	public static List<RepositoryInfo> loadRepos(Path repoStorePath) throws RepositoryException
 	{
-		if(repoStorePath == null || repoStorePath.isEmpty())
+		if(repoStorePath == null)
 		{
-			throw new IllegalArgumentException("repoStorePath cannot be null or empty");
+			throw new IllegalArgumentException("repoStorePath cannot be null");
 		}
-		ObjectInputStream ois = null;
-		List<RepositoryInfo> repos = new ArrayList<RepositoryInfo>();
 		try
 		{
-			ois = new ObjectInputStream(new FileInputStream(repoStorePath));
-			try
+			List<RepositoryInfo> repos;
+			String json = FileUtils.readFileToString(repoStorePath.toFile(), GsonFactory.encodingType);
+			if(json.isEmpty())
 			{
-				while(true)
-				{
-					RepositoryInfo repo = (RepositoryInfo) ois.readObject();
-					repos.add(repo);
-				}
+				repos = new ArrayList<RepositoryInfo>(); 
 			}
-			catch(EOFException e)
+			else
 			{
-				//ignore this exception, it just means its time to quit the loop
+				Gson gson = GsonFactory.getGson();
+				Type collectionType = new TypeToken<List<RepositoryInfo>>(){}.getType();
+				repos = gson.fromJson(json, collectionType);
 			}
+			return repos;
 		}
-		catch (IOException|ClassNotFoundException e)
+		catch (IOException e)
 		{
-			// TODO: log this => ("Error reading repository information to file '%s': %s", getRepositoryStorePath(), e.getMessage());
-			repos = new ArrayList<RepositoryInfo>(0);
+			throw new RepositoryException("Could not read file '%s'. Exception: %s", repoStorePath, e.getMessage());
 		}
-		finally
-		{
-			try
-			{
-				ois.close();
-			}
-			catch(NullPointerException ex)
-			{
-				// ignore this catch, it was probably never opened or something
-			}
-			catch(IOException e)
-			{
-				// TODO: log this => ("Error closing repository information file '%s': %s", getRepositoryStorePath(), e.getMessage());
-			}
-		}
-		return repos;
 	}
 
 	public Map<Integer, RepositoryInfo> getRepoMap()

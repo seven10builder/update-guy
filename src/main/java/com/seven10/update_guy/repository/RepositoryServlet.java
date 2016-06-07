@@ -1,5 +1,6 @@
 package com.seven10.update_guy.repository;
 
+import java.nio.file.Paths;
 import java.util.Map;
 
 import javax.ws.rs.Consumes;
@@ -26,9 +27,9 @@ public class RepositoryServlet
 	final private RepositoryInfoMgr repoInfoMgr;
 	private String activeRepo;
 	
-	public RepositoryServlet()
+	public RepositoryServlet() throws RepositoryException
 	{
-		repoInfoMgr = new RepositoryInfoMgr("repos.dat");
+		repoInfoMgr = new RepositoryInfoMgr(Paths.get("repos.dat"));
 	}
 	private final RepositoryInfo getActiveRepo()
 	{
@@ -45,7 +46,7 @@ public class RepositoryServlet
 		{
 			RepoConnection repoConnection = RepoConnectionFactory.connect(getActiveRepo());
 			// download manifest file
-			manifest = repoConnection.downloadManifest(releaseFamily);
+			manifest = repoConnection.getManifest(releaseFamily);
 		}
 		catch (RepositoryException e)
 		{

@@ -27,7 +27,7 @@ public class RepoConnectionFactoryTest
 	@Test
 	public void testConnect_valid() throws RepositoryException
 	{
-		RepositoryInfo activeRepo = TestHelpers.createMockedRepoInfo("testConnectLocal");
+		RepositoryInfo activeRepo = TestHelpers.createValidRepoInfo("testConnectLocal");
 		
 		// test local
 		activeRepo.repoType = RepositoryType.local;

@@ -1,7 +1,6 @@
 package com.seven10.update_guy.manifest;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Date;
@@ -14,15 +13,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
-import com.google.gson.reflect.TypeToken;
+import com.seven10.update_guy.GsonFactory;
 import com.seven10.update_guy.exceptions.RepositoryException;
 
 public class Manifest
 {
 
-	private static final String encodingType = "UTF-8";
 	@Expose
 	String releaseFamily;
 	@Expose
@@ -134,7 +131,7 @@ public class Manifest
 		}
 		Gson gson = GsonFactory.getGson();
 		String json = gson.toJson(manifest);
-		FileUtils.writeStringToFile(filePath.toFile(), json, encodingType);
+		FileUtils.writeStringToFile(filePath.toFile(), json, GsonFactory.encodingType);
 	}
 
 	public static Manifest loadFromFile(Path filePath) throws RepositoryException
@@ -145,9 +142,9 @@ public class Manifest
 		}
 		try
 		{
-			String json = FileUtils.readFileToString(filePath.toFile(), encodingType);
+			String json = FileUtils.readFileToString(filePath.toFile(), GsonFactory.encodingType);
 			Gson gson = GsonFactory.getGson();
-			Manifest manifest = (Manifest) gson.fromJson(json, Manifest.class);
+			Manifest manifest = gson.fromJson(json, Manifest.class);
 			return manifest;
 		}
 		catch (IOException e)
@@ -234,11 +231,7 @@ public class Manifest
 		{
 			return false;
 		}
-		else if( versions.entrySet().containsAll(other.versions.entrySet()))
-		{
-			return false;
-		}
-		return true;
+		return( versions.entrySet().containsAll(other.versions.entrySet()));
 	}
 
 }

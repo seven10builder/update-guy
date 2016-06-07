@@ -10,17 +10,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.seven10.update_guy.TestHelpers;
 import com.seven10.update_guy.exceptions.RepositoryException;
-import com.seven10.update_guy.manifest.GsonFactory;
 import com.seven10.update_guy.manifest.Manifest;
 import com.seven10.update_guy.manifest.ManifestVersionEntry;
 import com.seven10.update_guy.repository.RepositoryInfo;
@@ -32,18 +30,19 @@ import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
  */
 public class LocalRepoConnectionTest
 {
+	private static final Logger logger = LogManager.getFormatterLogger(LocalRepoConnectionTest.class);
 	/**
-	 * @param releaseFamily
-	 * @param destFolder
 	 * @param srcPath
+	 * @param destFolder
+	 * @param releaseFamily
 	 * @return
 	 */
-	private static LocalRepoConnection createLocalRepoInfo(String releaseFamily, Path destFolder, Path srcPath)
+	private static LocalRepoConnection createLocalRepoInfo(Path srcPath, Path destFolder, String releaseFamily)
 	{
 		RepositoryInfo repo = new RepositoryInfo();
 		repo.description = releaseFamily;
-		repo.manifestPath = srcPath.toString();
-		repo.cachePath = destFolder.toString();
+		repo.manifestPath = srcPath;
+		repo.cachePath = destFolder;
 		repo.repoType = RepositoryType.local;
 		return new LocalRepoConnection(repo);
 	}
@@ -62,24 +61,7 @@ public class LocalRepoConnectionTest
 			TestHelpers.createSparseFile(fileName, TestHelpers.testFileLength);
 		});
 	}
-	
-	/**
-	 * @param releaseFamily
-	 * @param srcFile
-	 * @return
-	 * @throws RepositoryException
-	 * @throws JsonGenerationException
-	 * @throws JsonMappingException
-	 * @throws IOException
-	 */
-	private void prepareManifestFile(String releaseFamily, Path srcFile) throws RepositoryException, IOException
-	{
-		Manifest manifest = TestHelpers.createValidManifest(releaseFamily, folder.newFile().toPath());
-		Gson gson = GsonFactory.getGson();
-		String json = gson.toJson(manifest);
-		FileUtils.writeStringToFile(srcFile.toFile(), json, "UTF-8");
-	}
-	
+
 	/**
 	 * @param srcPath
 	 * @param destFolder
@@ -112,6 +94,8 @@ public class LocalRepoConnectionTest
 		});
 	}
 	
+		
+	
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
 	
@@ -124,7 +108,7 @@ public class LocalRepoConnectionTest
 	public void testLocalRepoConnection_valid()
 	{
 		
-		RepositoryInfo activeRepo = TestHelpers.createMockedRepoInfo("lrc_valid");
+		RepositoryInfo activeRepo = TestHelpers.createValidRepoInfo("lrc_valid");
 		LocalRepoConnection repoConnection = new LocalRepoConnection(activeRepo);
 		assertNotNull(repoConnection);
 	}
@@ -138,18 +122,22 @@ public class LocalRepoConnectionTest
 	 * @throws RepositoryException
 	 */
 	@Test
-	public void testDownloadManifest_valid() throws IOException, RepositoryException
+	public void testgetManifest_valid() throws IOException, RepositoryException
 	{
-		String releaseFamily = "downloadMan_valid";
-		String fileName = String.format("%s.manifest", releaseFamily);
-		Path srcFile = createTestDownloadFolder("%s-src", releaseFamily).resolve(fileName);
-		Path destFolder = createTestDownloadFolder("%s-dest", releaseFamily);
-		prepareManifestFile(releaseFamily, srcFile);
-		LocalRepoConnection repoConnection = createLocalRepoInfo(releaseFamily, destFolder, srcFile);
+		String releaseFamily = "relfam";
 		
-		repoConnection.downloadManifest(releaseFamily);
+		Path srcManifestPath = TestHelpers.createManifestForReleaseFamily(releaseFamily, folder);
+		Path cacheFolder = createTestDownloadFolder("%s-dest", releaseFamily);
 		
-		validateDownload(srcFile, destFolder.resolve(fileName));
+		LocalRepoConnection repoConnection = createLocalRepoInfo(srcManifestPath, cacheFolder, releaseFamily);
+		Path manifestFile = srcManifestPath.resolve(String.format("%s.manifest", releaseFamily));
+		logger.debug(".testgetManifest_valid(): manifestFile = %s", manifestFile);
+		
+		Manifest expected = TestHelpers.loadValidManifest(releaseFamily, manifestFile);
+		
+		Manifest actual = repoConnection.getManifest(releaseFamily);
+		
+		assertEquals(expected, actual);
 	}
 	
 	/**
@@ -161,12 +149,12 @@ public class LocalRepoConnectionTest
 	 * @throws RepositoryException
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void testDownloadManifest_null() throws IOException, RepositoryException
+	public void testgetManifest_null() throws IOException, RepositoryException
 	{
 		RepositoryInfo repo = new RepositoryInfo();
 		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
 		String expected = null;
-		repoConnection.downloadManifest(expected);
+		repoConnection.getManifest(expected);
 	}
 	
 	/**
@@ -178,14 +166,29 @@ public class LocalRepoConnectionTest
 	 * @throws RepositoryException
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void testDownloadManifest_empty() throws IOException, RepositoryException
+	public void testgetManifest_empty() throws IOException, RepositoryException
 	{
 		RepositoryInfo repo = new RepositoryInfo();
 		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
 		String expected = "";
-		repoConnection.downloadManifest(expected);
+		repoConnection.getManifest(expected);
 	}
-	
+	/**
+	 * Test method for
+	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadManifest(java.lang.String)}
+	 * .
+	 * 
+	 * @throws IOException
+	 * @throws RepositoryException
+	 */
+	@Test(expected = RepositoryException.class)
+	public void testgetManifest_notFound() throws IOException, RepositoryException
+	{
+		RepositoryInfo repo = new RepositoryInfo();
+		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
+		String expected = "weKnowThisAintThere";
+		repoConnection.getManifest(expected);
+	}
 	/**
 	 * Test method for
 	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadRelease(com.seven10.update_guy.repository.Manifest.VersionEntry)}
@@ -204,7 +207,7 @@ public class LocalRepoConnectionTest
 				TestHelpers.versionEntryRoleCount, srcFile);
 				
 		prepareDownloadFiles(releaseFamily, srcFile, versionEntry);
-		LocalRepoConnection repoConnection = createLocalRepoInfo(releaseFamily, destFolder, srcFile);
+		LocalRepoConnection repoConnection = createLocalRepoInfo(srcFile, destFolder, releaseFamily);
 		
 		repoConnection.downloadRelease(versionEntry);
 		
@@ -225,7 +228,7 @@ public class LocalRepoConnectionTest
 		String releaseFamily = "downloadRel_valid";
 		Path srcFile = createTestDownloadFolder("%s-src", releaseFamily);
 		Path destFolder = createTestDownloadFolder("%s-dest", releaseFamily);
-		LocalRepoConnection repoConnection = createLocalRepoInfo(releaseFamily, destFolder, srcFile);
+		LocalRepoConnection repoConnection = createLocalRepoInfo(srcFile, destFolder, releaseFamily);
 		
 		ManifestVersionEntry versionEntry = null;
 		repoConnection.downloadRelease(versionEntry);

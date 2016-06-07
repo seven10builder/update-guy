@@ -27,6 +27,7 @@ hs_err_pid*
 # Log4J2
 *.log
 log/
+logs/
 
 #general swap/backup files
 *.tmp
