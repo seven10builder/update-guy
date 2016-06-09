@@ -2,7 +2,7 @@ package com.seven10.update_guy.manifest;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -105,9 +105,9 @@ public class Manifest
 		this.retrieved = newRetrieved;
 	}
 
-	public Collection<ManifestVersionEntry> getVersionEntries()
+	public List<ManifestVersionEntry> getVersionEntries()
 	{
-		return versions.values();
+		return new ArrayList<ManifestVersionEntry>(versions.values());
 	}
 
 	public void addVersionEntry(ManifestVersionEntry versionEntry)

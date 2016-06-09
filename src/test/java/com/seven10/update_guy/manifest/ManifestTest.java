@@ -10,14 +10,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Date;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.google.gson.Gson;
 import com.seven10.update_guy.GsonFactory;
-import com.seven10.update_guy.TestHelpers;
 import com.seven10.update_guy.exceptions.RepositoryException;
+import com.seven10.update_guy.test_helpers.Factories;
+import com.seven10.update_guy.test_helpers.TestHelpers;
 
 /**
  * @author kmm
@@ -47,8 +49,8 @@ public class ManifestTest
 	public void testManifestManifest_valid_manifest() throws IOException
 	{
 		String releaseFamily = "manifest-ctor";
-		Path rootFolder = TestHelpers.createManifestForReleaseFamily(releaseFamily, folder);
-		Manifest expectedManifest = TestHelpers.loadValidManifest(releaseFamily, TestHelpers.combineToFileName(releaseFamily, rootFolder));	
+		Path rootFolder = Factories.createManifestFileForReleaseFamily(releaseFamily, folder);
+		Manifest expectedManifest = Factories.createValidManifest(releaseFamily, TestHelpers.combineToManifestFileName(releaseFamily, rootFolder));	
 		Manifest  actual = new Manifest(expectedManifest);
 		assertEquals(expectedManifest, actual);
 	}
@@ -181,7 +183,7 @@ public class ManifestTest
 		for(int i = 0; i < TestHelpers.versionEntryCount; i++)
 		{
 			Manifest manifest = new Manifest();
-			Collection<ManifestVersionEntry> expected = TestHelpers.createValidManifestEntries(releaseFamily, i, rootPath);
+			Collection<ManifestVersionEntry> expected = Factories.createValidManifestEntries(releaseFamily, i, rootPath);
 			expected.forEach(versionEntry ->manifest.addVersionEntry(versionEntry));
 			
 			Collection<ManifestVersionEntry> actual = manifest.getVersionEntries();
@@ -211,8 +213,8 @@ public class ManifestTest
 	public void testSerializeManifest() throws IOException, RepositoryException
 	{
 		String releaseFamily = "serialize";
-		Path rootFolder = TestHelpers.createManifestForReleaseFamily(releaseFamily, folder);
-		Manifest expectedManifest = TestHelpers.loadValidManifest(releaseFamily, TestHelpers.combineToFileName(releaseFamily, rootFolder));			
+		Path rootFolder = Factories.createManifestFileForReleaseFamily(releaseFamily, folder);
+		Manifest expectedManifest = Factories.createValidManifest(releaseFamily, TestHelpers.combineToManifestFileName(releaseFamily, rootFolder));			
 		
 		Gson gson = GsonFactory.getGson();
 		
@@ -233,10 +235,10 @@ public class ManifestTest
 	public void testWriteToLoadFromFile_valid() throws IOException, RepositoryException
 	{
 		String releaseFamily = "wt-lf-rvalid";
-		Path rootFolder = TestHelpers.createManifestForReleaseFamily(releaseFamily, folder);
-		Manifest expected = TestHelpers.loadValidManifest(releaseFamily, TestHelpers.combineToFileName(releaseFamily, rootFolder));	
+		Path rootFolder = Factories.createManifestFileForReleaseFamily(releaseFamily, folder);
+		Manifest expected = Factories.createValidManifest(releaseFamily, TestHelpers.combineToManifestFileName(releaseFamily, rootFolder));	
 		
-		Path targetFile = TestHelpers.combineToFileName(releaseFamily, folder.newFolder().toPath());
+		Path targetFile = TestHelpers.combineToManifestFileName(releaseFamily, folder.newFolder().toPath());
 		Manifest.writeToFile(targetFile, expected);
 		Manifest actual = Manifest.loadFromFile(targetFile);
 		
@@ -253,7 +255,7 @@ public class ManifestTest
 	{
 		Path filePath = folder.newFolder("loadFromFile_invalid").toPath();
 		//create known bad file
-		TestHelpers.createInvalidManifestFile(filePath);
+		Factories.createInvalidManifestFile(filePath);
 		Manifest.loadFromFile(filePath);
 	}
 	/**
@@ -287,8 +289,8 @@ public class ManifestTest
 	public void testEquals_self() throws IOException
 	{
 		String releaseFamily = "testEquals-self";
-		Path rootFolder = TestHelpers.createManifestForReleaseFamily(releaseFamily, folder);
-		Manifest expectedManifest = TestHelpers.loadValidManifest(releaseFamily, TestHelpers.combineToFileName(releaseFamily, rootFolder));	
+		Path rootFolder = Factories.createManifestFileForReleaseFamily(releaseFamily, folder);
+		Manifest expectedManifest = Factories.createValidManifest(releaseFamily, TestHelpers.combineToManifestFileName(releaseFamily, rootFolder));	
 		
 		// same should equal
 		boolean actual = expectedManifest.equals(expectedManifest);
@@ -303,8 +305,8 @@ public class ManifestTest
 	public void testEquals_clone() throws IOException
 	{
 		String releaseFamily = "testEquals-clone";
-		Path rootFolder = TestHelpers.createManifestForReleaseFamily(releaseFamily, folder);
-		Manifest expectedManifest = TestHelpers.loadValidManifest(releaseFamily, TestHelpers.combineToFileName(releaseFamily, rootFolder));	
+		Path rootFolder = Factories.createManifestFileForReleaseFamily(releaseFamily, folder);
+		Manifest expectedManifest = Factories.createValidManifest(releaseFamily, TestHelpers.combineToManifestFileName(releaseFamily, rootFolder));	
 		
 		//clone should be equal
 		Manifest cloneManifest = new Manifest(expectedManifest);
@@ -320,8 +322,8 @@ public class ManifestTest
 	public void testEquals_createdDiff() throws IOException
 	{
 		String releaseFamily = "testEquals-created";
-		Path rootFolder = TestHelpers.createManifestForReleaseFamily(releaseFamily, folder);
-		Manifest expectedManifest = TestHelpers.loadValidManifest(releaseFamily, TestHelpers.combineToFileName(releaseFamily, rootFolder));	
+		Path rootFolder = Factories.createManifestFileForReleaseFamily(releaseFamily, folder);
+		Manifest expectedManifest = Factories.createValidManifest(releaseFamily, TestHelpers.combineToManifestFileName(releaseFamily, rootFolder));	
 		Manifest cloneManifest = new Manifest(expectedManifest);
 		// different object should be different
 		cloneManifest.setCreated(new Date(31337));
@@ -339,8 +341,8 @@ public class ManifestTest
 	{
 		String releaseFamily = "testEquals-rf";
 		
-		Path rootFolder = TestHelpers.createManifestForReleaseFamily(releaseFamily, folder);
-		Manifest expectedManifest = TestHelpers.loadValidManifest(releaseFamily, TestHelpers.combineToFileName(releaseFamily, rootFolder));	
+		Path rootFolder = Factories.createManifestFileForReleaseFamily(releaseFamily, folder);
+		Manifest expectedManifest = Factories.createValidManifest(releaseFamily, TestHelpers.combineToManifestFileName(releaseFamily, rootFolder));	
 		
 		Manifest cloneManifest = new Manifest(expectedManifest);
 		// different object should be different
@@ -358,8 +360,8 @@ public class ManifestTest
 	public void testEquals_retrievedDiff() throws IOException
 	{
 		String releaseFamily = "testEquals-retr";
-		Path rootFolder = TestHelpers.createManifestForReleaseFamily(releaseFamily, folder);
-		Manifest expectedManifest = TestHelpers.loadValidManifest(releaseFamily, TestHelpers.combineToFileName(releaseFamily, rootFolder));	
+		Path rootFolder = Factories.createManifestFileForReleaseFamily(releaseFamily, folder);
+		Manifest expectedManifest = Factories.createValidManifest(releaseFamily, TestHelpers.combineToManifestFileName(releaseFamily, rootFolder));	
 		Manifest cloneManifest = new Manifest(expectedManifest);
 		// different object should be different
 		cloneManifest.setRetrieved(new Date(31337));
@@ -376,14 +378,17 @@ public class ManifestTest
 	public void testEquals_versionsDiff() throws IOException
 	{
 		String releaseFamily = "testEquals-retr";
-		Path rootFolder = TestHelpers.createManifestForReleaseFamily(releaseFamily, folder);
-		Manifest expectedManifest = TestHelpers.loadValidManifest(releaseFamily, TestHelpers.combineToFileName(releaseFamily, rootFolder));	
-		Manifest cloneManifest = new Manifest(expectedManifest);
-		// different object should be different
-		ManifestVersionEntry versionEntry = TestHelpers.createValidVersionEntry(releaseFamily, 29, 3, rootFolder);
-		cloneManifest.addVersionEntry(versionEntry);
+		Path manifestPath = ManifestHelpers.build_manifest_path_by_testname(releaseFamily, folder);
+		ManifestHelpers.copy_manifest_to_path(ManifestHelpers.validManifestFileName, manifestPath);
+		Manifest ours = ManifestHelpers.load_manifest_from_path(manifestPath);
 		
-		boolean isEqual = expectedManifest.equals(cloneManifest);
+			
+		Manifest other = new Manifest(ours);
+		// different object should be different
+		ManifestVersionEntry versionEntry = Factories.createValidManifestEntry(releaseFamily, 0);
+		other.addVersionEntry(versionEntry);
+		
+		boolean isEqual = ours.equals(other);
 		assertFalse(isEqual);
 	}
 	/**
@@ -407,11 +412,12 @@ public class ManifestTest
 	public void testEquals_diffClass() throws IOException
 	{
 		String releaseFamily = "testEquals-retr";
-		Path rootFolder = TestHelpers.createManifestForReleaseFamily(releaseFamily, folder);
-		Manifest expectedManifest = TestHelpers.loadValidManifest(releaseFamily, TestHelpers.combineToFileName(releaseFamily, rootFolder));	
-		// different object should be different
-		ManifestVersionEntry other = TestHelpers.createValidVersionEntry(releaseFamily, 29, 3, rootFolder);
-		boolean isEqual = expectedManifest.equals(other);
+		Path manifestPath = ManifestHelpers.build_manifest_path_by_testname(releaseFamily, folder);
+		ManifestHelpers.copy_manifest_to_path(ManifestHelpers.validManifestFileName, manifestPath);
+		Manifest ours = ManifestHelpers.load_manifest_from_path(manifestPath);
+		
+		ManifestVersionEntry other = new ManifestVersionEntry();
+		boolean isEqual = ours.equals(other);
 		assertFalse(isEqual);
 	}
 }
