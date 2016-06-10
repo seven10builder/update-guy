@@ -3,32 +3,25 @@
  */
 package com.seven10.update_guy.repository.connection;
 
+import static com.seven10.update_guy.manifest.ManifestHelpers.*;
+import static com.seven10.update_guy.RepoConnectionHelpers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map.Entry;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.seven10.update_guy.GsonFactory;
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.manifest.Manifest;
-import static com.seven10.update_guy.manifest.ManifestHelpers.*;
+
 import com.seven10.update_guy.manifest.ManifestVersionEntry;
 import com.seven10.update_guy.repository.RepositoryInfo;
 import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
 import com.seven10.update_guy.test_helpers.Factories;
-import com.seven10.update_guy.test_helpers.TestHelpers;
 import com.seven10.update_guy.test_helpers.Validators;
 
 /**
@@ -166,8 +159,6 @@ public class LocalRepoConnectionTest
 		Validators.validateDownloadRelease(entry, repo.cachePath);
 	}
 	
-
-
 	/**
 	 * Test method for
 	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadRelease(com.seven10.update_guy.repository.Manifest.VersionEntry)}
@@ -182,45 +173,5 @@ public class LocalRepoConnectionTest
 		
 		ManifestVersionEntry versionEntry = null;
 		repoConnection.downloadRelease(versionEntry);
-	}
-	
-	private RepositoryInfo get_repo_info_by_type(List<RepositoryInfo> repos, RepositoryType type)
-	{
-		RepositoryInfo repoInfo = repos.stream().filter(repo->repo.repoType == type).findAny().orElse(new RepositoryInfo());
-		return repoInfo;
-	}
-
-	private List<RepositoryInfo> create_repo_infos_from_filename(String repoInfoFileName) throws IOException
-	{
-		Path repoPath = TestHelpers.get_repos_path().resolve(repoInfoFileName);
-		String json = FileUtils.readFileToString(repoPath.toFile(), GsonFactory.encodingType);
-		Gson gson = GsonFactory.getGson();
-		Type collectionType = new TypeToken<List<RepositoryInfo>>()
-		{
-		}.getType();
-		List<RepositoryInfo> repos = gson.fromJson(json, collectionType);
-		return repos;
-	}
-	private void copy_downloads_to_path(ManifestVersionEntry versionEntry, Path cachePath) throws IOException
-	{
-		for(Entry<String, Path> entry: versionEntry.getAllPaths())
-		{
-			Path srcFile = entry.getValue();
-			Path destFile = cachePath.resolve(entry.getValue().getFileName());
-			FileUtils.copyFile(srcFile.toFile(), destFile.toFile());
-		}
-	}
-
-	private static Path build_cache_path_by_testname(String releaseFamily, TemporaryFolder folder) throws IOException
-	{
-		return folder.newFolder(String.format("%s_cache", releaseFamily)).toPath();
-	}
-
-	private static ManifestVersionEntry get_manifest_entry_from_file(Path manifestPath) throws IOException
-	{		
-		copy_manifest_to_path(validManifestFileName, manifestPath);
-		// grab the first version entry we see
-		ManifestVersionEntry manifestEntry = load_manifest_from_path(manifestPath).getVersionEntries().get(0);
-		return manifestEntry;
 	}
 }

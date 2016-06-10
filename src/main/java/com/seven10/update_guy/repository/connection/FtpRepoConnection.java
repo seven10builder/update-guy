@@ -59,6 +59,8 @@ public class FtpRepoConnection implements RepoConnection
 		}
 		try
 		{
+			// ensure the dest path exists
+			destPath.getParent().toFile().mkdirs();
 			String srcPath = srcFullPath.toString();
 			OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(destPath.toFile()));
 			InputStream inputStream = ftpClient.retrieveFileStream(srcPath);
@@ -136,6 +138,8 @@ public class FtpRepoConnection implements RepoConnection
 		String manifestFileName = String.format("%s.manifest", releaseFamily);
 		Path srcPath = activeRepo.manifestPath.resolve(manifestFileName);
 		Path destPath = buildDestPath(manifestFileName);
+		//ensure the path exists
+		
 		downloadFile(srcPath, destPath);
 		return Manifest.loadFromFile(destPath);
 	}

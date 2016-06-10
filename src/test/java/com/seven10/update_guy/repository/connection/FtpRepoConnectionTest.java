@@ -3,6 +3,8 @@
  */
 package com.seven10.update_guy.repository.connection;
 
+import static com.seven10.update_guy.manifest.ManifestHelpers.*;
+import static com.seven10.update_guy.RepoConnectionHelpers.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -12,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.ftp.FTP;
@@ -302,13 +305,23 @@ public class FtpRepoConnectionTest
 	@Test
 	public void testGetManifest_valid() throws Exception
 	{
-		String releaseFamily = "getManifest";
-		RepositoryInfo repoInfo = Factories.createValidRepoInfo(RepositoryType.ftp);
-		Path rootFolder = Factories.createManifestFileForReleaseFamily(releaseFamily, repoInfo.manifestPath);
-		Path srcPath = TestHelpers.combineToJsonFileName(releaseFamily, rootFolder);
-		Manifest expected = Manifest.loadFromFile(srcPath);
+		String releaseFamily = "getManifest-v";
 		
-		Manifest actual = createConnectionWithMockedFtp(repoInfo).getManifest(releaseFamily);		
+		// setup a manifest to get
+		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
+		copy_manifest_to_path(validManifestFileName, manifestPath);
+		Manifest expected = load_manifest_from_path(manifestPath);
+		
+		// set up our ftp repo
+		String repoInfoFileName = "ftpRepo.json";
+		List<RepositoryInfo> repos = create_repo_infos_from_filename(repoInfoFileName);
+		RepositoryInfo repo = get_repo_info_by_type(repos, RepositoryType.ftp);
+		
+		// make sure we're using the path the manifest is stored at
+		repo.manifestPath = manifestPath.getParent();
+		FtpRepoConnection repoConnection = new FtpRepoConnection(repo, create_mocked_ftp_client());
+		
+		Manifest actual = repoConnection.getManifest(releaseFamily);
 		
 		assertEquals(expected, actual);
 	}
@@ -345,11 +358,22 @@ public class FtpRepoConnectionTest
 	@Test(expected=RepositoryException.class)
 	public void testGetManifest_notFound() throws Exception
 	{
-		RepositoryInfo repoInfo = Factories.createValidRepoInfo(RepositoryType.ftp);
-		FTPClient ftpClient = mock(FTPClient.class);
-		FtpRepoConnection repoConnection = new FtpRepoConnection(repoInfo, ftpClient);
-		String releaseFamily = "someRandomReleaseFamily";
-		repoConnection.getManifest(releaseFamily);
+		String releaseFamily = "getManifest-nf";
+		
+		// setup a manifest to get
+		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
+		copy_manifest_to_path(validManifestFileName, manifestPath);
+		
+		// set up our ftp repo
+		String repoInfoFileName = "ftpRepo.json";
+		List<RepositoryInfo> repos = create_repo_infos_from_filename(repoInfoFileName);
+		RepositoryInfo repo = get_repo_info_by_type(repos, RepositoryType.ftp);
+		
+		// make sure we're using the path the manifest is stored at
+		repo.manifestPath = manifestPath.getParent();
+		FtpRepoConnection repoConnection = new FtpRepoConnection(repo, create_mocked_ftp_client());
+		
+		repoConnection.getManifest("some-other-release");
 	}
 	
 	/**
@@ -360,12 +384,26 @@ public class FtpRepoConnectionTest
 	public void testDownloadRelease_valid() throws Exception
 	{
 		String releaseFamily = "downloadRel_valid";
-		RepositoryInfo repoInfo = Factories.createValidRepoInfo(RepositoryType.ftp);
-		ManifestVersionEntry versionEntry = Factories.createValidManifestEntry(releaseFamily, 1);
-				
-		createConnectionWithMockedFtp(repoInfo).downloadRelease(versionEntry);
+
+		// set up our local repo
+		String repoInfoFileName = "ftpRepo.json";
+		List<RepositoryInfo> repos = create_repo_infos_from_filename(repoInfoFileName);
+		RepositoryInfo repo = get_repo_info_by_type(repos, RepositoryType.ftp);
 		
-		Validators.validateDownloadRelease(versionEntry, repoInfo.cachePath);
+		// point repo at our test cache
+		Path cachePath = build_cache_path_by_testname(releaseFamily, folder);
+		repo.cachePath = cachePath;
+		
+		// setup a manifest entry to get
+		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
+		ManifestVersionEntry entry = get_manifest_entry_from_file(manifestPath);
+		
+		copy_downloads_to_path(entry, cachePath);
+
+		FtpRepoConnection repoConnection = new FtpRepoConnection(repo, create_mocked_ftp_client());
+		repoConnection.downloadRelease(entry);
+		
+		Validators.validateDownloadRelease(entry, repo.cachePath);
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#downloadRelease(com.seven10.update_guy.manifest.ManifestVersionEntry)}.
@@ -388,13 +426,23 @@ public class FtpRepoConnectionTest
 	@Test(expected=RepositoryException.class)
 	public void testDownloadRelease_fileNotFound() throws Exception
 	{
-		String releaseFamily = "downloadRel_fnf";
-		ManifestVersionEntry versionEntry = Factories.createValidManifestEntry(releaseFamily, 1);
-		versionEntry.addPath("nonsenseRole", Paths.get("invalid","path","nonsenseFile.role"));
+		String releaseFamily = "getManifest-nf";
 		
-		RepositoryInfo repoInfo = Factories.createValidRepoInfo(RepositoryType.ftp);
-		createConnectionWithMockedFtp(repoInfo).downloadRelease(versionEntry);
+		// set up our local repo
+		String repoInfoFileName = "ftpRepo.json";
+		List<RepositoryInfo> repos = create_repo_infos_from_filename(repoInfoFileName);
+		RepositoryInfo repo = get_repo_info_by_type(repos, RepositoryType.ftp);
 		
-		Validators.validateDownloadRelease(versionEntry, repoInfo.cachePath);
+		// point repo at our test cache
+		Path cachePath = build_cache_path_by_testname(releaseFamily, folder);
+		repo.cachePath = cachePath;
+		
+		// setup a manifest entry to get
+		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
+		ManifestVersionEntry entry = get_manifest_entry_from_file(manifestPath);
+		// dont copy the files over
+
+		FtpRepoConnection repoConnection = new FtpRepoConnection(repo, create_mocked_ftp_client());
+		repoConnection.downloadRelease(entry);
 	}
 }
