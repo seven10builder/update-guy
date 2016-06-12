@@ -16,13 +16,14 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.seven10.update_guy.RepoInfoHelpers;
+import com.seven10.update_guy.TestConstants;
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.manifest.Manifest;
 
 import com.seven10.update_guy.manifest.ManifestVersionEntry;
 import com.seven10.update_guy.repository.RepositoryInfo;
 import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
-import com.seven10.update_guy.test_helpers.Validators;
+import com.seven10.update_guy.DownloadValidator;
 
 /**
  * @author kmm
@@ -61,7 +62,7 @@ public class LocalRepoConnectionTest
 		
 		// setup a manifest to get
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
-		copy_manifest_to_path(validManifestFileName, manifestPath);
+		copy_manifest_to_path(TestConstants.valid_manifest_name, manifestPath);
 		Manifest expected = load_manifest_from_path(manifestPath);
 		
 		// set up our local repo
@@ -156,7 +157,7 @@ public class LocalRepoConnectionTest
 		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
 		repoConnection.downloadRelease(entry);
 		
-		Validators.validateDownloadRelease(entry, repo.cachePath);
+		DownloadValidator.validate_downloaded_release(entry, repo.cachePath);
 	}
 	
 	/**

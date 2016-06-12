@@ -5,6 +5,9 @@ package com.seven10.update_guy.repository.connection;
 
 import static com.seven10.update_guy.ManifestHelpers.*;
 import static com.seven10.update_guy.RepoConnectionHelpers.*;
+import static com.seven10.update_guy.RepoInfoHelpers.*;
+import static com.seven10.update_guy.ManifestEntryHelpers.*;
+import static com.seven10.update_guy.DownloadValidator.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -27,14 +30,12 @@ import org.mockito.stubbing.Answer;
 
 import static org.mockito.Mockito.*;
 
-import com.seven10.update_guy.RepoInfoHelpers;
+import com.seven10.update_guy.TestConstants;
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.manifest.Manifest;
 import com.seven10.update_guy.manifest.ManifestVersionEntry;
 import com.seven10.update_guy.repository.RepositoryInfo;
 import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
-import com.seven10.update_guy.test_helpers.TestHelpers;
-import com.seven10.update_guy.test_helpers.Validators;
 
 /**
  * @author kmm
@@ -72,7 +73,7 @@ public class FtpRepoConnectionTest
 	@Test
 	public void testFtpRepoConnection_valid() throws Exception
 	{
-		RepositoryInfo repoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.ftp);
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
 		FTPClient ftpClient = mock(FTPClient.class);
 		FtpRepoConnection repoConnection = new FtpRepoConnection(repoInfo, ftpClient);
 		assertNotNull(repoConnection);
@@ -94,7 +95,7 @@ public class FtpRepoConnectionTest
 	@Test(expected=IllegalArgumentException.class)
 	public void testFtpRepoConnection_nullFtpClient() throws Exception
 	{
-		RepositoryInfo repoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.ftp);
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
 		FTPClient ftpClient = null;
 		new FtpRepoConnection(repoInfo, ftpClient);
 	}
@@ -106,8 +107,8 @@ public class FtpRepoConnectionTest
 	@Test
 	public void testDownloadFile_valid() throws Exception
 	{
-		RepositoryInfo repoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.ftp);
-		Path srcPath = TestHelpers.getTestFilePath();
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
+		Path srcPath = get_valid_download_file_path();
 		Path destPath = folder.newFolder().toPath().resolve(srcPath.getFileName().toString());
 		
 		FtpRepoConnection repoConnection = createConnectionWithMockedFtp(repoInfo);
@@ -124,7 +125,7 @@ public class FtpRepoConnectionTest
 	@Test(expected=RepositoryException.class)
 	public void testDownloadFile_srcPathNotExist() throws Exception
 	{
-		RepositoryInfo repoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.ftp);
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
 		Path srcPath = Paths.get("someNonExistant","path","file.txt");
 		Path destPath = folder.newFolder().toPath().resolve(srcPath.getFileName().toString());
 		
@@ -139,11 +140,11 @@ public class FtpRepoConnectionTest
 	@Test(expected=RepositoryException.class)
 	public void testDownloadFile_srcPathNoPriv() throws Exception
 	{
-		String releaseFamily = "downloadFile-psnp";
-		RepositoryInfo repoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.ftp);
-		File srcFile = folder.newFolder();
+		String testName = "downloadFile-psnp";
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
+		File srcFile = folder.newFolder(testName);
 		srcFile.setReadable(false);
-		Path srcPath = TestHelpers.combineToJsonFileName(releaseFamily, srcFile.toPath());
+		Path srcPath =  srcFile.toPath().resolve(testName + ".json");
 		Path destPath = folder.newFolder().toPath().resolve(srcPath.getFileName());
 		
 		FtpRepoConnection repoConnection = createConnectionWithMockedFtp(repoInfo);
@@ -157,8 +158,8 @@ public class FtpRepoConnectionTest
 	@Test(expected=RepositoryException.class)
 	public void testDownloadFile_destPathNoPriv() throws Exception
 	{
-		RepositoryInfo repoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.ftp);
-		Path srcPath = TestHelpers.getTestFilePath();
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
+		Path srcPath = get_valid_download_file_path();
 		
 		File destFile = folder.newFolder();
 		destFile.setWritable(false);
@@ -175,7 +176,7 @@ public class FtpRepoConnectionTest
 	@Test(expected=IllegalArgumentException.class)
 	public void testDownloadFile_nullSrcPath() throws Exception
 	{
-		RepositoryInfo repoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.ftp);
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
 		FTPClient ftpClient = mock(FTPClient.class);
 		FtpRepoConnection repoConnection = new FtpRepoConnection(repoInfo, ftpClient);
 		Path srcFullPath = null;
@@ -189,7 +190,7 @@ public class FtpRepoConnectionTest
 	@Test(expected=IllegalArgumentException.class)
 	public void testDownloadFile_nullDestPath() throws Exception
 	{
-		RepositoryInfo repoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.ftp);
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
 		FTPClient ftpClient = mock(FTPClient.class);
 		FtpRepoConnection repoConnection = new FtpRepoConnection(repoInfo, ftpClient);
 		Path srcFullPath = Paths.get("srcPath");
@@ -206,7 +207,7 @@ public class FtpRepoConnectionTest
 	{
 		String fileName = "filename.ext";
 		
-		RepositoryInfo repoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.ftp);
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
 		FTPClient ftpClient = mock(FTPClient.class);
 		FtpRepoConnection repoConnection = new FtpRepoConnection(repoInfo, ftpClient);
 		
@@ -223,7 +224,7 @@ public class FtpRepoConnectionTest
 	@Test
 	public void testConnect_whileConnected() throws Exception
 	{
-		RepositoryInfo repoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.ftp);
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
 		FTPClient ftpClient = mock(FTPClient.class);
 		when(ftpClient.isConnected()).thenReturn(true);
 	
@@ -245,7 +246,7 @@ public class FtpRepoConnectionTest
 	@Test
 	public void testConnect_notConnected() throws Exception
 	{
-		RepositoryInfo repoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.ftp);
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
 		FTPClient ftpClient = mock(FTPClient.class);
 		when(ftpClient.isConnected()).thenReturn(false);
 	
@@ -268,7 +269,7 @@ public class FtpRepoConnectionTest
 	@Test
 	public void testDisconnect_whileConnected() throws Exception
 	{
-		RepositoryInfo repoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.ftp);
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
 		FTPClient ftpClient = mock(FTPClient.class);
 		when(ftpClient.isConnected()).thenReturn(true);
 	
@@ -286,7 +287,7 @@ public class FtpRepoConnectionTest
 	@Test
 	public void testDisconnect_notConnected() throws Exception
 	{
-		RepositoryInfo repoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.ftp);
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
 		FTPClient ftpClient = mock(FTPClient.class);
 		when(ftpClient.isConnected()).thenReturn(false);
 	
@@ -309,7 +310,7 @@ public class FtpRepoConnectionTest
 		
 		// setup a manifest to get
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
-		copy_manifest_to_path(validManifestFileName, manifestPath);
+		copy_manifest_to_path(TestConstants.valid_manifest_name, manifestPath);
 		Manifest expected = load_manifest_from_path(manifestPath);
 		
 		// set up our ftp repo
@@ -332,7 +333,7 @@ public class FtpRepoConnectionTest
 	@Test(expected=IllegalArgumentException.class)
 	public void testGetManifest_null() throws Exception
 	{
-		RepositoryInfo repoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.ftp);
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
 		FTPClient ftpClient = mock(FTPClient.class);
 		FtpRepoConnection repoConnection = new FtpRepoConnection(repoInfo, ftpClient);
 		String releaseFamily = null;
@@ -345,7 +346,7 @@ public class FtpRepoConnectionTest
 	@Test(expected=IllegalArgumentException.class)
 	public void testGetManifest_empty() throws Exception
 	{
-		RepositoryInfo repoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.ftp);
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
 		FTPClient ftpClient = mock(FTPClient.class);
 		FtpRepoConnection repoConnection = new FtpRepoConnection(repoInfo, ftpClient);
 		String releaseFamily = "";
@@ -362,7 +363,7 @@ public class FtpRepoConnectionTest
 		
 		// setup a manifest to get
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
-		copy_manifest_to_path(validManifestFileName, manifestPath);
+		copy_manifest_to_path(TestConstants.valid_manifest_name, manifestPath);
 		
 		// set up our ftp repo
 		String repoInfoFileName = "ftpRepo.json";
@@ -403,7 +404,7 @@ public class FtpRepoConnectionTest
 		FtpRepoConnection repoConnection = new FtpRepoConnection(repo, create_mocked_ftp_client());
 		repoConnection.downloadRelease(entry);
 		
-		Validators.validateDownloadRelease(entry, repo.cachePath);
+		validate_downloaded_release(entry, repo.cachePath);
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#downloadRelease(com.seven10.update_guy.manifest.ManifestVersionEntry)}.
@@ -412,7 +413,7 @@ public class FtpRepoConnectionTest
 	@Test(expected=IllegalArgumentException.class)
 	public void testDownloadRelease_nullManifestEntry() throws Exception
 	{
-		RepositoryInfo repoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.ftp);
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
 		FTPClient ftpClient = mock(FTPClient.class);
 		FtpRepoConnection repoConnection = new FtpRepoConnection(repoInfo, ftpClient);
 		ManifestVersionEntry versionEntry = null;

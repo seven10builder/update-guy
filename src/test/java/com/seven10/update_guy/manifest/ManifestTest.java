@@ -5,6 +5,7 @@ package com.seven10.update_guy.manifest;
 
 import static com.seven10.update_guy.ManifestHelpers.*;
 import static com.seven10.update_guy.ManifestEntryHelpers.*;
+import static com.seven10.update_guy.TestConstants.*;
 
 import static org.junit.Assert.*;
 
@@ -23,8 +24,6 @@ import com.google.gson.Gson;
 import com.seven10.update_guy.GsonFactory;
 import com.seven10.update_guy.ManifestHelpers;
 import com.seven10.update_guy.exceptions.RepositoryException;
-import com.seven10.update_guy.test_helpers.Factories;
-import com.seven10.update_guy.test_helpers.TestHelpers;
 
 /**
  * @author kmm
@@ -32,7 +31,6 @@ import com.seven10.update_guy.test_helpers.TestHelpers;
  */
 public class ManifestTest
 {
-
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
 
@@ -60,7 +58,7 @@ public class ManifestTest
 	{
 		String releaseFamily = "manifest-ctor";
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
-		copy_manifest_to_path(validManifestFileName, manifestPath);
+		copy_manifest_to_path(valid_manifest_name, manifestPath);
 		Manifest expectedManifest = load_manifest_from_path(manifestPath);
 		Manifest actual = new Manifest(expectedManifest);
 		assertEquals(expectedManifest, actual);
@@ -147,7 +145,7 @@ public class ManifestTest
 	public void testSetCreated_valid()
 	{
 		Manifest manifest = new Manifest();
-		Date expected = new Date(TestHelpers.validDateTimestamp);
+		Date expected = new Date(valid_timestamp);
 		manifest.setCreated(expected);
 		Date actual = manifest.getCreated();
 		assertEquals(expected, actual);
@@ -189,7 +187,7 @@ public class ManifestTest
 	public void testSetRetrieved_valid()
 	{
 		Manifest manifest = new Manifest();
-		Date expected = new Date(TestHelpers.validDateTimestamp);
+		Date expected = new Date(valid_timestamp);
 		manifest.setRetrieved(expected);
 		Date actual = manifest.getRetrieved();
 		assertEquals(expected, actual);
@@ -222,7 +220,7 @@ public class ManifestTest
 		Path rootPath = folder.newFolder(releaseFamily).toPath();
 		
 		
-		for (int i = 0; i < TestHelpers.versionEntryCount; i++)
+		for (int i = 0; i < version_entry_count; i++)
 		{
 			Manifest manifest = new Manifest();
 			List<ManifestVersionEntry> expected = create_valid_manifest_entries(releaseFamily,i,rootPath);
@@ -262,7 +260,7 @@ public class ManifestTest
 	{
 		String releaseFamily = "serialize";
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
-		copy_manifest_to_path(validManifestFileName, manifestPath);
+		copy_manifest_to_path(valid_manifest_name, manifestPath);
 		Manifest expectedManifest = load_manifest_from_path(manifestPath);
 
 		Gson gson = GsonFactory.getGson();
@@ -313,7 +311,7 @@ public class ManifestTest
 	{
 		Path filePath = folder.newFolder("loadFromFile_invalid").toPath();
 		// create known bad file
-		Factories.createInvalidManifestFile(filePath);
+		ManifestHelpers.create_invalid_manifest_file(filePath);
 		Manifest.loadFromFile(filePath);
 	}
 
@@ -358,7 +356,7 @@ public class ManifestTest
 	{
 		String releaseFamily = "testEquals-self";
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
-		copy_manifest_to_path(validManifestFileName, manifestPath);
+		copy_manifest_to_path(valid_manifest_name, manifestPath);
 		Manifest expectedManifest = load_manifest_from_path(manifestPath);
 		
 		// same should equal
@@ -378,7 +376,7 @@ public class ManifestTest
 	{
 		String releaseFamily = "testEquals-clone";
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
-		copy_manifest_to_path(validManifestFileName, manifestPath);
+		copy_manifest_to_path(valid_manifest_name, manifestPath);
 		Manifest expectedManifest = load_manifest_from_path(manifestPath);
 
 		// clone should be equal
@@ -399,7 +397,7 @@ public class ManifestTest
 	{
 		String releaseFamily = "testEquals-created";
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
-		copy_manifest_to_path(validManifestFileName, manifestPath);
+		copy_manifest_to_path(valid_manifest_name, manifestPath);
 		Manifest expectedManifest = load_manifest_from_path(manifestPath);
 		Manifest cloneManifest = new Manifest(expectedManifest);
 		// different object should be different
@@ -423,7 +421,7 @@ public class ManifestTest
 
 		// setup a manifest to get
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
-		copy_manifest_to_path(validManifestFileName, manifestPath);
+		copy_manifest_to_path(valid_manifest_name, manifestPath);
 		Manifest expected = load_manifest_from_path(manifestPath);
 		
 		
@@ -450,7 +448,7 @@ public class ManifestTest
 		String releaseFamily = "testEquals-retr";
 		
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
-		copy_manifest_to_path(validManifestFileName, manifestPath);
+		copy_manifest_to_path(valid_manifest_name, manifestPath);
 		Manifest expectedManifest = load_manifest_from_path(manifestPath);
 		
 		Manifest cloneManifest = new Manifest(expectedManifest);
@@ -473,7 +471,7 @@ public class ManifestTest
 	{
 		String releaseFamily = "testEquals-retr";
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
-		copy_manifest_to_path(validManifestFileName, manifestPath);
+		copy_manifest_to_path(valid_manifest_name, manifestPath);
 		Manifest ours = load_manifest_from_path(manifestPath);
 
 		Manifest other = new Manifest(ours);
@@ -513,7 +511,7 @@ public class ManifestTest
 	{
 		String releaseFamily = "testEquals-retr";
 		Path manifestPath = ManifestHelpers.build_manifest_path_by_testname(releaseFamily, folder);
-		ManifestHelpers.copy_manifest_to_path(ManifestHelpers.validManifestFileName, manifestPath);
+		ManifestHelpers.copy_manifest_to_path(valid_manifest_name, manifestPath);
 		Manifest ours = ManifestHelpers.load_manifest_from_path(manifestPath);
 
 		ManifestVersionEntry other = new ManifestVersionEntry();

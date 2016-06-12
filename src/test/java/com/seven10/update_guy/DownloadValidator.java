@@ -1,4 +1,4 @@
-package com.seven10.update_guy.test_helpers;
+package com.seven10.update_guy;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -14,7 +14,7 @@ import org.apache.commons.io.FileUtils;
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.manifest.ManifestVersionEntry;
 
-public class Validators
+public class DownloadValidator
 {
 
 	/**
@@ -23,7 +23,7 @@ public class Validators
 	 * @throws RepositoryException
 	 * @throws IOException
 	 */
-	public static void validateDownload(Path srcPath, Path destFolder) throws RepositoryException, IOException
+	public static void validate_download(Path srcPath, Path destFolder) throws RepositoryException, IOException
 	{
 		assertTrue(Files.exists(destFolder, LinkOption.NOFOLLOW_LINKS));
 		File srcFile = srcPath.toFile();
@@ -31,16 +31,16 @@ public class Validators
 		assertTrue(FileUtils.contentEquals(srcFile, destFile));
 	}
 
-	public static void validateDownloadRelease(ManifestVersionEntry versionEntry, Path destFolder)
+	public static void validate_downloaded_release(ManifestVersionEntry versionEntry, Path destFolder)
 	{
-		versionEntry.getAllPaths().forEach(entry ->
+		versionEntry.getAllRolePaths().forEach(entry ->
 		{
 			Path srcPath = entry.getValue();
 			Path fileName = srcPath.getFileName();
 			Path destPath = destFolder.resolve(fileName);
 			try
 			{
-				validateDownload(srcPath, destPath);
+				validate_download(srcPath, destPath);
 			}
 			catch (Exception e)
 			{

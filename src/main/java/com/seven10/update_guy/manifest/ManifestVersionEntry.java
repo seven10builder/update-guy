@@ -185,7 +185,7 @@ public class ManifestVersionEntry
 		return roleList;
 	}
 	
-	public List<Entry<String, Path>> getPaths(List<String> roles)
+	public List<Entry<String, Path>> getRolePaths(List<String> roles)
 	{
 		List<Entry<String, Path>> selectedValues = fileMap.entrySet().stream() // convert all entries into stream of pairs
 				.filter(pair -> filterPaths(roles, pair)) // select the pair if it is one we are interest in
@@ -206,10 +206,10 @@ public class ManifestVersionEntry
 		return isMatch;
 	}
 	
-	public List<Entry<String, Path>> getAllPaths()
+	public List<Entry<String, Path>> getAllRolePaths()
 	{
 		List<String> roles = getRoles();
-		return getPaths(roles);
+		return getRolePaths(roles);
 	}
 	
 	

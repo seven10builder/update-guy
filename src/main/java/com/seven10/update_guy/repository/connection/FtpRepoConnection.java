@@ -281,7 +281,7 @@ public class FtpRepoConnection implements RepoConnection
 		{
 			throw new IllegalArgumentException("versionEntry cannot be null");
 		}
-		for (Entry<String, Path> entry : versionEntry.getPaths(versionEntry.getRoles())) // get all the  paths
+		for (Entry<String, Path> entry : versionEntry.getRolePaths(versionEntry.getRoles())) // get all the  paths
 		{
 			Path srcPath = entry.getValue();
 			Path destPath = buildDestPath(srcPath.getFileName().toString());

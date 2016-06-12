@@ -27,8 +27,6 @@ import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.repository.RepositoryInfo;
 import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
 import com.seven10.update_guy.repository.RepositoryInfoMgr;
-import com.seven10.update_guy.test_helpers.Factories;
-import com.seven10.update_guy.test_helpers.TestHelpers;
 
 /**
  * @author dra
@@ -95,11 +93,11 @@ public class RepositoryInfoMgrTest
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storeFile);
 
 		// get sha of config to compare later
-		String originalHash = TestHelpers.hashFile(storeFile);
+		String originalHash = RepoInfoHelpers.hashFile(storeFile);
 
 		RepositoryInfo actual = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local);
 		mgr.addRepository(actual);
-		String modifiedHash = TestHelpers.hashFile(storeFile);
+		String modifiedHash = RepoInfoHelpers.hashFile(storeFile);
 
 		// there should be only one item
 		assertEquals(mgr.getRepoMap().keySet().size(), 1);
@@ -124,7 +122,7 @@ public class RepositoryInfoMgrTest
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
 
 		// get sha of config to compare later
-		String originalHash = TestHelpers.hashFile(storePath);
+		String originalHash = RepoInfoHelpers.hashFile(storePath);
 		int originalSize =  mgr.getRepoMap().keySet().size();
 
 		// get the id for the repo
@@ -139,7 +137,7 @@ public class RepositoryInfoMgrTest
 		actual.port = 31337;
 		actual.user = "drApocalypse";
 		mgr.addRepository(actual);
-		String modifiedHash = TestHelpers.hashFile(storePath);
+		String modifiedHash = RepoInfoHelpers.hashFile(storePath);
 
 		assertEquals(originalSize+1, mgr.getRepoMap().keySet().size());
 		// the file should have changed (been saved to)
@@ -162,7 +160,7 @@ public class RepositoryInfoMgrTest
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
 
 		// get sha of config to compare later
-		String originalHash = TestHelpers.hashFile(storePath);
+		String originalHash = RepoInfoHelpers.hashFile(storePath);
 		int originalSize =  mgr.getRepoMap().keySet().size();
 
 		// get the id for the repo
@@ -177,7 +175,7 @@ public class RepositoryInfoMgrTest
 		{
 			assertTrue(e.getMessage().contains(expectedCollisionMsg));
 		}
-		String modifiedHash = TestHelpers.hashFile(storePath);
+		String modifiedHash = RepoInfoHelpers.hashFile(storePath);
 
 		// there should still be only one item
 		assertEquals(originalSize, mgr.getRepoMap().keySet().size());
@@ -203,7 +201,7 @@ public class RepositoryInfoMgrTest
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
 
 		// get sha of config to compare later
-		String originalHash = TestHelpers.hashFile(storePath);
+		String originalHash = RepoInfoHelpers.hashFile(storePath);
 		int originalSize =  mgr.getRepoMap().keySet().size();
 
 		RepositoryInfo actual = null;
@@ -215,7 +213,7 @@ public class RepositoryInfoMgrTest
 		catch (IllegalArgumentException e)
 		{
 		}
-		String modifiedHash = TestHelpers.hashFile(storePath);
+		String modifiedHash = RepoInfoHelpers.hashFile(storePath);
 
 		// there should still be only one item
 		assertEquals(mgr.getRepoMap().keySet().size(), originalSize);
@@ -239,13 +237,13 @@ public class RepositoryInfoMgrTest
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
 
 		// get sha of config to compare later
-		String originalHash = TestHelpers.hashFile(storePath);
+		String originalHash = RepoInfoHelpers.hashFile(storePath);
 		int originalSize =  mgr.getRepoMap().keySet().size();
 
 		// get the id for the repo
 		int actual = mgr.getRepoMap().values().stream().findAny().get().hashCode();
 		mgr.deleteRepository(actual);
-		String modifiedHash = TestHelpers.hashFile(storePath);
+		String modifiedHash = RepoInfoHelpers.hashFile(storePath);
 
 		// there should be zero items
 		assertEquals(originalSize-1, mgr.getRepoMap().keySet().size());
@@ -271,7 +269,7 @@ public class RepositoryInfoMgrTest
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
 
 		// get sha of config to compare later
-		String originalHash = TestHelpers.hashFile(storePath);
+		String originalHash = RepoInfoHelpers.hashFile(storePath);
 		int originalSize =  mgr.getRepoMap().keySet().size();
 
 		// get the id for the repo
@@ -291,7 +289,7 @@ public class RepositoryInfoMgrTest
 		{
 			assertTrue(e.getMessage().contains(expectedNotExistMsg));
 		}
-		String modifiedHash = TestHelpers.hashFile(storePath);
+		String modifiedHash = RepoInfoHelpers.hashFile(storePath);
 
 		// nothing should have been deleted
 		assertEquals(originalSize, mgr.getRepoMap().keySet().size());
@@ -321,11 +319,11 @@ public class RepositoryInfoMgrTest
 		// file should be created
 		assertTrue(Files.exists(storePath));
 		// store hash for comparison for later
-		String hashAfterWrite = TestHelpers.hashFile(storePath);
+		String hashAfterWrite = RepoInfoHelpers.hashFile(storePath);
 
 		// read the file back, testing loadRepos
 		List<RepositoryInfo> actualRepos = RepositoryInfoMgr.loadRepos(storePath);
-		String hashAfterLoad = TestHelpers.hashFile(storePath);
+		String hashAfterLoad = RepoInfoHelpers.hashFile(storePath);
 
 		// loading should not change the file
 		assertEquals(hashAfterWrite, hashAfterLoad);
@@ -347,7 +345,7 @@ public class RepositoryInfoMgrTest
 	public void testWrite_nullPath() throws IOException, RepositoryException, NoSuchAlgorithmException
 	{
 		Path storePath = null;
-		List<RepositoryInfo> expectedRepos = Factories.load_valid_repos_list();
+		List<RepositoryInfo> expectedRepos = RepoInfoHelpers.load_valid_repos_list();
 		RepositoryInfoMgr.writeRepos(storePath, expectedRepos);
 	}
 
@@ -389,11 +387,11 @@ public class RepositoryInfoMgrTest
 		// file should be created
 		assertTrue(Files.exists(storePath));
 		// store hash for comparison for later
-		String hashAfterWrite = TestHelpers.hashFile(storePath);
+		String hashAfterWrite = RepoInfoHelpers.hashFile(storePath);
 
 		// read the file back, testing loadRepos
 		List<RepositoryInfo> actualRepos = RepositoryInfoMgr.loadRepos(storePath);
-		String hashAfterLoad = TestHelpers.hashFile(storePath);
+		String hashAfterLoad = RepoInfoHelpers.hashFile(storePath);
 
 		// loading should not change the file
 		assertEquals(hashAfterWrite, hashAfterLoad);

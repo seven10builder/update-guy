@@ -61,7 +61,7 @@ class LocalRepoConnection implements RepoConnection
 		{
 			throw new IllegalArgumentException("versionEntry must not be null");
 		}
-		for(Entry<String, Path> entry: versionEntry.getAllPaths())
+		for(Entry<String, Path> entry: versionEntry.getAllRolePaths())
 		{
 			Path srcPath = entry.getValue();
 			Path destPath = cachePath.resolve(srcPath.getFileName());

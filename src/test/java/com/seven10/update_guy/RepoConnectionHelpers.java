@@ -29,7 +29,6 @@ import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
 
 public class RepoConnectionHelpers
 {
-
 	public static List<RepositoryInfo> create_repo_infos_from_filename(String repoInfoFileName) throws IOException
 	{
 		Path repoPath = get_repos_path().resolve(repoInfoFileName);
@@ -44,7 +43,7 @@ public class RepoConnectionHelpers
 
 	public static void copy_downloads_to_path(ManifestVersionEntry versionEntry, Path cachePath) throws IOException
 	{
-		for(Entry<String, Path> entry: versionEntry.getAllPaths())
+		for(Entry<String, Path> entry: versionEntry.getAllRolePaths())
 		{
 			Path srcFile = entry.getValue();
 			Path destFile = cachePath.resolve(entry.getValue().getFileName());
@@ -65,7 +64,7 @@ public class RepoConnectionHelpers
 
 	public static ManifestVersionEntry get_manifest_entry_from_file(Path manifestPath) throws IOException
 	{		
-		copy_manifest_to_path(validManifestFileName, manifestPath);
+		copy_manifest_to_path(TestConstants.valid_manifest_name, manifestPath);
 		// grab the first version entry we see
 		ManifestVersionEntry manifestEntry = load_manifest_from_path(manifestPath).getVersionEntries().get(0);
 		return manifestEntry;

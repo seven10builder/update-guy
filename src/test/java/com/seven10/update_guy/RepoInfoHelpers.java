@@ -1,12 +1,18 @@
 package com.seven10.update_guy;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.input.AutoCloseInputStream;
 import org.junit.rules.TemporaryFolder;
 
 import com.google.gson.Gson;
@@ -81,6 +87,18 @@ public class RepoInfoHelpers
 		}
 		List<RepositoryInfo> repos = load_repos_from_file(repoDefPath);
 		return repos.get(0);
+	}
+
+	public static String hashFile(Path storeFile) throws NoSuchAlgorithmException, IOException
+	{
+		final InputStream fis = new AutoCloseInputStream(new FileInputStream(storeFile.toFile()));
+		return new String(Hex.encodeHex(DigestUtils.md5(fis)));
+	}
+
+	public static List<RepositoryInfo> load_valid_repos_list() throws IOException
+	{
+		Path repoPath = get_valid_repos_path();
+		return load_repos_from_file(repoPath);
 	}
 
 }

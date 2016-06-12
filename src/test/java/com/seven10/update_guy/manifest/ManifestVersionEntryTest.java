@@ -4,10 +4,11 @@
 package com.seven10.update_guy.manifest;
 
 import static org.junit.Assert.*;
-
+import static com.seven10.update_guy.ManifestEntryHelpers.*;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -23,9 +24,8 @@ import org.junit.rules.TemporaryFolder;
 
 import com.google.gson.Gson;
 import com.seven10.update_guy.GsonFactory;
+import com.seven10.update_guy.TestConstants;
 import com.seven10.update_guy.exceptions.RepositoryException;
-import com.seven10.update_guy.test_helpers.Factories;
-import com.seven10.update_guy.test_helpers.TestHelpers;
 
 /**
  * @author kmm
@@ -34,12 +34,6 @@ import com.seven10.update_guy.test_helpers.TestHelpers;
 public class ManifestVersionEntryTest
 {
 	private static final Logger logger = LogManager.getFormatterLogger(ManifestVersionEntryTest.class);
-	
-	private List<String> createTestRoleSubset(Map<String, Path> roleMap)
-	{
-		// filter out keys with odd hashs. This should give us a subset of the keys
-		return roleMap.keySet().stream().filter(key->key.hashCode()%2 == 0).collect(Collectors.toList());
-	}
 	
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
@@ -52,18 +46,22 @@ public class ManifestVersionEntryTest
 	@Test
 	public void testSerializeManifestEntry() throws IOException, RepositoryException
 	{
-		String releaseFamily = "serialize-me";
+		String testName = "serialize-me";
 		
-		ManifestVersionEntry expected = Factories.createValidManifestEntry(releaseFamily, 1);
+		Path rootPath = folder.newFolder(testName).toPath();
+		ManifestVersionEntry versionEntry = new ManifestVersionEntry();
+		// create roleMap and add to the versionEntry
+		Map<String, Path> roleMap = create_entry_folder_list(TestConstants.version_entry_count, rootPath);
+		roleMap.forEach((role, path)->versionEntry.addPath(role, path));
 		
 		Gson gson = GsonFactory.getGson();		
-		String json = gson.toJson(expected);		
+		String json = gson.toJson(versionEntry);		
 		assertNotNull(json);
 		assertFalse(json.isEmpty());
 		
 		ManifestVersionEntry actual = gson.fromJson(json, ManifestVersionEntry.class);	
 		assertNotNull(actual);
-		assertEquals(expected, actual);
+		assertEquals(versionEntry, actual);
 	}
 	
 	/**
@@ -119,7 +117,7 @@ public class ManifestVersionEntryTest
 	public void testGetAndSetPublishDate()
 	{
 		ManifestVersionEntry versionEntry = new ManifestVersionEntry();
-		Date expected = new Date(TestHelpers.validDateTimestamp);
+		Date expected = new Date(TestConstants.valid_timestamp);
 		versionEntry.setPublishDate(expected);
 		Date actual = versionEntry.getPublishDate();
 		assertEquals(expected, actual);
@@ -143,17 +141,18 @@ public class ManifestVersionEntryTest
 	@Test
 	public void testGetAndAddPath() throws IOException
 	{
-		Path rootPath = folder.newFolder("testGetAndAddPath").toPath();
+		String testName = "testGetAndAddPath";
+		Path rootPath = folder.newFolder(testName).toPath();
 		ManifestVersionEntry versionEntry = new ManifestVersionEntry();
-		String expected = "getAndAddPath";
-		Map<String, Path> roleMap = Factories.createValidRolePaths(expected);
+		// create roleMap and add to the versionEntry
+		Map<String, Path> roleMap = create_entry_folder_list(TestConstants.version_entry_count, rootPath);
 		roleMap.forEach((role, path)->versionEntry.addPath(role, path));
 		
 		roleMap.keySet().forEach(
 				role->
 				{
 					Path actual = versionEntry.getPath(role);
-					assertEquals(rootPath.resolve(role), actual);
+					assertEquals(rootPath.resolve(role + ".txt"), actual);
 				});
 	}
 	/**
@@ -237,43 +236,49 @@ public class ManifestVersionEntryTest
 	@Test
 	public void testGetRoles() throws IOException
 	{
-		Path rootPath = folder.newFolder("testGetRoles").toPath();
+		String testName = "testGetRoles";
+		Path rootPath = folder.newFolder(testName).toPath();
 		ManifestVersionEntry versionEntry = new ManifestVersionEntry();
-		String expected = "getRoles";
-		Map<String, Path> roleMap = Factories.createValidRolePaths(expected);
+		// create roleMap and add to the versionEntry
+		Map<String, Path> roleMap = create_entry_folder_list(TestConstants.version_entry_count, rootPath);
 		roleMap.forEach((role, path)->versionEntry.addPath(role, path));
 		
-		roleMap.keySet().forEach(
-				role->
-				{
-					Path actual = rootPath.resolve(versionEntry.getPath(role).toAbsolutePath());
-					assertEquals(rootPath.resolve(role), actual);
-				});
+		List<String> expectedRoles = new ArrayList<String>(roleMap.keySet());
+		List<String> actualRoles = versionEntry.getRoles();
+		
+		assertTrue(expectedRoles.containsAll(actualRoles));
+		assertTrue(actualRoles.containsAll(expectedRoles));
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestVersionEntry#getPaths(java.util.Set)}.
+	 * Test method for {@link com.seven10.update_guy.manifest.ManifestVersionEntry#getRolePaths(java.util.Set)}.
 	 * @throws IOException 
 	 */
 	@Test
 	public void testGetPaths() throws IOException
 	{
+		String testName = "getPaths";
 		ManifestVersionEntry versionEntry = new ManifestVersionEntry();
-		String expected = "getPaths";
-		Map<String, Path> roleMap = Factories.createValidRolePaths(expected);
-		roleMap.forEach((role, path)->versionEntry.addPath(role, path));
+		
+		Path rootFolder = folder.newFolder(testName).toPath();
+		Map<String, Path> rolePathList = create_entry_folder_list(TestConstants.version_entry_count, rootFolder);
+		// add role/paths to entry
+		rolePathList.forEach((key, value)-> versionEntry.addPath(key, value));
 
-		List<String> roles = createTestRoleSubset(roleMap);
-		logger.debug(".testGetPaths(): roles = %s", Arrays.toString(roles.toArray()) ); 
+		List<String> roles_subset = create_subset_of_roles(rolePathList);
+		logger.debug(".testGetPaths(): roles = %s", Arrays.toString(roles_subset.toArray()) ); 
 		
-		List<Entry<String, Path>> actual = versionEntry.getPaths(roles);
+		List<Entry<String, Path>> actual = versionEntry.getRolePaths(roles_subset);
 		
+		// convert entries to list of keys
 		List<String> actualKeys = actual.stream().map(entry->entry.getKey()).collect(Collectors.toList());
 		logger.debug(".testGetPaths(): actualKeys = %s", Arrays.toString(actualKeys.toArray()) ); 
 		
-		boolean rolesContainsKeys = roles.containsAll(actualKeys);
+		// all of the keys returned schould be in the roles subset that was requested
+		boolean rolesContainsKeys = roles_subset.containsAll(actualKeys);
  		assertTrue(rolesContainsKeys);
-		actual.forEach(entry->
+		// test each entry to make sure the path returned is the path that we expect
+ 		actual.forEach(entry->
 				{
 					Path path = versionEntry.getPath(entry.getKey());
 					assertEquals(path, entry.getValue());
@@ -282,18 +287,20 @@ public class ManifestVersionEntryTest
 
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestVersionEntry#getAllPaths()}.
+	 * Test method for {@link com.seven10.update_guy.manifest.ManifestVersionEntry#getAllRolePaths()}.
 	 * @throws IOException 
 	 */
 	@Test
 	public void testGetAllPaths() throws IOException
 	{
-		ManifestVersionEntry versionEntry = new ManifestVersionEntry();
 		String testName = "getAllPaths";
-		Map<String, Path> roleMap = Factories.createValidRolePaths(testName);
+		Path rootPath = folder.newFolder(testName).toPath();
+		ManifestVersionEntry versionEntry = new ManifestVersionEntry();
+		// create roleMap and add to the versionEntry
+		Map<String, Path> roleMap = create_entry_folder_list(TestConstants.version_entry_count, rootPath);
 		roleMap.forEach((role, path)->versionEntry.addPath(role, path));
 		
-		List<Entry<String, Path>> actual = versionEntry.getAllPaths();
+		List<Entry<String, Path>> actual = versionEntry.getAllRolePaths();
 		List<Entry<String, Path>> expected = roleMap.entrySet().stream().collect(Collectors.toList());
 		assertTrue(expected.containsAll(actual));
 		assertTrue(actual.containsAll(expected));
@@ -307,8 +314,7 @@ public class ManifestVersionEntryTest
 	@Test
 	public void testEquals_self() throws IOException
 	{
-		String releaseFamily = "testEquals-self";
-		ManifestVersionEntry versionEntry = Factories.createValidManifestEntry(releaseFamily, 1);
+		ManifestVersionEntry versionEntry = new ManifestVersionEntry();
 		
 		// same should equal
 		boolean actual = versionEntry.equals(versionEntry);
@@ -322,13 +328,16 @@ public class ManifestVersionEntryTest
 	@Test
 	public void testEquals_clone() throws IOException
 	{
-		String releaseFamily = "testEquals-clone";
-		ManifestVersionEntry versionEntry = Factories.createValidManifestEntry(releaseFamily, 1);
+		String testName = "testEquals-clone";
+		Path rootPath = folder.newFolder(testName).toPath();
+		ManifestVersionEntry versionEntry = new ManifestVersionEntry();
+		// create roleMap and add to the versionEntry
+		Map<String, Path> roleMap = create_entry_folder_list(TestConstants.version_entry_count, rootPath);
+		roleMap.forEach((role, path)->versionEntry.addPath(role, path));
 		
 		//clone should be equal
 		ManifestVersionEntry cloneManifest = new ManifestVersionEntry(versionEntry);
-		boolean isEqual = versionEntry.equals(cloneManifest);
-		assertTrue(isEqual);
+		assertEquals(versionEntry, cloneManifest);
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.manifest.ManifestVersionEntry#equals(Object)}.
@@ -338,14 +347,17 @@ public class ManifestVersionEntryTest
 	@Test
 	public void testEquals_versionDiff() throws IOException
 	{
-		String releaseFamily = "testEquals-created";
-		ManifestVersionEntry versionEntry = Factories.createValidManifestEntry(releaseFamily, 1);
+		String testName = "testEquals-created";
+		Path rootPath = folder.newFolder(testName).toPath();
+		ManifestVersionEntry versionEntry = new ManifestVersionEntry();
+		// create roleMap and add to the versionEntry
+		Map<String, Path> roleMap = create_entry_folder_list(TestConstants.version_entry_count, rootPath);
+		roleMap.forEach((role, path)->versionEntry.addPath(role, path));
+		
 		ManifestVersionEntry cloneManifest = new ManifestVersionEntry(versionEntry);
 		// different object should be different
 		cloneManifest.setVersion("something_else");
-		
-		boolean isEqual = versionEntry.equals(cloneManifest);
-		assertFalse(isEqual);
+		assertNotEquals(versionEntry, cloneManifest);
 	}
 
 	/**
@@ -356,14 +368,18 @@ public class ManifestVersionEntryTest
 	@Test
 	public void testEquals_publishedDiff() throws IOException
 	{
-		String releaseFamily = "testEquals-retr";
-		ManifestVersionEntry versionEntry = Factories.createValidManifestEntry(releaseFamily, 1);
+		String testName = "testEquals-retr";
+		Path rootPath = folder.newFolder(testName).toPath();
+		ManifestVersionEntry versionEntry = new ManifestVersionEntry();
+		// create roleMap and add to the versionEntry
+		Map<String, Path> roleMap = create_entry_folder_list(TestConstants.version_entry_count, rootPath);
+		roleMap.forEach((role, path)->versionEntry.addPath(role, path));
+		
 		ManifestVersionEntry cloneManifest = new ManifestVersionEntry(versionEntry);
 		// different object should be different
 		cloneManifest.setPublishDate(new Date(31337));
 		
-		boolean isEqual = versionEntry.equals(cloneManifest);
-		assertFalse(isEqual);
+		assertNotEquals(versionEntry, cloneManifest);
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.manifest.ManifestVersionEntry#equals(Object)}.
@@ -373,14 +389,19 @@ public class ManifestVersionEntryTest
 	@Test
 	public void testEquals_fileMapDiff() throws IOException
 	{
-		String releaseFamily = "testEquals-retr";
-		ManifestVersionEntry versionEntry = Factories.createValidManifestEntry(releaseFamily, 1);
+		String testName = "testEquals-retr";
+		Path rootPath = folder.newFolder(testName).toPath();
+		ManifestVersionEntry versionEntry = new ManifestVersionEntry();
+		// create roleMap and add to the versionEntry
+		Map<String, Path> roleMap = create_entry_folder_list(TestConstants.version_entry_count, rootPath);
+		roleMap.forEach((role, path)->versionEntry.addPath(role, path));
+		
 		ManifestVersionEntry cloneManifest = new ManifestVersionEntry(versionEntry);
+		assertEquals(versionEntry, cloneManifest);
 		// different object should be different
 		cloneManifest.addPath("some-role", folder.newFolder("jibberish").toPath());
 		
-		boolean isEqual = versionEntry.equals(cloneManifest);
-		assertFalse(isEqual);
+		assertNotEquals(versionEntry, cloneManifest);
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.manifest.ManifestVersionEntry#equals(Object)}.
@@ -390,10 +411,8 @@ public class ManifestVersionEntryTest
 	@Test
 	public void testEquals_null() throws IOException
 	{
-		String releaseFamily = "testEquals-retr";
-		ManifestVersionEntry versionEntry = Factories.createValidManifestEntry(releaseFamily, 1);
-		// different object should be different
-	
+		ManifestVersionEntry versionEntry = new ManifestVersionEntry();
+
 		boolean isEqual = versionEntry.equals(null);
 		assertFalse(isEqual);
 	}
@@ -405,8 +424,7 @@ public class ManifestVersionEntryTest
 	@Test
 	public void testEquals_diffClass() throws IOException
 	{
-		String releaseFamily = "testEquals-retr";
-		ManifestVersionEntry versionEntry = Factories.createValidManifestEntry(releaseFamily, 1);
+		ManifestVersionEntry versionEntry = new ManifestVersionEntry();
 		// different object should be different
 		ManifestVersionEntryTest other =  new ManifestVersionEntryTest();
 		boolean isEqual = versionEntry.equals(other);
