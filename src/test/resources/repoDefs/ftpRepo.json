@@ -1,0 +1,12 @@
+[
+  {
+    "repoAddress": "192.168.99.91",
+    "port": 21,
+    "user": "user_1",
+    "password": "password_1",
+    "manifestPath": "src/test/resources/manifests",
+    "description": "This is a regular FTP repo",
+    "repoType": "ftp",
+    "cachePath": "target/test/resources/cachePath"
+  }
+]

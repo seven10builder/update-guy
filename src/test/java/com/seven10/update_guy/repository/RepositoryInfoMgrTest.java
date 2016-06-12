@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -19,9 +20,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.seven10.update_guy.TestHelpers;
+import static com.seven10.update_guy.RepoInfoHelpers.*;
+
+import com.seven10.update_guy.RepoInfoHelpers;
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.repository.RepositoryInfo;
+import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
 import com.seven10.update_guy.repository.RepositoryInfoMgr;
 
 /**
@@ -31,9 +35,9 @@ import com.seven10.update_guy.repository.RepositoryInfoMgr;
 public class RepositoryInfoMgrTest
 {
 
-	private final static int maxNumberOfRepos = 5;
 	private static final String expectedCollisionMsg = "repoMap already contains hash";
 	private static final CharSequence expectedNotExistMsg = " does not exist";
+	
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
 
@@ -76,48 +80,24 @@ public class RepositoryInfoMgrTest
 
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.repository.RepositoryInfoMgr#testRepositoryInfoMgr()}
-	 * .
-	 * 
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 * @throws RepositoryException 
-	 */
-	@Test
-	public void testRepositoryInfoMgr_ManyRepoList() throws FileNotFoundException, IOException, RepositoryException
-	{
-		for (int i = 0; i < maxNumberOfRepos; i++)
-		{
-			String fileName = String.format("ManyRepoList%d.json", i);
-			Path storePath = folder.newFile(fileName).toPath();
-			TestHelpers.createValidRepoFile(storePath, i);
-			RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
-			assertEquals(mgr.getRepoMap().keySet().size(), i);
-		}
-	}
-
-	/**
-	 * Test method for
 	 * {@link com.seven10.update_guy.repository.RepositoryInfoMgr#addRepository(com.seven10.update_guy.repository.RepositoryInfo)}
 	 * .
-	 * 
-	 * @throws NoSuchAlgorithmException
-	 * @throws IOException
-	 * @throws RepositoryException
+	 * @throws Exception 
 	 */
 	@Test
-	public void testAddRepository_valid_no_entries() throws NoSuchAlgorithmException, IOException, RepositoryException
+	public void testAddRepository_valid_no_entries() throws Exception
 	{
 
-		File storeFile = folder.newFile("add_valid_no_entries.json");
-		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storeFile.toPath());
+		
+		Path storeFile = folder.newFile("add_valid_no_entries.json").toPath();
+		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storeFile);
 
 		// get sha of config to compare later
-		String originalHash = TestHelpers.hashFile(storeFile);
+		String originalHash = RepoInfoHelpers.hashFile(storeFile);
 
-		RepositoryInfo actual = TestHelpers.createValidRepoInfo("valid_no_entries");
+		RepositoryInfo actual = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local);
 		mgr.addRepository(actual);
-		String modifiedHash = TestHelpers.hashFile(storeFile);
+		String modifiedHash = RepoInfoHelpers.hashFile(storeFile);
 
 		// there should be only one item
 		assertEquals(mgr.getRepoMap().keySet().size(), 1);
@@ -129,30 +109,37 @@ public class RepositoryInfoMgrTest
 	 * Test method for
 	 * {@link com.seven10.update_guy.repository.RepositoryInfoMgr#addRepository(com.seven10.update_guy.repository.RepositoryInfo)}
 	 * .
-	 * 
-	 * @throws NoSuchAlgorithmException
-	 * @throws IOException
-	 * @throws RepositoryException
+	 * @throws Exception 
 	 */
 	@Test
 	public void testAddRepository_valid_entries_no_colision()
-			throws NoSuchAlgorithmException, IOException, RepositoryException
+			throws Exception
 	{
-
-		File storeFile = folder.newFile("addRepo-venc.json");
-		Path storePath = storeFile.toPath();
-		TestHelpers.createValidRepoFile(storePath, maxNumberOfRepos - 1);
+		String releaseFamily = "addRepo-venc";
+		
+		Path storePath = build_repo_info_file_by_testname(releaseFamily, folder);
+		copy_valid_repos_to_test(storePath);
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
 
 		// get sha of config to compare later
-		String originalHash = TestHelpers.hashFile(storeFile);
+		String originalHash = RepoInfoHelpers.hashFile(storePath);
+		int originalSize =  mgr.getRepoMap().keySet().size();
 
-		RepositoryInfo actual = TestHelpers.createValidRepoInfo("addRepo-venc");
+		// get the id for the repo
+		RepositoryInfo actualRepoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local);
+		actualRepoInfo.description = "this is completely different";
+		actualRepoInfo.port = 31337;
+		actualRepoInfo.user = "drApocalypse";
+		
+		
+		RepositoryInfo actual = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local);
+		actual.description = "this is completely different";
+		actual.port = 31337;
+		actual.user = "drApocalypse";
 		mgr.addRepository(actual);
-		String modifiedHash = TestHelpers.hashFile(storeFile);
+		String modifiedHash = RepoInfoHelpers.hashFile(storePath);
 
-		// there should be only one item
-		assertEquals(mgr.getRepoMap().keySet().size(), maxNumberOfRepos);
+		assertEquals(originalSize+1, mgr.getRepoMap().keySet().size());
 		// the file should have changed (been saved to)
 		assertNotEquals(originalHash, modifiedHash);
 	}
@@ -161,25 +148,24 @@ public class RepositoryInfoMgrTest
 	 * Test method for
 	 * {@link com.seven10.update_guy.repository.RepositoryInfoMgr#addRepository(com.seven10.update_guy.repository.RepositoryInfo)}
 	 * .
-	 * 
-	 * @throws NoSuchAlgorithmException
-	 * @throws IOException
-	 * @throws RepositoryException
+	 * @throws Exception 
 	 */
 	@Test
-	public void testAddRepository_valid_entries_colision() throws NoSuchAlgorithmException, IOException, RepositoryException
+	public void testAddRepository_valid_entries_colision() throws Exception
 	{
-
-		File storeFile = folder.newFile("addRepo-vec.json");
-		Path storePath = storeFile.toPath();
-		TestHelpers.createValidRepoFile(storePath, 1);
+		String releaseFamily = "addRepo-vec";
+		
+		Path storePath = build_repo_info_file_by_testname(releaseFamily, folder);
+		copy_valid_repos_to_test(storePath);
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
 
 		// get sha of config to compare later
-		String originalHash = TestHelpers.hashFile(storeFile);
+		String originalHash = RepoInfoHelpers.hashFile(storePath);
+		int originalSize =  mgr.getRepoMap().keySet().size();
 
-		RepositoryInfo actual = TestHelpers.createValidRepoInfo("1"); // see createDummyFile
-															// for why this is 1
+		// get the id for the repo
+		RepositoryInfo actual = mgr.getRepoMap().values().stream().findAny().get();
+	
 		try
 		{
 			mgr.addRepository(actual); // this SHOULD throw an exception
@@ -189,10 +175,10 @@ public class RepositoryInfoMgrTest
 		{
 			assertTrue(e.getMessage().contains(expectedCollisionMsg));
 		}
-		String modifiedHash = TestHelpers.hashFile(storeFile);
+		String modifiedHash = RepoInfoHelpers.hashFile(storePath);
 
 		// there should still be only one item
-		assertEquals(mgr.getRepoMap().keySet().size(), 1);
+		assertEquals(originalSize, mgr.getRepoMap().keySet().size());
 		// the file should NOT have changed (been saved to)
 		assertEquals(originalHash, modifiedHash);
 	}
@@ -209,14 +195,14 @@ public class RepositoryInfoMgrTest
 	@Test
 	public void testAddRepository_nullEntries() throws NoSuchAlgorithmException, IOException, RepositoryException
 	{
-
-		File storeFile = folder.newFile("addRepo-ne.json");
-		Path storePath = storeFile.toPath();
-		TestHelpers.createValidRepoFile(storePath, 1);
+		String releaseFamily = "addRepo-ne";
+		Path storePath = build_repo_info_file_by_testname(releaseFamily, folder);
+		copy_valid_repos_to_test(storePath);
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
 
 		// get sha of config to compare later
-		String originalHash = TestHelpers.hashFile(storeFile);
+		String originalHash = RepoInfoHelpers.hashFile(storePath);
+		int originalSize =  mgr.getRepoMap().keySet().size();
 
 		RepositoryInfo actual = null;
 		try
@@ -227,10 +213,10 @@ public class RepositoryInfoMgrTest
 		catch (IllegalArgumentException e)
 		{
 		}
-		String modifiedHash = TestHelpers.hashFile(storeFile);
+		String modifiedHash = RepoInfoHelpers.hashFile(storePath);
 
 		// there should still be only one item
-		assertEquals(mgr.getRepoMap().keySet().size(), 1);
+		assertEquals(mgr.getRepoMap().keySet().size(), originalSize);
 		// the file should NOT have changed (been saved to)
 		assertEquals(originalHash, modifiedHash);
 	}
@@ -239,31 +225,28 @@ public class RepositoryInfoMgrTest
 	 * Test method for
 	 * {@link com.seven10.update_guy.repository.RepositoryInfoMgr#deleteRepository(int)}
 	 * .
-	 * 
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 * @throws RepositoryException
-	 * @throws NoSuchAlgorithmException
+	 * @throws Exception 
 	 */
 	@Test
-	public void testDeleteRepository_valid_exists()
-			throws FileNotFoundException, IOException, RepositoryException, NoSuchAlgorithmException
+	public void testDeleteRepository_valid_exists()	throws Exception
 	{
-		File storeFile = folder.newFile("delRepo-ve.json");
-		Path storePath = storeFile.toPath();
-		TestHelpers.createValidRepoFile(storePath, 1);
+		String releaseFamily = "delRepo-ve";
+		
+		Path storePath = build_repo_info_file_by_testname(releaseFamily, folder);
+		copy_valid_repos_to_test(storePath);
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
 
 		// get sha of config to compare later
-		String originalHash = TestHelpers.hashFile(storeFile);
+		String originalHash = RepoInfoHelpers.hashFile(storePath);
+		int originalSize =  mgr.getRepoMap().keySet().size();
 
 		// get the id for the repo
-		int actual = TestHelpers.createValidRepoInfo("1").hashCode();
+		int actual = mgr.getRepoMap().values().stream().findAny().get().hashCode();
 		mgr.deleteRepository(actual);
-		String modifiedHash = TestHelpers.hashFile(storeFile);
+		String modifiedHash = RepoInfoHelpers.hashFile(storePath);
 
 		// there should be zero items
-		assertEquals(mgr.getRepoMap().keySet().size(), 0);
+		assertEquals(originalSize-1, mgr.getRepoMap().keySet().size());
 		// the file should have changed (been saved to)
 		assertNotEquals(originalHash, modifiedHash);
 	}
@@ -272,25 +255,31 @@ public class RepositoryInfoMgrTest
 	 * Test method for
 	 * {@link com.seven10.update_guy.repository.RepositoryInfoMgr#deleteRepository(int)}
 	 * .
-	 * 
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 * @throws RepositoryException
-	 * @throws NoSuchAlgorithmException
+	 * @throws Exception 
 	 */
 	@Test
 	public void testDeleteRepository_valid_not_exists()
-			throws FileNotFoundException, IOException, NoSuchAlgorithmException, RepositoryException
+			throws Exception
 	{
-		Path storeFile = folder.newFile("delRepo-vne.json").toPath();
-		TestHelpers.createValidRepoFile(storeFile, 1);
-		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storeFile);
+		String releaseFamily = "delRepo-vne";
+		
+		
+		Path storePath = build_repo_info_file_by_testname(releaseFamily, folder);
+		copy_valid_repos_to_test(storePath);
+		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
 
 		// get sha of config to compare later
-		String originalHash = TestHelpers.hashFile(storeFile.toFile());
+		String originalHash = RepoInfoHelpers.hashFile(storePath);
+		int originalSize =  mgr.getRepoMap().keySet().size();
 
 		// get the id for the repo
-		int actual = TestHelpers.createValidRepoInfo("delRepo-vne").hashCode();
+		RepositoryInfo actualRepoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local);
+		actualRepoInfo.description = "this is completely different";
+		actualRepoInfo.port = 31337;
+		actualRepoInfo.user = "drApocalypse";
+		
+		int actual = actualRepoInfo.hashCode();
+
 		try
 		{
 			mgr.deleteRepository(actual);
@@ -300,10 +289,10 @@ public class RepositoryInfoMgrTest
 		{
 			assertTrue(e.getMessage().contains(expectedNotExistMsg));
 		}
-		String modifiedHash = TestHelpers.hashFile(storeFile.toFile());
+		String modifiedHash = RepoInfoHelpers.hashFile(storePath);
 
 		// nothing should have been deleted
-		assertEquals(mgr.getRepoMap().keySet().size(), 1);
+		assertEquals(originalSize, mgr.getRepoMap().keySet().size());
 		// the file should NOT have changed (been saved to)
 		assertEquals(originalHash, modifiedHash);
 	}
@@ -320,20 +309,21 @@ public class RepositoryInfoMgrTest
 	@Test
 	public void testWriteReadRepos() throws IOException, RepositoryException, NoSuchAlgorithmException
 	{
-		String fileName = "writeReadRepos.json";
-		Path storeFile = folder.newFile(fileName).toPath();
-
-		List<RepositoryInfo> expectedRepos = TestHelpers.createValidRepoList(maxNumberOfRepos);
-		RepositoryInfoMgr.writeRepos(storeFile, expectedRepos);
+		String releaseFamily = "writeReadRepos";
+		Path storePath = build_repo_info_file_by_testname(releaseFamily, folder);
+		
+		List<RepositoryInfo> expectedRepos = load_repos_from_file(get_valid_repos_path());
+		
+		RepositoryInfoMgr.writeRepos(storePath, expectedRepos);
 
 		// file should be created
-		assertTrue(Files.exists(storeFile));
+		assertTrue(Files.exists(storePath));
 		// store hash for comparison for later
-		String hashAfterWrite = TestHelpers.hashFile(storeFile.toFile());
+		String hashAfterWrite = RepoInfoHelpers.hashFile(storePath);
 
 		// read the file back, testing loadRepos
-		List<RepositoryInfo> actualRepos = RepositoryInfoMgr.loadRepos(storeFile);
-		String hashAfterLoad = TestHelpers.hashFile(storeFile.toFile());
+		List<RepositoryInfo> actualRepos = RepositoryInfoMgr.loadRepos(storePath);
+		String hashAfterLoad = RepoInfoHelpers.hashFile(storePath);
 
 		// loading should not change the file
 		assertEquals(hashAfterWrite, hashAfterLoad);
@@ -355,7 +345,7 @@ public class RepositoryInfoMgrTest
 	public void testWrite_nullPath() throws IOException, RepositoryException, NoSuchAlgorithmException
 	{
 		Path storePath = null;
-		List<RepositoryInfo> expectedRepos = TestHelpers.createValidRepoList(maxNumberOfRepos);
+		List<RepositoryInfo> expectedRepos = RepoInfoHelpers.load_valid_repos_list();
 		RepositoryInfoMgr.writeRepos(storePath, expectedRepos);
 	}
 
@@ -371,7 +361,7 @@ public class RepositoryInfoMgrTest
 	@Test(expected = IllegalArgumentException.class)
 	public void testWrite_nullRepos() throws IOException, RepositoryException, NoSuchAlgorithmException
 	{
-		Path storePath = Paths.get("writeNullRepos.json");
+		Path storePath = Paths.get("writeNullRepos");
 		List<RepositoryInfo> expectedRepos = null;
 		RepositoryInfoMgr.writeRepos(storePath, expectedRepos);
 	}
@@ -391,17 +381,17 @@ public class RepositoryInfoMgrTest
 		String fileName = "writeEmptyRepos.json";
 		Path storePath = folder.newFile(fileName).toPath();
 
-		List<RepositoryInfo> expectedRepos = TestHelpers.createValidRepoList(0);
+		List<RepositoryInfo> expectedRepos = new ArrayList<RepositoryInfo>();
 		RepositoryInfoMgr.writeRepos(storePath, expectedRepos);
 
 		// file should be created
 		assertTrue(Files.exists(storePath));
 		// store hash for comparison for later
-		String hashAfterWrite = TestHelpers.hashFile(storePath.toFile());
+		String hashAfterWrite = RepoInfoHelpers.hashFile(storePath);
 
 		// read the file back, testing loadRepos
 		List<RepositoryInfo> actualRepos = RepositoryInfoMgr.loadRepos(storePath);
-		String hashAfterLoad = TestHelpers.hashFile(storePath.toFile());
+		String hashAfterLoad = RepoInfoHelpers.hashFile(storePath);
 
 		// loading should not change the file
 		assertEquals(hashAfterWrite, hashAfterLoad);
