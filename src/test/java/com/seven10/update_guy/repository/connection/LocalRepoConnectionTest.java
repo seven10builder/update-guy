@@ -3,7 +3,7 @@
  */
 package com.seven10.update_guy.repository.connection;
 
-import static com.seven10.update_guy.manifest.ManifestHelpers.*;
+import static com.seven10.update_guy.ManifestHelpers.*;
 import static com.seven10.update_guy.RepoConnectionHelpers.*;
 import static org.junit.Assert.*;
 
@@ -15,13 +15,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.seven10.update_guy.RepoInfoHelpers;
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.manifest.Manifest;
 
 import com.seven10.update_guy.manifest.ManifestVersionEntry;
 import com.seven10.update_guy.repository.RepositoryInfo;
 import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
-import com.seven10.update_guy.test_helpers.Factories;
 import com.seven10.update_guy.test_helpers.Validators;
 
 /**
@@ -43,7 +43,7 @@ public class LocalRepoConnectionTest
 	@Test
 	public void testLocalRepoConnection_valid() throws Exception
 	{
-		RepositoryInfo activeRepo = Factories.createValidRepoInfo(RepositoryType.local);
+		RepositoryInfo activeRepo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local);
 		LocalRepoConnection repoConnection = new LocalRepoConnection(activeRepo);
 		assertNotNull(repoConnection);
 	}
@@ -168,7 +168,7 @@ public class LocalRepoConnectionTest
 	@Test(expected = IllegalArgumentException.class)
 	public void testDownloadRelease_null() throws Exception
 	{
-		RepositoryInfo repo = Factories.createValidRepoInfo(RepositoryType.local);
+		RepositoryInfo repo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local);
 		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
 		
 		ManifestVersionEntry versionEntry = null;

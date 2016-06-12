@@ -25,27 +25,8 @@ public class TestHelpers
 	{
 		return rootFolder.resolve(String.format("%s.json", releaseFamily));
 	}
-	public static Path getValidFtpRepoFilePath()
-	{
-		Path srcFile = Paths.get("src","test","resources","repoDefs","ftpRepo.json");
-		return srcFile;
-	}
 	
-	public static Path getValidLocalRepoFilePath()
-	{
-		Path srcFile = Paths.get("src","test","resources","repoDefs","localRepo.json");
-		return srcFile;
-	}
-	public static Path get_repos_path()
-	{
-		Path srcFile = Paths.get("src","test","resources","repoDefs");
-		return srcFile;
-	}
-	public static Path get_manifests_path()
-	{
-		Path srcFile = Paths.get("src","test","resources","manifests");
-		return srcFile;
-	}
+	
 	public static Path getTestFilePath()
 	{
 		return Paths.get("src","test","resources","repoPaths","1.0","file1");

@@ -20,9 +20,14 @@ public class RepositoryInfoMgr
 	private final Path repositoryStorePath;
 	private Map<Integer, RepositoryInfo> repoMap;
 
-	public RepositoryInfoMgr(Path repositoryStorePath) throws RepositoryException
+	/**
+	 * Creates a new repository manager
+	 * @param repositoryStoreFile the path to the file containing the repository information
+	 * @throws RepositoryException
+	 */
+	public RepositoryInfoMgr(Path repositoryStoreFile) throws RepositoryException
 	{
-		this.repositoryStorePath = repositoryStorePath;
+		this.repositoryStorePath = repositoryStoreFile;
 		repoMap = new HashMap<Integer, RepositoryInfo>();
 		init();
 	}

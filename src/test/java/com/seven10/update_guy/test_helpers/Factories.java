@@ -1,14 +1,13 @@
 package com.seven10.update_guy.test_helpers;
 
 import static org.junit.Assert.fail;
-
+import static com.seven10.update_guy.RepoInfoHelpers.*;
+import static com.seven10.update_guy.ManifestHelpers.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -20,57 +19,26 @@ import org.apache.logging.log4j.Logger;
 import org.junit.rules.TemporaryFolder;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 import com.seven10.update_guy.GsonFactory;
 import com.seven10.update_guy.manifest.Manifest;
 import com.seven10.update_guy.manifest.ManifestVersionEntry;
 import com.seven10.update_guy.repository.RepositoryInfo;
-import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
 
 public class Factories
 {
 	private static final Logger logger = LogManager.getFormatterLogger(Factories.class);
 	
-	public static RepositoryInfo createValidRepoInfo(RepositoryType type) throws Exception
+	public static List<RepositoryInfo> load_valid_repos_list() throws IOException
 	{
-		Path repoDefPath;
-		switch (type)
-		{
-		case ftp:
-			repoDefPath = TestHelpers.getValidFtpRepoFilePath();
-			break;
-		case local:
-			repoDefPath = TestHelpers.getValidLocalRepoFilePath();
-			break;
-		default:
-			throw new Exception("incorrect type passed in");
-		}
-		List<RepositoryInfo> repos = loadRepoListFromFile(repoDefPath);
-		return repos.get(0);
-	}
-	
-	public static List<RepositoryInfo> createValidRepoList() throws IOException
-	{
-		Path repoPath = TestHelpers.get_repos_path();
-		return loadRepoListFromFile(repoPath);
+		Path repoPath = get_valid_repos_path();
+		return load_repos_from_file(repoPath);
 	}
 
-	public static List<RepositoryInfo> loadRepoListFromFile(Path repoPath) throws IOException, JsonSyntaxException
-	{
-		String json = FileUtils.readFileToString(repoPath.toFile(), GsonFactory.encodingType);
-		logger.debug(".loadValidRepoList(): read file '%s' to %s", repoPath, json);
-		Gson gson = GsonFactory.getGson();
-		Type collectionType = new TypeToken<List<RepositoryInfo>>()
-		{
-		}.getType();
-		List<RepositoryInfo> repos = gson.fromJson(json, collectionType);
-		return repos;
-	}
+	
 	
 	public static void createValidRepoFile(Path storePath) throws FileNotFoundException, IOException
 	{
-		Path repoFilePath = TestHelpers.get_repos_path();
+		Path repoFilePath = get_repos_path();
 		FileUtils.copyFile(repoFilePath.toFile(), storePath.toFile());
 	}
 	
@@ -85,21 +53,9 @@ public class Factories
 		return manifest;
 	}
 	
-	public static List<ManifestVersionEntry> createValidManifestEntries(String testName, int entryCount,
-			Path rootFolder) throws IOException
-	{
-		List<ManifestVersionEntry> versionEntries = new ArrayList<ManifestVersionEntry>();
-		for (int i = 1; i <= entryCount; i++)
-		{
-			ManifestVersionEntry versionEntry = createValidManifestEntry(testName, i);
-			versionEntries.add(versionEntry);
-		}
-		return versionEntries;
-	}
-	
 	public static ManifestVersionEntry createValidManifestEntry(String testName, int index) throws IOException
 	{
-		Manifest manifest = Factories.createValidManifest(testName, TestHelpers.get_manifests_path());
+		Manifest manifest = Factories.createValidManifest(testName, get_manifests_path());
 		List<ManifestVersionEntry> manifestEntries = manifest.getVersionEntries();
 		return manifestEntries.get(index);
 	}
@@ -117,7 +73,7 @@ public class Factories
 	{
 		// copy valid manifest to path
 		Path targetFile = manPath.resolve(String.format("%s.manifest", releaseFamily));
-		FileUtils.copyFile(TestHelpers.get_manifests_path().toFile(), targetFile.toFile());
+		FileUtils.copyFile(get_manifests_path().toFile(), targetFile.toFile());
 		// return path
 		return manPath;
 	}

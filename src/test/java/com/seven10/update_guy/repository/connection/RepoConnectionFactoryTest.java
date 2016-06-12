@@ -9,10 +9,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.seven10.update_guy.RepoInfoHelpers;
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.repository.RepositoryInfo;
 import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
-import com.seven10.update_guy.test_helpers.Factories;
+
 import static org.hamcrest.CoreMatchers.instanceOf;
 
 /**
@@ -31,7 +32,7 @@ public class RepoConnectionFactoryTest
 	public void testConnect_valid() throws Exception
 	{
 		
-		RepositoryInfo activeRepo = Factories.createValidRepoInfo(RepositoryType.local);
+		RepositoryInfo activeRepo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local);
 		
 		// test local
 		activeRepo.repoType = RepositoryType.local;

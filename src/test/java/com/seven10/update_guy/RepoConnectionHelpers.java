@@ -1,8 +1,7 @@
 package com.seven10.update_guy;
 
-import static com.seven10.update_guy.manifest.ManifestHelpers.copy_manifest_to_path;
-import static com.seven10.update_guy.manifest.ManifestHelpers.load_manifest_from_path;
-import static com.seven10.update_guy.manifest.ManifestHelpers.validManifestFileName;
+import static com.seven10.update_guy.ManifestHelpers.*;
+import static com.seven10.update_guy.RepoInfoHelpers.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -27,14 +26,13 @@ import com.seven10.update_guy.GsonFactory;
 import com.seven10.update_guy.manifest.ManifestVersionEntry;
 import com.seven10.update_guy.repository.RepositoryInfo;
 import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
-import com.seven10.update_guy.test_helpers.TestHelpers;
 
 public class RepoConnectionHelpers
 {
 
 	public static List<RepositoryInfo> create_repo_infos_from_filename(String repoInfoFileName) throws IOException
 	{
-		Path repoPath = TestHelpers.get_repos_path().resolve(repoInfoFileName);
+		Path repoPath = get_repos_path().resolve(repoInfoFileName);
 		String json = FileUtils.readFileToString(repoPath.toFile(), GsonFactory.encodingType);
 		Gson gson = GsonFactory.getGson();
 		Type collectionType = new TypeToken<List<RepositoryInfo>>()
@@ -86,6 +84,13 @@ public class RepoConnectionHelpers
 		    }
 		};
 		when(ftpClient.retrieveFileStream(anyString())).then(fileStreamAnswer);
+		when(ftpClient.completePendingCommand()).thenReturn(true);
+		return ftpClient;
+	}
+	public static FTPClient create_mocked_ftp_client_file_not_found() throws IOException
+	{
+		FTPClient ftpClient = mock(FTPClient.class);
+		when(ftpClient.retrieveFileStream(anyString())).thenReturn(null);
 		when(ftpClient.completePendingCommand()).thenReturn(true);
 		return ftpClient;
 	}
