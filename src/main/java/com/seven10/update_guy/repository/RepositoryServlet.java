@@ -15,6 +15,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import com.google.gson.Gson;
+import com.seven10.update_guy.GsonFactory;
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.manifest.Manifest;
 import com.seven10.update_guy.repository.connection.RepoConnection;
@@ -29,7 +31,8 @@ public class RepositoryServlet
 	
 	public RepositoryServlet() throws RepositoryException
 	{
-		repoInfoMgr = new RepositoryInfoMgr(Paths.get("repos.dat"));
+		String repoPath = System.getProperty("seven10.repo_path", "repos.json");
+		repoInfoMgr = new RepositoryInfoMgr(Paths.get(repoPath));
 	}
 	private final RepositoryInfo getActiveRepo()
 	{
@@ -37,41 +40,37 @@ public class RepositoryServlet
 	}
 	@GET
 	@Path("manifest")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Manifest getManifest(@QueryParam("releaseFamily") String releaseFamily)
+	public Response getManifest(@QueryParam("releaseFamily") String releaseFamily)
 	{
-		// open repository connection
-		Manifest manifest; 
+		ResponseBuilder resp = null;
 		try
 		{
 			RepoConnection repoConnection = RepoConnectionFactory.connect(getActiveRepo());
 			// download manifest file
-			manifest = repoConnection.getManifest(releaseFamily);
+			Manifest manifest = repoConnection.getManifest(releaseFamily);
+			resp = Response.ok().entity(manifest.toString());
 		}
-		catch (RepositoryException e)
+		catch(RepositoryException ex)
 		{
-			manifest = null;
+			resp = Response.serverError().entity(ex.getMessage());
 		}
-		
-		// return manifest object
-		return manifest;
+		return resp.build();
 	}
 	
 	@GET
 	@Path("showRepos")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Map<Integer, RepositoryInfo> showRepos()
+	public Response showRepos()
 	{
 		Map<Integer, RepositoryInfo> repoMap = repoInfoMgr.getRepoMap();
-		return repoMap;
-		
+		Gson gson = GsonFactory.getGson();
+		String repoMapJson = gson.toJson(repoMap);
+		ResponseBuilder resp = Response.ok().entity(repoMapJson);
+		return resp.build();
 	}
-	
 	
 	@POST
 	@Path("createRepository")
 	@Consumes("application/json")
-	@Produces(MediaType.APPLICATION_JSON)
 	public Response createRepository(final RepositoryInfo repoInfo)
 	{
 		ResponseBuilder resp;
