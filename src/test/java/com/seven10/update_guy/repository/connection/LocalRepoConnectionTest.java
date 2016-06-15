@@ -20,7 +20,7 @@ import com.seven10.update_guy.TestConstants;
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.manifest.Manifest;
 
-import com.seven10.update_guy.manifest.ManifestVersionEntry;
+import com.seven10.update_guy.manifest.ManifestEntry;
 import com.seven10.update_guy.repository.RepositoryInfo;
 import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
 import com.seven10.update_guy.DownloadValidator;
@@ -150,7 +150,7 @@ public class LocalRepoConnectionTest
 		
 		// setup a manifest entry to get
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
-		ManifestVersionEntry entry = get_manifest_entry_from_file(manifestPath);
+		ManifestEntry entry = get_manifest_entry_from_file(manifestPath);
 		
 		copy_downloads_to_path(entry, cachePath);
 
@@ -172,7 +172,7 @@ public class LocalRepoConnectionTest
 		RepositoryInfo repo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local);
 		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
 		
-		ManifestVersionEntry versionEntry = null;
+		ManifestEntry versionEntry = null;
 		repoConnection.downloadRelease(versionEntry);
 	}
 }

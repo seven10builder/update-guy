@@ -9,7 +9,6 @@ import static com.seven10.update_guy.RepoInfoHelpers.*;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import javax.ws.rs.core.Application;

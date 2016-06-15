@@ -7,11 +7,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
+
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-
 import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.seven10.update_guy.GsonFactory;
@@ -27,7 +29,7 @@ public class Manifest
 	@Expose
 	Date retrieved;
 	@Expose
-	Map<String, ManifestVersionEntry> versions;
+	Map<String, ManifestEntry> versions;
 
 	private String formatVersions()
 	{
@@ -41,7 +43,7 @@ public class Manifest
 		releaseFamily = "unknown";
 		created = new Date();
 		retrieved = new Date();
-		versions = new HashMap<String, ManifestVersionEntry>();
+		versions = new HashMap<String, ManifestEntry>();
 	}
 
 	public Manifest(Manifest newManifest)
@@ -53,7 +55,7 @@ public class Manifest
 		this.releaseFamily = newManifest.releaseFamily;
 		this.created = newManifest.created;
 		this.retrieved = newManifest.retrieved;
-		this.versions = new HashMap<String, ManifestVersionEntry>(newManifest.versions);
+		this.versions = new HashMap<String, ManifestEntry>(newManifest.versions);
 	}
 
 	@Override
@@ -105,12 +107,29 @@ public class Manifest
 		this.retrieved = newRetrieved;
 	}
 
-	public List<ManifestVersionEntry> getVersionEntries()
+	public ManifestEntry getVersionEntry(String version) throws RepositoryException
 	{
-		return new ArrayList<ManifestVersionEntry>(versions.values());
+		if (version == null || version.isEmpty())
+		{
+			throw new IllegalArgumentException("version must not be null or empty");
+		}
+		try
+		{
+			ManifestEntry entry = versions.values().stream().filter(ver->ver.getVersion() == version).findFirst().get();
+			return entry;
+		}
+		catch(NoSuchElementException ex)
+		{
+			throw new RepositoryException(Status.NOT_FOUND, "Could not find version '%s'", version);
+		}
 	}
-
-	public void addVersionEntry(ManifestVersionEntry versionEntry)
+	
+	public List<ManifestEntry> getVersionEntries()
+	{
+		return new ArrayList<ManifestEntry>(versions.values());
+	}
+	
+	public void addVersionEntry(ManifestEntry versionEntry)
 	{
 		if (versionEntry == null)
 		{
@@ -149,7 +168,7 @@ public class Manifest
 		}
 		catch (IOException e)
 		{
-			throw new RepositoryException("Could not read file '%s'. Exception: %s", filePath, e.getMessage());
+			throw new RepositoryException(Status.UNSUPPORTED_MEDIA_TYPE, "Could not read file '%s'. Exception: %s", filePath, e.getMessage());
 		}
 	}
 

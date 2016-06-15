@@ -12,7 +12,7 @@ import java.nio.file.Path;
 import org.apache.commons.io.FileUtils;
 
 import com.seven10.update_guy.exceptions.RepositoryException;
-import com.seven10.update_guy.manifest.ManifestVersionEntry;
+import com.seven10.update_guy.manifest.ManifestEntry;
 
 public class DownloadValidator
 {
@@ -31,7 +31,7 @@ public class DownloadValidator
 		assertTrue(FileUtils.contentEquals(srcFile, destFile));
 	}
 
-	public static void validate_downloaded_release(ManifestVersionEntry versionEntry, Path destFolder)
+	public static void validate_downloaded_release(ManifestEntry versionEntry, Path destFolder)
 	{
 		versionEntry.getAllRolePaths().forEach(entry ->
 		{

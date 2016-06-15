@@ -205,7 +205,87 @@ public class ManifestTest
 		Date expected = null;
 		manifest.setRetrieved(expected);
 	}
-
+	
+	/**
+	 * Test method for
+	 * {@link com.seven10.update_guy.manifest.Manifest# getVersionEntry(String version)}
+	 * .
+	 * @throws IOException 
+	 * @throws RepositoryException 
+	 */
+	@Test
+	public void test_getVersionEntry_valid() throws IOException, RepositoryException
+	{
+		String releaseFamily = "getVersionEntry";
+		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
+		copy_manifest_to_path(valid_manifest_name, manifestPath);
+		Manifest manifest = load_manifest_from_path(manifestPath);
+		
+		List<ManifestEntry> expectedVersionEntries = manifest.getVersionEntries();
+		for(ManifestEntry expected: expectedVersionEntries)
+		{
+			ManifestEntry actual = manifest.getVersionEntry(expected.getVersion());
+			assertEquals(expected, actual);
+		}
+	}
+	/**
+	 * Test method for
+	 * {@link com.seven10.update_guy.manifest.Manifest# getVersionEntry(String version)}
+	 * .
+	 * @throws IOException 
+	 * @throws RepositoryException 
+	 */
+	@Test(expected=RepositoryException.class)
+	public void test_getVersionEntry_not_found_entries() throws IOException, RepositoryException
+	{
+		String releaseFamily = "getVersionEntry-nf";
+		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
+		copy_manifest_to_path(valid_manifest_name, manifestPath);
+		Manifest manifest = load_manifest_from_path(manifestPath);
+		manifest.getVersionEntry("no-way-this-version-exists");
+	}
+	/**
+	 * Test method for
+	 * {@link com.seven10.update_guy.manifest.Manifest# getVersionEntry(String version)}
+	 * .
+	 * @throws IOException 
+	 * @throws RepositoryException 
+	 */
+	@Test(expected=RepositoryException.class)
+	public void test_getVersionEntry_not_found_no_entries() throws IOException, RepositoryException
+	{
+		Manifest manifest = new Manifest();
+		manifest.getVersionEntry("no-way-this-version-exists");
+	}
+	/**
+	 * Test method for
+	 * {@link com.seven10.update_guy.manifest.Manifest# getVersionEntry(String version)}
+	 * .
+	 * @throws IOException 
+	 * @throws RepositoryException 
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void test_getVersionEntry_null() throws IOException, RepositoryException
+	{
+		Manifest manifest = new Manifest();
+		String version = null;
+		manifest.getVersionEntry(version);
+	}
+	/**
+	 * Test method for
+	 * {@link com.seven10.update_guy.manifest.Manifest# getVersionEntry(String version)}
+	 * .
+	 * @throws IOException 
+	 * @throws RepositoryException 
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void test_getVersionEntry_empty() throws IOException, RepositoryException
+	{
+		Manifest manifest = new Manifest();
+		String version = "";
+		manifest.getVersionEntry(version);
+	}
+	
 	/**
 	 * Test method for
 	 * {@link com.seven10.update_guy.manifest.Manifest#getVersionEntries()}.
@@ -223,27 +303,27 @@ public class ManifestTest
 		for (int i = 0; i < version_entry_count; i++)
 		{
 			Manifest manifest = new Manifest();
-			List<ManifestVersionEntry> expected = create_valid_manifest_entries(releaseFamily,i,rootPath);
+			List<ManifestEntry> expected = create_valid_manifest_entries(releaseFamily,i,rootPath);
 			expected.forEach(versionEntry -> manifest.addVersionEntry(versionEntry));
 
-			Collection<ManifestVersionEntry> actual = manifest.getVersionEntries();
+			Collection<ManifestEntry> actual = manifest.getVersionEntries();
 
 			assertNotNull(actual);
 			assertTrue("version entries should be equal!",
 					expected.containsAll(actual) && actual.containsAll(expected));
 		}
 	}
-
+	
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.manifest.Manifest#addVersionEntry(com.seven10.update_guy.manifest.ManifestVersionEntry)}
+	 * {@link com.seven10.update_guy.manifest.Manifest#addVersionEntry(com.seven10.update_guy.manifest.ManifestEntry)}
 	 * .
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void testAddVersion_null()
 	{
 		Manifest manifest = new Manifest();
-		ManifestVersionEntry expected = null;
+		ManifestEntry expected = null;
 		manifest.addVersionEntry(expected);
 	}
 
@@ -476,7 +556,7 @@ public class ManifestTest
 
 		Manifest other = new Manifest(ours);
 		// different object should be different
-		ManifestVersionEntry versionEntry = new ManifestVersionEntry();
+		ManifestEntry versionEntry = new ManifestEntry();
 		versionEntry.version = "something-else";
 		other.addVersionEntry(versionEntry);
 
@@ -514,7 +594,7 @@ public class ManifestTest
 		ManifestHelpers.copy_manifest_to_path(valid_manifest_name, manifestPath);
 		Manifest ours = ManifestHelpers.load_manifest_from_path(manifestPath);
 
-		ManifestVersionEntry other = new ManifestVersionEntry();
+		ManifestEntry other = new ManifestEntry();
 		boolean isEqual = ours.equals(other);
 		assertFalse(isEqual);
 	}

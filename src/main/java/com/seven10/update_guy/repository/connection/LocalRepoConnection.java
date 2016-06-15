@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map.Entry;
 
+import javax.ws.rs.core.Response.Status;
+
 import org.apache.commons.io.FileUtils;
 
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.manifest.Manifest;
-import com.seven10.update_guy.manifest.ManifestVersionEntry;
+import com.seven10.update_guy.manifest.ManifestEntry;
 import com.seven10.update_guy.repository.RepositoryInfo;
 
 class LocalRepoConnection implements RepoConnection
@@ -25,7 +27,7 @@ class LocalRepoConnection implements RepoConnection
 		}
 		catch (IOException e)
 		{
-			throw new RepositoryException("Could not copy file '%s' to '%s'. Reason: %s", srcPath, destPath, e.getMessage());
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR,"Could not copy file '%s' to '%s'. Reason: %s", srcPath, destPath, e.getMessage());
 		}
 	}
 	public LocalRepoConnection(RepositoryInfo activeRepo)
@@ -55,7 +57,7 @@ class LocalRepoConnection implements RepoConnection
 		return manifest;
 	}
 	@Override
-	public void downloadRelease(ManifestVersionEntry versionEntry) throws RepositoryException
+	public void downloadRelease(ManifestEntry versionEntry) throws RepositoryException
 	{
 		if(versionEntry==null)
 		{
@@ -67,5 +69,10 @@ class LocalRepoConnection implements RepoConnection
 			Path destPath = cachePath.resolve(srcPath.getFileName());
 			copyFileToPath(srcPath, destPath);
 		}
+	}
+	@Override
+	public Path getCachePath()
+	{
+		return cachePath;
 	}
 }

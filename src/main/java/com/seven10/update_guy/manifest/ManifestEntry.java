@@ -16,9 +16,9 @@ import org.apache.logging.log4j.Logger;
 import com.google.gson.annotations.Expose;
 import com.seven10.update_guy.GsonFactory;
 
-public class ManifestVersionEntry
+public class ManifestEntry
 {
-	private static final Logger logger = LogManager.getFormatterLogger(ManifestVersionEntry.class);
+	private static final Logger logger = LogManager.getFormatterLogger(ManifestEntry.class);
 	
 	@Expose
 	protected String version;
@@ -27,14 +27,14 @@ public class ManifestVersionEntry
 	@Expose
 	protected final Map<String, Path> fileMap;
 	
-	public ManifestVersionEntry()
+	public ManifestEntry()
 	{
 		version = "unknown";
 		publishDate = new Date();
 		fileMap = new HashMap<String, Path>();
 	}
 	
-	public ManifestVersionEntry(ManifestVersionEntry versionEntry)
+	public ManifestEntry(ManifestEntry versionEntry)
 	{
 		version = versionEntry.version;
 		publishDate = versionEntry.publishDate;
@@ -81,12 +81,12 @@ public class ManifestVersionEntry
 			logger.debug(".equals(): match = false. other is null");
 			return false;
 		}
-		if (!(obj instanceof ManifestVersionEntry))
+		if (!(obj instanceof ManifestEntry))
 		{
 			logger.debug(".equals(): match = false. other is not a ManifestVersionEntry");
 			return false;
 		}
-		ManifestVersionEntry other = (ManifestVersionEntry) obj;
+		ManifestEntry other = (ManifestEntry) obj;
 		if (fileMap.size() != other.fileMap.size())
 		{
 			logger.debug(".equals(): match = false. other size does not match (this = %d, other = %d)", fileMap.size(),

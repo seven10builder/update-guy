@@ -33,7 +33,7 @@ import static org.mockito.Mockito.*;
 import com.seven10.update_guy.TestConstants;
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.manifest.Manifest;
-import com.seven10.update_guy.manifest.ManifestVersionEntry;
+import com.seven10.update_guy.manifest.ManifestEntry;
 import com.seven10.update_guy.repository.RepositoryInfo;
 import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
 
@@ -378,7 +378,7 @@ public class FtpRepoConnectionTest
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#downloadRelease(com.seven10.update_guy.manifest.ManifestVersionEntry)}.
+	 * Test method for {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#downloadRelease(com.seven10.update_guy.manifest.ManifestEntry)}.
 	 * @throws Exception 
 	 */
 	@Test
@@ -397,7 +397,7 @@ public class FtpRepoConnectionTest
 		
 		// setup a manifest entry to get
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
-		ManifestVersionEntry entry = get_manifest_entry_from_file(manifestPath);
+		ManifestEntry entry = get_manifest_entry_from_file(manifestPath);
 		
 		copy_downloads_to_path(entry, cachePath);
 
@@ -407,7 +407,7 @@ public class FtpRepoConnectionTest
 		validate_downloaded_release(entry, repo.cachePath);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#downloadRelease(com.seven10.update_guy.manifest.ManifestVersionEntry)}.
+	 * Test method for {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#downloadRelease(com.seven10.update_guy.manifest.ManifestEntry)}.
 	 * @throws Exception 
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -416,12 +416,12 @@ public class FtpRepoConnectionTest
 		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
 		FTPClient ftpClient = mock(FTPClient.class);
 		FtpRepoConnection repoConnection = new FtpRepoConnection(repoInfo, ftpClient);
-		ManifestVersionEntry versionEntry = null;
+		ManifestEntry versionEntry = null;
 		repoConnection.downloadRelease(versionEntry);
 		
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#downloadRelease(com.seven10.update_guy.manifest.ManifestVersionEntry)}.
+	 * Test method for {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#downloadRelease(com.seven10.update_guy.manifest.ManifestEntry)}.
 	 * @throws Exception 
 	 */
 	@Test(expected=RepositoryException.class)
@@ -440,7 +440,7 @@ public class FtpRepoConnectionTest
 		
 		// setup a manifest entry to get
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
-		ManifestVersionEntry entry = get_manifest_entry_from_file(manifestPath);
+		ManifestEntry entry = get_manifest_entry_from_file(manifestPath);
 		// dont copy the files over
 
 		FtpRepoConnection repoConnection = new FtpRepoConnection(repo, create_mocked_ftp_client_file_not_found());

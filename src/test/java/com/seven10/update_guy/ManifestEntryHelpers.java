@@ -7,10 +7,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import com.seven10.update_guy.manifest.ManifestVersionEntry;
+import com.seven10.update_guy.manifest.ManifestEntry;
 
 public class ManifestEntryHelpers
 {
@@ -25,29 +24,22 @@ public class ManifestEntryHelpers
 		}
 		return rvalue;
 	}
-	public static ManifestVersionEntry create_valid_manifest_entry(String testName, int index, Path rootFolder)
+	public static ManifestEntry create_valid_manifest_entry(String testName, int index, Path rootFolder)
 	{
-		ManifestVersionEntry mve = new ManifestVersionEntry();
+		ManifestEntry mve = new ManifestEntry();
 		mve.setVersion("v"+ testName + index);
 		Map<String, Path> entries = create_entry_folder_list(index, rootFolder);
 		entries.forEach((key,value)->mve.addPath(key, value));
 		return mve;
 	}
 	
-	public static List<Entry<String, Path>> create_entry_folder_list(ManifestVersionEntry mve, int index,
-			Path rootFolder)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public static List<ManifestVersionEntry> create_valid_manifest_entries(String testName, int entryCount,
+	public static List<ManifestEntry> create_valid_manifest_entries(String testName, int entryCount,
 			Path rootFolder) throws IOException
 	{
-		List<ManifestVersionEntry> versionEntries = new ArrayList<ManifestVersionEntry>();
+		List<ManifestEntry> versionEntries = new ArrayList<ManifestEntry>();
 		for (int i = 1; i <= entryCount; i++)
 		{
-			ManifestVersionEntry versionEntry = create_valid_manifest_entry(testName, i, rootFolder);
+			ManifestEntry versionEntry = create_valid_manifest_entry(testName, i, rootFolder);
 			versionEntries.add(versionEntry);
 		}
 		return versionEntries;

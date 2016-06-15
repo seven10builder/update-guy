@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.Response.Status;
+
 import org.apache.commons.io.FileUtils;
 
 import com.google.gson.Gson;
@@ -47,7 +49,7 @@ public class RepositoryInfoMgr
 		int hash = repoInfo.hashCode();
 		if (repoMap.containsKey(hash))
 		{
-			throw new RepositoryException("repoMap already contains hash '%d'. Delete first.", hash);
+			throw new RepositoryException(Status.CONFLICT, "repoMap already contains hash '%d'. Delete first.", hash);
 		}
 		// store repositoryInfo list
 		repoMap.put(hash, repoInfo);
@@ -59,7 +61,7 @@ public class RepositoryInfoMgr
 		// find repositoryInfo object for repositoryId in list
 		if (repoMap.containsKey(repositoryId) == false)
 		{
-			throw new RepositoryException("Repository entry id='%d' does not exist", repositoryId);
+			throw new RepositoryException(Status.NOT_FOUND, "Repository entry id='%d' does not exist", repositoryId);
 		}
 		// remove repositoryInfo object from list
 		repoMap.remove(repositoryId);
@@ -84,7 +86,7 @@ public class RepositoryInfoMgr
 		}
 		catch (IOException e)
 		{
-			throw new RepositoryException("Could not write file '%s'. Exception: %s", repoStorePath, e.getMessage());
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "Could not write file '%s'. Exception: %s", repoStorePath, e.getMessage());
 		}
 	}
 
@@ -112,7 +114,7 @@ public class RepositoryInfoMgr
 		}
 		catch (IOException e)
 		{
-			throw new RepositoryException("Could not read file '%s'. Exception: %s", repoStorePath, e.getMessage());
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "Could not read file '%s'. Exception: %s", repoStorePath, e.getMessage());
 		}
 	}
 

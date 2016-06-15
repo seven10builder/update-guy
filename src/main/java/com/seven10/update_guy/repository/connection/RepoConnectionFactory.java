@@ -1,5 +1,7 @@
 package com.seven10.update_guy.repository.connection;
 
+import javax.ws.rs.core.Response.Status;
+
 import org.apache.commons.net.ftp.FTPClient;
 
 import com.seven10.update_guy.exceptions.RepositoryException;
@@ -23,7 +25,7 @@ public class RepoConnectionFactory
 			rval = new FtpRepoConnection(activeRepo, new FTPClient());
 			break;
 		default:
-			throw new RepositoryException("Unsupported repository type '%s'", activeRepo.repoType);
+			throw new RepositoryException(Status.BAD_REQUEST, "Unsupported repository type '%s'", activeRepo.repoType);
 		}
 		return rval;
 	}

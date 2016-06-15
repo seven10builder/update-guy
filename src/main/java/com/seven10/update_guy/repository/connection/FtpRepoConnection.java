@@ -11,6 +11,8 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.Map.Entry;
 
+import javax.ws.rs.core.Response.Status;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -19,7 +21,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.manifest.Manifest;
-import com.seven10.update_guy.manifest.ManifestVersionEntry;
+import com.seven10.update_guy.manifest.ManifestEntry;
 import com.seven10.update_guy.repository.RepositoryInfo;
 
 /**
@@ -64,7 +66,7 @@ public class FtpRepoConnection implements RepoConnection
 		{
 			String msg = "Could not close input stream. Reason: " + ex.getMessage();
 			logger.error(".closeInputFileStream(): %s", msg);
-			throw new RepositoryException(msg);
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, msg);
 		}
 		catch(NullPointerException ex)
 		{
@@ -85,7 +87,7 @@ public class FtpRepoConnection implements RepoConnection
 		{
 			String msg = "Could not close output stream. Reason: " + ex.getMessage();
 			logger.error(".closeOutputFileStream(): %s", msg);
-			throw new RepositoryException(msg);
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, msg);
 		}
 		catch(NullPointerException ex)
 		{
@@ -105,7 +107,7 @@ public class FtpRepoConnection implements RepoConnection
 		{
 			String msg = "Could not retrieve filestream. Reason: " + ftpClient.getReplyString();
 			logger.error(".executeDownload(): %s", msg);
-			throw new RepositoryException(msg);
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, msg);
 		}
 		try
 		{
@@ -119,7 +121,7 @@ public class FtpRepoConnection implements RepoConnection
 		{
 			String msg = "IOException on download: %s" + ex.getMessage();
 			logger.error(".downloadFile(): %s", msg);
-			throw new RepositoryException(msg);
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, msg);
 		}
 		logger.info(".executeDownload(): File '%s' has been downloaded successfully.", srcPath);
 	}
@@ -139,7 +141,7 @@ public class FtpRepoConnection implements RepoConnection
 		{
 			String msg = "Could not create input stream. Reason: " + ex.getMessage();
 			logger.error(".createInputStream(): %s", msg);
-			throw new RepositoryException(msg);
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, msg);
 		}
 		return inputStream;
 	}
@@ -161,7 +163,7 @@ public class FtpRepoConnection implements RepoConnection
 		{
 			String msg = "Could not create output stream. Reason: " + ex.getMessage();
 			logger.error(".createOutputStream(): %s", msg);
-			throw new RepositoryException(msg);
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, msg);
 		}
 	}
 	
@@ -233,7 +235,7 @@ public class FtpRepoConnection implements RepoConnection
 		}
 		catch (IOException ex)
 		{
-			throw new RepositoryException("Could not connect to ftp client. Reason: %s", ex.getMessage());
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "Could not connect to ftp client. Reason: %s", ex.getMessage());
 		}
 	}
 
@@ -250,7 +252,7 @@ public class FtpRepoConnection implements RepoConnection
 		}
 		catch (IOException ex)
 		{
-			throw new RepositoryException("Could not disconnect from ftp client. Reason: %s", ex.getMessage());
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "Could not disconnect from ftp client. Reason: %s", ex.getMessage());
 		}
 
 	}
@@ -272,10 +274,10 @@ public class FtpRepoConnection implements RepoConnection
 	}
 
 	/**
-	 * @see com.seven10.update_guy.repository.connection.RepoConnection#downloadRelease(com.seven10.update_guy.repository.ManifestVersionEntry)
+	 * @see com.seven10.update_guy.repository.connection.RepoConnection#downloadRelease(com.seven10.update_guy.repository.ManifestEntry)
 	 */
 	@Override
-	public void downloadRelease(ManifestVersionEntry versionEntry) throws RepositoryException
+	public void downloadRelease(ManifestEntry versionEntry) throws RepositoryException
 	{
 		if (versionEntry == null)
 		{
@@ -287,5 +289,10 @@ public class FtpRepoConnection implements RepoConnection
 			Path destPath = buildDestPath(srcPath.getFileName().toString());
 			downloadFile(srcPath, destPath);
 		}
+	}
+	@Override
+	public Path getCachePath()
+	{
+		return activeRepo.cachePath;
 	}
 }
