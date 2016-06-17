@@ -1,8 +1,11 @@
 package com.seven10.update_guy;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.rules.TemporaryFolder;
@@ -52,6 +55,33 @@ public class ManifestHelpers
 		String json = gson.toJson(expected);
 		FileUtils.writeStringToFile(destPath.toFile(), json, "UTF-8");
 		return destPath;
+	}
+	public static void write_manifest_list_to_folder(Path rootPath, List<Manifest> manifestList) throws IOException
+	{
+		for(Manifest manifest: manifestList)
+		{
+			Path filePath = rootPath.resolve(manifest.getReleaseFamily() + ".manifest");
+			Manifest.writeToFile(filePath, manifest);
+		}
+	}
+	public static List<Manifest> create_manifest_list(String testName, int count)
+	{
+		List<Manifest> manifestList = new ArrayList<Manifest>();
+		for(int i = 1; i <= count; i++)
+		{
+			Manifest manifest = new Manifest();
+			manifest.setReleaseFamily(testName + i + ".manifest");
+			manifestList.add(manifest);
+		}
+		return manifestList;
+	}
+	public static void write_dummy_files_to_folder(Path rootPath, int count) throws IOException
+	{
+		for(int i =1; i<= count; i++)
+		{
+			Path filePath = rootPath.resolve("dummy"+i+".file");
+			Files.createFile(filePath);
+		}
 	}
 
 }

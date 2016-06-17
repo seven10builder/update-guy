@@ -31,9 +31,9 @@ import com.seven10.update_guy.exceptions.RepositoryException;
  * @author kmm
  *
  */
-public class ManifestVersionEntryTest
+public class ManifestEntryTest
 {
-	private static final Logger logger = LogManager.getFormatterLogger(ManifestVersionEntryTest.class);
+	private static final Logger logger = LogManager.getFormatterLogger(ManifestEntryTest.class);
 	
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
@@ -426,7 +426,7 @@ public class ManifestVersionEntryTest
 	{
 		ManifestEntry versionEntry = new ManifestEntry();
 		// different object should be different
-		ManifestVersionEntryTest other =  new ManifestVersionEntryTest();
+		ManifestEntryTest other =  new ManifestEntryTest();
 		boolean isEqual = versionEntry.equals(other);
 		assertFalse(isEqual);
 	}

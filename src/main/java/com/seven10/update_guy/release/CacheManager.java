@@ -1,32 +1,25 @@
 package com.seven10.update_guy.release;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.input.AutoCloseInputStream;
-
-import com.seven10.update_guy.GsonFactory;
+import com.seven10.update_guy.FileFingerPrint;
+import com.seven10.update_guy.Globals;
 import com.seven10.update_guy.exceptions.RepositoryException;
-import com.seven10.update_guy.manifest.Manifest;
-import com.seven10.update_guy.manifest.ManifestEntry;
 import com.seven10.update_guy.repository.connection.RepoConnection;
+import com.seven10.update_guy.repository.connection.RepoConnectionFactory;
 
 public class CacheManager
 {	
-	private ManifestEntry activeVersion;
-	private Manifest manifest;
-	private RepoConnection repoConnection;
 
-	private Thread createDownloadThread(final AsyncResponse asyncResponse, ManifestEntry newEntry)
+	private Globals globals;
+
+	private Thread createDownloadThread(final AsyncResponse asyncResponse, RepoConnection repoConnection)
 	{
 		return new Thread(new Runnable()
 		{
@@ -35,10 +28,8 @@ public class CacheManager
             {
             	try
             	{
-            		repoConnection.downloadRelease(newEntry);
-            		activeVersion = newEntry;
-            		String json = GsonFactory.getGson().toJson(activeVersion);
-            		Response resp = Response.ok().entity(json).build();
+            		repoConnection.downloadRelease(globals.getActiveVersion());
+            		Response resp = Response.ok().build();
             		asyncResponse.resume(resp);
             	}
             	catch(RepositoryException ex)
@@ -50,34 +41,20 @@ public class CacheManager
         });
 	}
 	
-	public CacheManager(RepoConnection repoConnection, String releaseFamily, String activeVersion) throws RepositoryException
+	/**
+	 * Constructor for the CacheManager, a class used to handle the serving of locally cached files to consumers
+	 * @param manifestPath The path to the manifest FILE for a given release family
+	 * @param cachePath The path where the various versions store the files to be served to consumers
+	 * @param releaseFamily
+	 * @param activeVersion
+	 * @throws RepositoryException
+	 */
+	public CacheManager(Globals globals) throws RepositoryException
 	{
-		this.repoConnection = repoConnection;
-		this.manifest = repoConnection.getManifest(releaseFamily);
-		this.activeVersion = manifest.getVersionEntry(activeVersion);
+		this.globals = globals;
 	}
 
-	/**
-	 * Sets the active version to the entry identified by the parameter
-	 * @param version The name of the version entry to use
-	 * @throws RepositoryException If the entry does not exist
-	 */
-	public void setActiveVersion(String version, final AsyncResponse asyncResponse) throws RepositoryException
-	{
-		// get new manifestVersionEntry from version
-		ManifestEntry newEntry =  manifest.getVersionEntry(version);
-		Thread downloadThread = createDownloadThread(asyncResponse, newEntry);
-		downloadThread.start();
-	}
 
-	/**
-	 * Retrieves the name of the active version
-	 * @return the name of the active version
-	 */
-	public String getActiveVersion()
-	{
-		return activeVersion.getVersion();
-	}
 
 	/**
 	 * Lists all of the roles that are hosted by the active version
@@ -85,7 +62,7 @@ public class CacheManager
 	 */
 	public List<String> getAvailableRoles()
 	{
-		return activeVersion.getRoles();
+		return globals.getActiveVersion().getRoles();
 	}
 
 	/**
@@ -99,8 +76,7 @@ public class CacheManager
 		File file = getFileForRole(roleName);
 		try
 		{
-			final InputStream fis = new AutoCloseInputStream(new FileInputStream(file));
-			return new String(Hex.encodeHex(DigestUtils.md5(fis)));
+			return FileFingerPrint.create(file);
 		}
 		catch(IOException ex)
 		{
@@ -118,12 +94,22 @@ public class CacheManager
 	{
 		if( getAvailableRoles().contains(roleName))
 		{
-			return activeVersion.getPath(roleName).toFile();
+			return globals.getActiveVersion().getPath(roleName).toFile();
 		}
 		else
 		{
 			throw new RepositoryException(Status.NOT_FOUND, "Could not find file for role name '%s'", roleName);
 		}
+	}
+
+	public void cacheFiles(final AsyncResponse asyncResponse) throws RepositoryException
+	{
+		// create repo connection
+		RepoConnection repoConnection = RepoConnectionFactory.connect(globals.getRepoInfo());		
+		// create download thread
+		Thread downloadThread = createDownloadThread(asyncResponse, repoConnection);
+		// start thread
+		downloadThread.start();
 	}
 
 }

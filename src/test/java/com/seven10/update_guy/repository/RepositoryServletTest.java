@@ -51,30 +51,13 @@ public class RepositoryServletTest extends JerseyTest
 	 * @throws IOException 
 	 */
 	@Test
-	public void testRepositoryServlet_file_exists_valid() throws RepositoryException, IOException
+	public void testRepositoryServlet_valid() throws RepositoryException, IOException
 	{
 		String testName = "repoServlet-fev";
 		Path fileName = build_repo_info_file_by_testname(testName, folder);
 		copy_valid_repos_to_test(fileName);
-		System.setProperty("seven10.repo_path", fileName.toString());
-		RepositoryServlet servlet = new RepositoryServlet();
-		assertNotNull(servlet);
-		
-	}
-	/**
-	 * Test method for
-	 * {@link com.seven10.update_guy.repository.RepositoryServlet#RepositoryServlet()}
-	 * .
-	 * @throws RepositoryException 
-	 * @throws IOException 
-	 */
-	@Test
-	public void testRepositoryServlet_valid_but_empty() throws RepositoryException, IOException
-	{
-		String testName = "repoServlet-vbe";
-		Path fileName = folder.newFile(testName + ".json").toPath();
-		System.setProperty("seven10.repo_path", fileName.toString());
-		RepositoryServlet servlet = new RepositoryServlet();
+		RepositoryInfoMgr repoInfoMgr = new RepositoryInfoMgr(fileName);
+		RepositoryServlet servlet = new RepositoryServlet(repoInfoMgr);
 		assertNotNull(servlet);
 	}
 	/**
@@ -84,19 +67,12 @@ public class RepositoryServletTest extends JerseyTest
 	 * @throws RepositoryException 
 	 * @throws IOException 
 	 */
-	@Test
-	public void testRepositoryServlet_file_not_exist() throws RepositoryException, IOException
+	@Test(expected=IllegalArgumentException.class)
+	public void testRepositoryServlet_repoMgr_Null() throws RepositoryException, IOException
 	{
-		String testName = "repoServlet-vne";
-		Path fileName = folder.newFolder(testName).toPath().resolve(testName + ".json");		
-		assertFalse(fileName.toFile().exists());
-		
-		System.setProperty("seven10.repo_path", fileName.toString());
-		RepositoryServlet servlet = new RepositoryServlet();
+		RepositoryInfoMgr repoInfoMgr = null;
+		RepositoryServlet servlet = new RepositoryServlet(repoInfoMgr);
 		assertNotNull(servlet);
-		
-		// the file should now exist
-		assertTrue(fileName.toFile().exists());
 	}
 	
 	/**

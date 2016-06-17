@@ -22,37 +22,12 @@ public class ReleaseServlet
 {
 	CacheManager cacheMgr;
 	
-	public ReleaseServlet(String s)
+	public ReleaseServlet(CacheManager cacheMgr)
 	{
-		
+		this.cacheMgr = cacheMgr;
 	}
 	
-	@GET
-	@Path("activeVersion")
-	public Response setActiveVersion(@QueryParam("version") String version, @Suspended AsyncResponse response)
-	{
-		ResponseBuilder resp;
-		try
-		{
-			cacheMgr.setActiveVersion(version, response);
-			resp = Response.ok();
-		}
-		catch (RepositoryException ex)
-		{
-			resp = Response.status(Status.NOT_MODIFIED).entity(ex);
-		}
-		return resp.build();
-	}
-	
-	@GET
-	@Path("activeVersion/list")
-	public Response showActiveVersion()
-	{
-		String version = cacheMgr.getActiveVersion();
-		ResponseBuilder resp = Response.ok().entity(version);
-		return resp.build();
-	}
-	
+
 	/**
 	 * Gets the list of roles that the active version entry provides files for
 	 * 
@@ -106,6 +81,16 @@ public class ReleaseServlet
 		{
 			resp = Response.status(Status.INTERNAL_SERVER_ERROR).entity(ex);
 		}
+		return resp.build();
+	}
+	
+
+	@GET
+	@Path("update-cache")
+	public Response doUpdateCache(final @Suspended AsyncResponse response) throws RepositoryException
+	{
+		cacheMgr.cacheFiles(response);
+		ResponseBuilder	resp = Response.ok();
 		return resp.build();
 	}
 }
