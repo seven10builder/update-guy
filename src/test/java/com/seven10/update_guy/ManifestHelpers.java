@@ -70,7 +70,7 @@ public class ManifestHelpers
 		for(int i = 1; i <= count; i++)
 		{
 			Manifest manifest = new Manifest();
-			manifest.setReleaseFamily(testName + i + ".manifest");
+			manifest.setReleaseFamily(testName + i);
 			manifestList.add(manifest);
 		}
 		return manifestList;

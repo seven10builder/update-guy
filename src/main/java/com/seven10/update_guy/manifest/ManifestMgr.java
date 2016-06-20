@@ -114,7 +114,7 @@ public class ManifestMgr
 	 */
 	public List<Manifest> getManifests() throws RepositoryException
 	{
-		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*.manifest");
+		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**.manifest");
 		Path manifestPath = globals.getManifestPath();
 		try
 		{
@@ -130,6 +130,5 @@ public class ManifestMgr
 			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "Could not walk path '%s'. Reason: %s", manifestPath, ex.getMessage());
 		}
 	}
-	
 	
 }

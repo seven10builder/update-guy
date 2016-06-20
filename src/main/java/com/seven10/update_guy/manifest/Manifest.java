@@ -8,13 +8,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
 import com.google.gson.annotations.Expose;
 import com.seven10.update_guy.GsonFactory;
 import com.seven10.update_guy.exceptions.RepositoryException;
@@ -30,13 +29,6 @@ public class Manifest
 	Date retrieved;
 	@Expose
 	Map<String, ManifestEntry> versions;
-
-	private String formatVersions()
-	{
-		List<String> entryString = versions.entrySet().stream()
-				.map(entry -> String.format("[%s: %s]", entry.getKey(), entry.getValue())).collect(Collectors.toList());
-		return StringUtils.join(entryString.toArray(), ", ");
-	}
 
 	public Manifest()
 	{
@@ -61,8 +53,7 @@ public class Manifest
 	@Override
 	public String toString()
 	{
-		return "Manifest [releaseFamily=" + releaseFamily + ", created=" + created + ", retrieved=" + retrieved
-				+ ", versions=[ " + formatVersions() + "]]";
+		return GsonFactory.getGson().toJson(this);
 	}
 
 	public String getReleaseFamily()
@@ -115,7 +106,7 @@ public class Manifest
 		}
 		try
 		{
-			ManifestEntry entry = versions.values().stream().filter(ver->ver.getVersion() == version).findFirst().get();
+			ManifestEntry entry = versions.values().stream().filter(ver->ver.getVersion().contentEquals(version)).findFirst().get();
 			return entry;
 		}
 		catch(NoSuchElementException ex)
@@ -123,7 +114,7 @@ public class Manifest
 			throw new RepositoryException(Status.NOT_FOUND, "Could not find version '%s'", version);
 		}
 	}
-	
+
 	public List<ManifestEntry> getVersionEntries()
 	{
 		return new ArrayList<ManifestEntry>(versions.values());
@@ -166,7 +157,7 @@ public class Manifest
 			Manifest manifest = gson.fromJson(json, Manifest.class);
 			return manifest;
 		}
-		catch (IOException e)
+		catch (JsonParseException|IOException e)
 		{
 			throw new RepositoryException(Status.UNSUPPORTED_MEDIA_TYPE, "Could not read file '%s'. Exception: %s", filePath, e.getMessage());
 		}
