@@ -1,6 +1,7 @@
 package com.seven10.update_guy;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -13,18 +14,19 @@ import com.seven10.update_guy.manifest.ManifestEntry;
 
 public class ManifestEntryHelpers
 {
-	public static Map<String, Path> create_entry_folder_list(int roleCount, Path rootFolder)
+	public static Map<String, Path> create_entry_folder_list(int roleCount, Path rootFolder) throws IOException
 	{
 		Map<String, Path> rvalue = new HashMap<String, Path>();
-		for(int i = 1; i < roleCount; i++)
+		for(int i = 1; i <= roleCount; i++)
 		{
 			String key = "role_" + i;
 			Path target = rootFolder.resolve(key + ".txt");
+			Files.createFile(target);
 			rvalue.put(key,  target);
 		}
 		return rvalue;
 	}
-	public static ManifestEntry create_valid_manifest_entry(String testName, int index, Path rootFolder)
+	public static ManifestEntry create_valid_manifest_entry(String testName, int index, Path rootFolder) throws IOException
 	{
 		ManifestEntry mve = new ManifestEntry();
 		mve.setVersion("v"+ testName + index);
