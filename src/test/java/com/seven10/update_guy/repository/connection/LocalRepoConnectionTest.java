@@ -71,7 +71,7 @@ public class LocalRepoConnectionTest
 		RepositoryInfo repo = get_repo_info_by_type(repos, RepositoryType.local);
 		
 		// make sure we're using the path the manifest is stored at
-		repo.manifestPath = manifestPath.getParent();
+		repo.manifestPath = manifestPath.getParent().toString();
 		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
 		
 		Manifest actual = repoConnection.getManifest(releaseFamily);
@@ -146,7 +146,7 @@ public class LocalRepoConnectionTest
 		
 		// point repo at our test cache
 		Path cachePath = build_cache_path_by_testname(releaseFamily, folder);
-		repo.cachePath = cachePath;
+		repo.cachePath = cachePath.toString();
 		
 		// setup a manifest entry to get
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
@@ -157,7 +157,7 @@ public class LocalRepoConnectionTest
 		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
 		repoConnection.downloadRelease(entry);
 		
-		DownloadValidator.validate_downloaded_release(entry, repo.cachePath);
+		DownloadValidator.validate_downloaded_release(entry, repo.getCachePath());
 	}
 	
 	/**

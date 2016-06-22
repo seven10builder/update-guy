@@ -12,6 +12,7 @@ import org.junit.rules.TemporaryFolder;
 
 import com.google.gson.Gson;
 import com.seven10.update_guy.GsonFactory;
+import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.manifest.Manifest;
 import com.seven10.update_guy.repository.RepositoryInfo;
 
@@ -43,7 +44,7 @@ public class ManifestHelpers
 	public static Path build_manifest_path_by_testname(String testName, TemporaryFolder folder) throws IOException
 	{
 		String fileName = String.format("%s.manifest", testName);
-		return folder.newFolder(testName).toPath().resolve(fileName);
+		return folder.newFolder(testName).toPath().resolve("manifests").resolve(fileName);
 	}
 	public static Path create_invalid_manifest_file(Path rootFolder) throws IOException
 	{
@@ -64,17 +65,19 @@ public class ManifestHelpers
 			Manifest.writeToFile(filePath, manifest);
 		}
 	}
-	public static List<Manifest> create_manifest_list(String testName, int count)
+	public static List<Manifest> create_manifest_list(String testName, int count) throws RepositoryException
 	{
 		List<Manifest> manifestList = new ArrayList<Manifest>();
 		for(int i = 1; i <= count; i++)
 		{
-			Manifest manifest = new Manifest();
+			Path filePath = get_manifests_path().resolve("valid.manifest");
+			Manifest manifest = Manifest.loadFromFile(filePath);
 			manifest.setReleaseFamily(testName + i);
 			manifestList.add(manifest);
 		}
 		return manifestList;
 	}
+
 	public static void write_dummy_files_to_folder(Path rootPath, int count) throws IOException
 	{
 		for(int i =1; i<= count; i++)

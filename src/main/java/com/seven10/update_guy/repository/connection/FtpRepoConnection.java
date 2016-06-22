@@ -215,7 +215,7 @@ public class FtpRepoConnection implements RepoConnection
 	 */
 	public Path buildDestPath(String fileName)
 	{
-		return activeRepo.cachePath.resolve(fileName);
+		return activeRepo.getCachePath().resolve(fileName);
 	}
 
 	@Override
@@ -265,7 +265,7 @@ public class FtpRepoConnection implements RepoConnection
 			throw new IllegalArgumentException("releaseFamily cannot be null or empty");
 		}
 		String manifestFileName = String.format("%s.manifest", releaseFamily);
-		Path srcPath = activeRepo.manifestPath.resolve(manifestFileName);
+		Path srcPath = activeRepo.getmanifestPath().resolve(manifestFileName);
 		Path destPath = buildDestPath(manifestFileName);
 		// ensure the path exists
 
@@ -293,6 +293,6 @@ public class FtpRepoConnection implements RepoConnection
 	@Override
 	public Path getCachePath()
 	{
-		return activeRepo.cachePath;
+		return activeRepo.getCachePath();
 	}
 }

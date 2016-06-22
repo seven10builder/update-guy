@@ -1,6 +1,7 @@
 package com.seven10.update_guy.manifest;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
@@ -149,6 +150,10 @@ public class Manifest
 		if (filePath == null)
 		{
 			throw new IllegalArgumentException("filePath must not be null");
+		}
+		if(Files.exists(filePath) == false)
+		{
+			throw new RepositoryException(Status.NOT_FOUND, "The manifest located at '%s' was not found", filePath.toString());
 		}
 		try
 		{

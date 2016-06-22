@@ -22,5 +22,9 @@ public class FileFingerPrint
 	{
 		return new String(Hex.encodeHex(DigestUtils.md5(json)));
 	}
+	public static String create(byte[] bytes) throws FileNotFoundException, IOException
+	{
+		return new String(Hex.encodeHex(DigestUtils.md5(bytes)));
+	}
 
 }

@@ -32,8 +32,8 @@ class LocalRepoConnection implements RepoConnection
 	}
 	public LocalRepoConnection(RepositoryInfo activeRepo)
 	{
-		repoPath = activeRepo.manifestPath;
-		cachePath = activeRepo.cachePath;
+		repoPath = activeRepo.getmanifestPath();
+		cachePath = activeRepo.getCachePath();
 	}
 	@Override
 	public void connect() throws RepositoryException

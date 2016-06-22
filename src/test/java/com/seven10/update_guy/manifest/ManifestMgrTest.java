@@ -8,14 +8,12 @@ import static com.seven10.update_guy.ManifestHelpers.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.seven10.update_guy.Globals;
 import com.seven10.update_guy.TestConstants;
 import com.seven10.update_guy.exceptions.RepositoryException;
 
@@ -30,80 +28,43 @@ public class ManifestMgrTest
 	
 	/**
 	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#ManifestMgr(com.seven10.update_guy.Globals)}.
+	 * @throws IOException 
 	 */
 	@Test
-	public void testManifestMgr_valid()
+	public void testManifestMgr_valid_path_not_exists() throws IOException
 	{
-		Globals globals = new Globals();
-		ManifestMgr manifestMgr = new ManifestMgr(globals);
+		
+		Path path = folder.getRoot().toPath().resolve("path-not-exist-yet"); 
+		assertFalse(Files.exists(path));
+		ManifestMgr manifestMgr = new ManifestMgr(path);
 		assertNotNull(manifestMgr);
+		assertTrue(Files.exists(path));
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#ManifestMgr(com.seven10.update_guy.Globals)}.
+	 * @throws IOException 
+	 */
+	@Test
+	public void testManifestMgr_valid_path_exists() throws IOException
+	{
+		
+		Path path = folder.newFolder("manmgr").toPath(); 
+		Files.createDirectories(path);
+		assertTrue(Files.exists(path));
+		ManifestMgr manifestMgr = new ManifestMgr(path);
+		assertNotNull(manifestMgr);
+		assertTrue(Files.exists(path));
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#ManifestMgr(com.seven10.update_guy.Globals)}.
 	 */
 	@Test(expected=IllegalArgumentException.class)
-	public void testManifestMgr_null_globals()
+	public void testManifestMgr_null()
 	{
-		Globals globals = null;
-		new ManifestMgr(globals);
+		Path path = null;
+		new ManifestMgr(path);
 	}
 	
-	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#setActiveVersion(java.lang.String)}
-	 * and  {@link com.seven10.update_guy.manifest.ManifestMgr#getActiveVersion()}.
-	 * @throws IOException 
-	 * @throws RepositoryException 
-	 */
-	@Test
-	public void testSetGetActiveVersion_valid() throws IOException, RepositoryException
-	{
-		String testName = "getActiveVersion";
-		Path manifestPath = build_manifest_path_by_testname(testName, folder);
-		copy_manifest_to_path(TestConstants.valid_manifest_name, manifestPath);
-		Manifest manifest = load_manifest_from_path(manifestPath);
-		
-		Globals globals = new Globals();
-		globals.setManifestPath(manifestPath.getParent());
-		globals.setReleaseFamily(testName);
-		
-		ManifestMgr manifestMgr = new ManifestMgr(globals);
-		for(ManifestEntry expectedEntry: manifest.getVersionEntries())
-		{
-			String expectedVersion = expectedEntry.getVersion();
-			
-			manifestMgr.setActiveVersion(expectedVersion);
-			String actualVersion = manifestMgr.getActiveVersion();  
-			
-			ManifestEntry actualEntry = globals.getActiveVersion();
-			assertEquals(expectedEntry, actualEntry);
-			assertEquals(expectedVersion, actualVersion);
-		}
-	}
-
-	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#setActiveVersion(java.lang.String)}.
-	 * @throws RepositoryException 
-	 */
-	@Test(expected=IllegalArgumentException.class)
-	public void testSetActiveVersion_null() throws RepositoryException
-	{
-		Globals globals = new Globals();
-		ManifestMgr manifestMgr = new ManifestMgr(globals);
-		String version = null;
-		manifestMgr.setActiveVersion(version);
-	}
-	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#setActiveVersion(java.lang.String)}.
-	 * @throws RepositoryException 
-	 */
-	@Test(expected=IllegalArgumentException.class)
-	public void testSetActiveVersion_empty() throws RepositoryException
-	{
-		Globals globals = new Globals();
-		ManifestMgr manifestMgr = new ManifestMgr(globals);
-		String version = "";
-		manifestMgr.setActiveVersion(version);
-	}
 	
 	/**
 	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getManifest(java.lang.String)}.
@@ -113,14 +74,13 @@ public class ManifestMgrTest
 	@Test
 	public void testGetManifest_valid() throws IOException, RepositoryException
 	{
-		String testName = "getActiveVersion";
+		String testName = "getManifest";
 		
 		Path manifestPath = build_manifest_path_by_testname(testName, folder);
+		Path manifestDir = manifestPath.getParent();
 		copy_manifest_to_path(TestConstants.valid_manifest_name, manifestPath);
 		Manifest expected = load_manifest_from_path(manifestPath);
-		Globals globals = new Globals();
-		globals.setManifestPath(manifestPath.getParent());
-		ManifestMgr manifestMgr = new ManifestMgr(globals);
+		ManifestMgr manifestMgr = new ManifestMgr(manifestDir);
 		Manifest actual = manifestMgr.getManifest(testName);
 		
 		assertEquals(expected, actual);
@@ -133,35 +93,37 @@ public class ManifestMgrTest
 	@Test(expected=RepositoryException.class)
 	public void testGetManifest_not_found() throws IOException, RepositoryException
 	{
-		String testName = "getActiveVersion";
-		
-		Globals globals = new Globals();
-		
-		ManifestMgr manifestMgr = new ManifestMgr(globals);
+		String testName = "manifest-nf";
+		Path manifestPath = folder.newFolder(testName).toPath();
+		ManifestMgr manifestMgr = new ManifestMgr(manifestPath);
 		manifestMgr.getManifest(testName);
 		
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getManifest(java.lang.String)}.
 	 * @throws RepositoryException 
+	 * @throws IOException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
-	public void testGetManifest_null() throws RepositoryException
+	public void testGetManifest_null() throws RepositoryException, IOException
 	{
-		Globals globals = new Globals();
-		ManifestMgr manifestMgr = new ManifestMgr(globals);
+		String testName = "getmanifest-n";
+		Path manifestPath = folder.newFolder(testName).toPath();
+		ManifestMgr manifestMgr = new ManifestMgr(manifestPath);
 		String releaseFamily = null;
 		manifestMgr.getManifest(releaseFamily);
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getManifest(java.lang.String)}.
 	 * @throws RepositoryException 
+	 * @throws IOException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
-	public void testGetManifest_empty() throws RepositoryException
+	public void testGetManifest_empty() throws RepositoryException, IOException
 	{
-		Globals globals = new Globals();
-		ManifestMgr manifestMgr = new ManifestMgr(globals);
+		String testName = "getmanifest-emp";
+		Path manifestPath = folder.newFolder(testName).toPath();
+		ManifestMgr manifestMgr = new ManifestMgr(manifestPath);
 		String releaseFamily = "";
 		manifestMgr.getManifest(releaseFamily);
 	}
@@ -180,11 +142,9 @@ public class ManifestMgrTest
 		// save list to files in folder
 		Path rootPath = folder.newFolder(testName).toPath();
 		write_manifest_list_to_folder(rootPath, expected);
-		// create globals variable
-		Globals globals = new Globals();
-		globals.setManifestPath(rootPath);
+
 		// create object to test
-		ManifestMgr manifestMgr = new ManifestMgr(globals);		
+		ManifestMgr manifestMgr = new ManifestMgr(rootPath);		
 		List<Manifest> actual = manifestMgr.getManifests();
 		assertEquals(expected.size(), actual.size());
 		assertTrue(expected.containsAll(actual));
@@ -205,11 +165,8 @@ public class ManifestMgrTest
 		Path rootPath = folder.newFolder(testName).toPath();
 		write_manifest_list_to_folder(rootPath, expected);
 		write_dummy_files_to_folder(rootPath, 5);
-		// create globals variable
-		Globals globals = new Globals();
-		globals.setManifestPath(rootPath);
 		// create object to test
-		ManifestMgr manifestMgr = new ManifestMgr(globals);		
+		ManifestMgr manifestMgr = new ManifestMgr(rootPath);		
 		List<Manifest> actual = manifestMgr.getManifests();
 		// list should still only contain the expected entries.
 		assertTrue(expected.containsAll(actual));
@@ -228,14 +185,12 @@ public class ManifestMgrTest
 		List<Manifest> expected = create_manifest_list(testName,5);
 		// save list to files in folder
 		Path rootPath = folder.newFolder(testName).toPath();
+		
 		write_manifest_list_to_folder(rootPath, expected);
 		// create a defective manifest file
 		create_invalid_manifest_file(rootPath);
-		// create globals variable
-		Globals globals = new Globals();
-		globals.setManifestPath(rootPath);
 		// create object to test
-		ManifestMgr manifestMgr = new ManifestMgr(globals);		
+		ManifestMgr manifestMgr = new ManifestMgr(rootPath);		
 		List<Manifest> actual = manifestMgr.getManifests();
 		// list should still only contain the expected (valid) entries.
 		
@@ -255,35 +210,13 @@ public class ManifestMgrTest
 	{
 		String testName = "getManifests-0f";
 		Path rootPath = folder.newFolder(testName).toPath();
-		// create globals variable
-		Globals globals = new Globals();
-		globals.setManifestPath(rootPath);
 		// create object to test
-		ManifestMgr manifestMgr = new ManifestMgr(globals);		
+		ManifestMgr manifestMgr = new ManifestMgr(rootPath);		
 		List<Manifest> actual = manifestMgr.getManifests();
 		
 		assertTrue(actual.isEmpty());
 	}
-	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getManifests()}.
-	 * @throws RepositoryException 
-	 * @throws IOException 
-	 */
-	@Test(expected=RepositoryException.class)
-	public void testGetManifests_invalid_path() throws RepositoryException, IOException
-	{
-		// create globals variable
-		Globals globals = new Globals();
-		// use default path, which must not exist
-		Path rootPath = Paths.get("this","shouldnt", "exist");
-		assertFalse(Files.exists(rootPath));
-		globals.setManifestPath(rootPath);
-		// create object to test
-		ManifestMgr manifestMgr = new ManifestMgr(globals);		
-		List<Manifest> actual = manifestMgr.getManifests();
-		
-		assertTrue(actual.isEmpty());
-	}
+
 	
 	
 }

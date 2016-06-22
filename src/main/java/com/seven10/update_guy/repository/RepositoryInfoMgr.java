@@ -2,6 +2,7 @@ package com.seven10.update_guy.repository;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +12,8 @@ import java.util.Map;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -19,49 +22,60 @@ import com.seven10.update_guy.exceptions.RepositoryException;
 
 public class RepositoryInfoMgr
 {
+	private static final Logger logger = LogManager.getFormatterLogger(RepositoryInfoMgr.class);
+	
 	private final Path repositoryStorePath;
-	private Map<Integer, RepositoryInfo> repoMap;
+	private Map<String, RepositoryInfo> repoMap;
 
 	/**
 	 * Creates a new repository manager
 	 * @param repositoryStoreFile the path to the file containing the repository information
 	 * @throws RepositoryException
 	 */
-	public RepositoryInfoMgr(Path repositoryStoreFile) throws RepositoryException
+	public RepositoryInfoMgr(Path repoStorePath) throws RepositoryException
 	{
-		this.repositoryStorePath = repositoryStoreFile;
-		repoMap = new HashMap<Integer, RepositoryInfo>();
+		this.repositoryStorePath = repoStorePath;
+		repoMap = new HashMap<String, RepositoryInfo>();
 		init();
 	}
 	
 	private void init() throws RepositoryException
 	{
+		if(Files.exists(repositoryStorePath)==false)
+		{
+			createDefaultFile(repositoryStorePath);
+		}
 		List<RepositoryInfo> repos = loadRepos(repositoryStorePath);
-		repos.forEach(repo->repoMap.put(repo.hashCode(), repo));
+		for(RepositoryInfo repo: repos)
+		{
+			String repoHash = repo.getShaHash();
+			logger.debug("adding repo '%s' to repoMap", repoHash);	
+			repoMap.put(repoHash, repo);
+		}
 	}
 
-	public void addRepository(RepositoryInfo repoInfo) throws RepositoryException
+	public void addRepository(final RepositoryInfo repoInfo) throws RepositoryException
 	{
 		if(repoInfo == null)
 		{
 			throw new IllegalArgumentException("repoInfo cannot be null");
 		}
-		int hash = repoInfo.hashCode();
-		if (repoMap.containsKey(hash))
+		String shaHash = repoInfo.getShaHash();
+		if (repoMap.containsKey(shaHash))
 		{
-			throw new RepositoryException(Status.CONFLICT, "repoMap already contains hash '%d'. Delete first.", hash);
+			throw new RepositoryException(Status.NOT_MODIFIED, "repoMap already contains hash '%s'. Delete first.", shaHash);
 		}
 		// store repositoryInfo list
-		repoMap.put(hash, repoInfo);
+		repoMap.put(repoInfo.getShaHash(), repoInfo);
 		writeRepos(repositoryStorePath, new ArrayList<RepositoryInfo>(repoMap.values()));
 	}
 
-	public void deleteRepository(int repositoryId) throws RepositoryException
+	public void deleteRepository(String repositoryId) throws RepositoryException
 	{
 		// find repositoryInfo object for repositoryId in list
 		if (repoMap.containsKey(repositoryId) == false)
 		{
-			throw new RepositoryException(Status.NOT_FOUND, "Repository entry id='%d' does not exist", repositoryId);
+			throw new RepositoryException(Status.NOT_FOUND, "Repository entry id='%s' does not exist", repositoryId);
 		}
 		// remove repositoryInfo object from list
 		repoMap.remove(repositoryId);
@@ -118,7 +132,22 @@ public class RepositoryInfoMgr
 		}
 	}
 
-	public Map<Integer, RepositoryInfo> getRepoMap()
+	private static void createDefaultFile(Path repoStorePath) throws RepositoryException
+	{
+		Path parent = repoStorePath.getParent();
+		try
+		{
+			parent.toFile().mkdirs();
+			Files.createFile(repoStorePath);
+		}
+		catch (IOException e)
+		{
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, 
+					"Could not create default file '%s'. Reason: %s", repoStorePath.toString(), e.getMessage());
+		}
+	}
+
+	public Map<String, RepositoryInfo> getRepoMap()
 	{
 		return repoMap;
 	}

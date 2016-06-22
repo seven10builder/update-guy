@@ -29,6 +29,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.seven10.update_guy.Globals;
 import com.seven10.update_guy.GsonFactory;
+import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.repository.RepositoryInfo;
 
 /**
@@ -38,7 +39,6 @@ import com.seven10.update_guy.repository.RepositoryInfo;
 public class ManifestServletTest extends JerseyTest
 {
 	private static final String SHOW_PATH = "/manifest/show";
-	private static final String ACTIVE_VERSION_PATH = "/manifest/activeVersion";
 	
 	private static final String manifestServletName = "manifest_servlet";
 
@@ -54,17 +54,16 @@ public class ManifestServletTest extends JerseyTest
 		return resourceConfig;
 	}
 	
-	@Before public void setUpManifests() throws IOException
+	@Before public void setUpManifests() throws IOException, RepositoryException
 	{
 		// create list of valid manifests
 		List<Manifest> expected = create_manifest_list(manifestServletName, 5);
 		// save list to files in folder
 		Path rootPath = folder.newFolder(manifestServletName).toPath();
-		write_manifest_list_to_folder(rootPath, expected);
+		write_manifest_list_to_folder(rootPath.resolve("manifests"), expected);
 		
 		// create globals variable
-		Globals globals = Globals.createGlobals();
-		globals.setManifestPath(rootPath);
+		System.setProperty(Globals.SETTING_LOCAL_PATH, rootPath.toString());
 	}
 	/**
 	 * Test method for
@@ -87,7 +86,7 @@ public class ManifestServletTest extends JerseyTest
 	@Test
 	public void testGetManifest_show_specific_valid()
 	{
-		WebTarget req = target(SHOW_PATH + "/manifestServletName"+1);
+		WebTarget req = target(SHOW_PATH + "/" + manifestServletName +1);
 		Builder request = req.request();
 		Response resp = request.get();
 		assertEquals(Status.OK.getStatusCode(), resp.getStatus());
@@ -128,76 +127,5 @@ public class ManifestServletTest extends JerseyTest
 		assertNotNull(actual);
 		assertFalse(actual.isEmpty());
 	}
-	
-	/**
-	 * Test method for
-	 * {@link com.seven10.update_guy.manifest.ManifestServlet#setActiveVersion(java.lang.String)}
-	 * and
-	 * {@link com.seven10.update_guy.manifest.ManifestServlet#showActiveVersion()}
-	 * .
-	 */
-	@Test
-	public void testGetSetActiveVersion_valid()
-	{
-		String expected = "1.0";
-		Response resp = target(ACTIVE_VERSION_PATH).queryParam("version", expected).request().get();
-		assertEquals(Status.OK.getStatusCode(), resp.getStatus());
-		// no parameter returns the current active version
-		resp = target(ACTIVE_VERSION_PATH).request().get();
-		assertEquals(Status.OK.getStatusCode(), resp.getStatus());
-		
-		String actual = resp.readEntity(String.class);
-		assertEquals(expected, actual);
-	}
-	
-	/**
-	 * Test method for
-	 * {@link com.seven10.update_guy.manifest.ManifestServlet#setActiveVersion(java.lang.String)}
-	 * and
-	 * {@link com.seven10.update_guy.manifest.ManifestServlet#showActiveVersion()}
-	 * .
-	 */
-	@Test
-	public void testGetSetActiveVersion_version_not_found()
-	{
-		// get original version
-		Response resp = target(ACTIVE_VERSION_PATH).request().get();
-		assertEquals(Status.OK.getStatusCode(), resp.getStatus());
-		String expected = resp.readEntity(String.class);
-		// make request to with bogus parameter
-		resp = target(ACTIVE_VERSION_PATH).queryParam("version", "silly-version-value").request().get();
-		assertEquals(Status.NOT_FOUND.getStatusCode(), resp.getStatus());
-		// make sure the active version was not changed
-		resp = target(ACTIVE_VERSION_PATH).request().get();
-		assertEquals(Status.OK.getStatusCode(), resp.getStatus());
-		String actual = resp.readEntity(String.class);
-		
-		assertEquals(expected, actual);
-	}
-	
-	/**
-	 * Test method for
-	 * {@link com.seven10.update_guy.manifest.ManifestServlet#setActiveVersion(java.lang.String)}
-	 * and
-	 * {@link com.seven10.update_guy.manifest.ManifestServlet#showActiveVersion()}
-	 * .
-	 */
-	@Test
-	public void testGetSetActiveVersion_empty_version()
-	{
-		// get original version
-		Response resp = target(ACTIVE_VERSION_PATH).request().get();
-		assertEquals(Status.OK.getStatusCode(), resp.getStatus());
-		String expected = resp.readEntity(String.class);
-		// make request to with bogus parameter
-		resp = target(ACTIVE_VERSION_PATH).queryParam("version", "").request().get();
-		assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), resp.getStatus());
-		// make sure the active version was not changed
-		resp = target(ACTIVE_VERSION_PATH).request().get();
-		assertEquals(Status.OK.getStatusCode(), resp.getStatus());
-		String actual = resp.readEntity(String.class);
-		
-		assertEquals(expected, actual);
-	}
-	
+
 }
