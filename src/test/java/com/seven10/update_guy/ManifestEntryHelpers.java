@@ -17,6 +17,7 @@ public class ManifestEntryHelpers
 	public static Map<String, Path> create_entry_folder_list(int roleCount, Path rootFolder) throws IOException
 	{
 		Map<String, Path> rvalue = new HashMap<String, Path>();
+		rootFolder.toFile().mkdirs();
 		for(int i = 1; i <= roleCount; i++)
 		{
 			String key = "role_" + i;
@@ -29,7 +30,8 @@ public class ManifestEntryHelpers
 	public static ManifestEntry create_valid_manifest_entry(String testName, int index, Path rootFolder) throws IOException
 	{
 		ManifestEntry mve = new ManifestEntry();
-		mve.setVersion("v"+ testName + index);
+		String version = "v"+ testName + index;
+		mve.setVersion(version);
 		Map<String, Path> entries = create_entry_folder_list(index, rootFolder);
 		entries.forEach((key,value)->mve.addPath(key, value));
 		return mve;
@@ -41,7 +43,8 @@ public class ManifestEntryHelpers
 		List<ManifestEntry> versionEntries = new ArrayList<ManifestEntry>();
 		for (int i = 1; i <= entryCount; i++)
 		{
-			ManifestEntry versionEntry = create_valid_manifest_entry(testName, i, rootFolder);
+			ManifestEntry versionEntry = create_valid_manifest_entry(testName, i, 
+												rootFolder.resolve(String.format("entry_%d_%d", entryCount, i)));
 			versionEntries.add(versionEntry);
 		}
 		return versionEntries;
