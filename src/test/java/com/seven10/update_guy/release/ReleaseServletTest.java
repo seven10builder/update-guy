@@ -7,6 +7,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import com.seven10.update_guy.exceptions.RepositoryException;
+
 /**
  * @author kmm
  *
@@ -16,12 +18,43 @@ public class ReleaseServletTest
 	
 	/**
 	 * Test method for {@link com.seven10.update_guy.release.ReleaseServlet#ReleaseServlet(com.seven10.update_guy.release.CacheManager)}.
+	 * @throws RepositoryException 
 	 */
 	@Test
-	public void testReleaseServlet()
+	public void testReleaseServlet_valid() throws RepositoryException
 	{
+		String versionId = "version";
+		String repoId = "repo";
+		ReleaseServlet releaseServlet = new ReleaseServlet(repoId, versionId);
+		assertNotNull(releaseServlet);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.release.ReleaseServlet#ReleaseServlet(com.seven10.update_guy.release.CacheManager)}.
+	 * @throws RepositoryException 
+	 */
+	@Test
+	public void testReleaseServlet_repoId_notFound() throws RepositoryException
+	{
+		String versionId = "version";
+		String repoId = "repo";
+		ReleaseServlet releaseServlet = new ReleaseServlet(repoId, versionId);
+		assertNotNull(releaseServlet);
 		fail("Not yet implemented");
 	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.release.ReleaseServlet#ReleaseServlet(com.seven10.update_guy.release.CacheManager)}.
+	 * @throws RepositoryException 
+	 */
+	@Test
+	public void testReleaseServlet_versionId_notFound() throws RepositoryException
+	{
+		String versionId = "version";
+		String repoId = "repo";
+		ReleaseServlet releaseServlet = new ReleaseServlet(repoId, versionId);
+		assertNotNull(releaseServlet);
+		fail("Not yet implemented");
+	}
+	
 	
 	/**
 	 * Test method for {@link com.seven10.update_guy.release.ReleaseServlet#getRoles()}.

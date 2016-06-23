@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 import javax.ws.rs.core.Response.Status;
 
@@ -277,7 +278,7 @@ public class FtpRepoConnection implements RepoConnection
 	 * @see com.seven10.update_guy.repository.connection.RepoConnection#downloadRelease(com.seven10.update_guy.repository.ManifestEntry)
 	 */
 	@Override
-	public void downloadRelease(ManifestEntry versionEntry) throws RepositoryException
+	public void downloadRelease(ManifestEntry versionEntry, Consumer<Path> onFileComplete) throws RepositoryException
 	{
 		if (versionEntry == null)
 		{
@@ -288,6 +289,7 @@ public class FtpRepoConnection implements RepoConnection
 			Path srcPath = entry.getValue();
 			Path destPath = buildDestPath(srcPath.getFileName().toString());
 			downloadFile(srcPath, destPath);
+			onFileComplete.accept(destPath);
 		}
 	}
 	@Override

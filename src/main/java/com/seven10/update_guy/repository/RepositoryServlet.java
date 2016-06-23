@@ -1,7 +1,9 @@
 package com.seven10.update_guy.repository;
 
 import java.nio.file.FileSystems;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -30,6 +32,32 @@ public class RepositoryServlet
 	private static final Logger logger = LogManager.getFormatterLogger(RepositoryServlet.class);
 	final private RepositoryInfoMgr repoInfoMgr;
 	
+	private static boolean compareHashForRepoInfo(RepositoryInfo repoInfo, String target)
+	{
+		boolean rval = false;
+		try
+		{
+			rval = (repoInfo.getShaHash() == target);
+		}
+		catch(RepositoryException ex)
+		{
+			logger.error(".compareHashForRepoInfo(): Could not test hash for repoInfo '%s'. Skipping. ", repoInfo.repoAddress);
+		}
+		return rval;
+	}
+	
+	public static RepositoryInfo getRepoInfoById(String repoId) throws RepositoryException
+	{
+		java.nio.file.Path repoFile = RepositoryServlet.getRepoInfoPath();
+		List<RepositoryInfo> repoList = RepositoryInfoMgr.loadRepos(repoFile);
+		Supplier<? extends RepositoryException> exceptionSupplier = 
+				()->new RepositoryException(Status.NOT_FOUND, "Could not find repository with ID '%s'", repoId);
+		RepositoryInfo repoInfo = repoList.stream()
+									.filter(ri->compareHashForRepoInfo(ri,repoId))
+									.findFirst()
+									.orElseThrow(exceptionSupplier);
+		return repoInfo;
+	}
 
 	public RepositoryServlet() throws RepositoryException
 	{
@@ -39,7 +67,7 @@ public class RepositoryServlet
 		this.repoInfoMgr = new RepositoryInfoMgr(repoFilePath);
 	}
 	
-	public java.nio.file.Path getRepoInfoPath()
+	public static java.nio.file.Path getRepoInfoPath()
 	{
 		String repoFileName = System.getProperty(Globals.SETTING_REPO_FILENAME, Globals.DEFAULT_REPO_FILENAME);
 		logger.debug(".getRepoInfoPath(): Using '%s' for repo info file name", repoFileName);

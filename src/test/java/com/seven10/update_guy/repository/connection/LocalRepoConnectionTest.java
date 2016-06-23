@@ -6,10 +6,16 @@ package com.seven10.update_guy.repository.connection;
 import static com.seven10.update_guy.ManifestHelpers.*;
 import static com.seven10.update_guy.RepoConnectionHelpers.*;
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -22,6 +28,7 @@ import com.seven10.update_guy.manifest.Manifest;
 
 import com.seven10.update_guy.manifest.ManifestEntry;
 import com.seven10.update_guy.repository.RepositoryInfo;
+import com.seven10.update_guy.repository.SpyablePathConsumer;
 import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
 import com.seven10.update_guy.DownloadValidator;
 
@@ -151,28 +158,56 @@ public class LocalRepoConnectionTest
 		// setup a manifest entry to get
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
 		ManifestEntry entry = get_manifest_entry_from_file(manifestPath);
+		int roleCount = entry.getRoles().size();
 		
 		copy_downloads_to_path(entry, cachePath);
 
 		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
-		repoConnection.downloadRelease(entry);
+		Consumer<Path> spiedOnFileComplete = spy(new SpyablePathConsumer());
+		repoConnection.downloadRelease(entry, spiedOnFileComplete );
+		verify(spiedOnFileComplete, times(roleCount)).accept(any());
 		
 		DownloadValidator.validate_downloaded_release(entry, repo.getCachePath());
 	}
-	
-	/**
+		/**
 	 * Test method for
 	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadRelease(com.seven10.update_guy.repository.Manifest.VersionEntry)}
 	 * .
 	 * @throws Exception 
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testDownloadRelease_null() throws Exception
 	{
 		RepositoryInfo repo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local);
 		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
 		
 		ManifestEntry versionEntry = null;
-		repoConnection.downloadRelease(versionEntry);
+		Consumer<Path> spiedOnFileComplete = spy(new SpyablePathConsumer());
+		try
+		{
+			repoConnection.downloadRelease(versionEntry, spiedOnFileComplete );
+			//we expect this to fail
+			fail("downloadRelease should have thrown an IllegalArgumentException");
+		}
+		catch(IllegalArgumentException ex)
+		{
+			verify(spiedOnFileComplete, never()).accept(any());
+		}
+	}
+	/**
+	 * Test method for
+	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadRelease(com.seven10.update_guy.repository.Manifest.VersionEntry)}
+	 * .
+	 * @throws Exception 
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void testDownloadRelease_null_onFileComplete() throws Exception
+	{
+		RepositoryInfo repo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local);
+		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
+		
+		ManifestEntry versionEntry = new ManifestEntry();
+		Consumer<Path> spiedOnFileComplete = null;
+		repoConnection.downloadRelease(versionEntry, spiedOnFileComplete );
 	}
 }

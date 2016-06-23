@@ -60,7 +60,7 @@ public class RepositoryServletTest extends JerseyTest
 		
 		RepositoryServlet servlet = new RepositoryServlet();
 		assertNotNull(servlet);
-		assertEquals(fileName.toString(), servlet.getRepoInfoPath().toString());
+		assertEquals(fileName.toString(), RepositoryServlet.getRepoInfoPath().toString());
 	}
 	/**
 	 * Test method for
@@ -79,7 +79,7 @@ public class RepositoryServletTest extends JerseyTest
 		RepositoryServlet servlet = new RepositoryServlet();
 		assertNotNull(servlet);
 		String expectedRepoInfoPath = Paths.get(Globals.DEFAULT_LOCAL_PATH, Globals.DEFAULT_REPO_FILENAME).toString();
-		assertEquals(expectedRepoInfoPath, servlet.getRepoInfoPath().toString());
+		assertEquals(expectedRepoInfoPath, RepositoryServlet.getRepoInfoPath().toString());
 	}
 	
 	/**

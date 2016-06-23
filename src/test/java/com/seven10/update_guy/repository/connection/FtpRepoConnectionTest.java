@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.ftp.FTP;
@@ -36,6 +37,7 @@ import com.seven10.update_guy.manifest.Manifest;
 import com.seven10.update_guy.manifest.ManifestEntry;
 import com.seven10.update_guy.repository.RepositoryInfo;
 import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
+import com.seven10.update_guy.repository.SpyablePathConsumer;
 
 /**
  * @author kmm
@@ -398,33 +400,60 @@ public class FtpRepoConnectionTest
 		// setup a manifest entry to get
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
 		ManifestEntry entry = get_manifest_entry_from_file(manifestPath);
+		int roleCount = entry.getRoles().size();
 		
 		copy_downloads_to_path(entry, cachePath);
 
 		FtpRepoConnection repoConnection = new FtpRepoConnection(repo, create_mocked_ftp_client());
-		repoConnection.downloadRelease(entry);
-		
+
+		Consumer<Path> spiedOnFileComplete = spy(new SpyablePathConsumer());
+		repoConnection.downloadRelease(entry, spiedOnFileComplete );
+		verify(spiedOnFileComplete, times(roleCount)).accept(any());
 		validate_downloaded_release(entry, repo.getCachePath());
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#downloadRelease(com.seven10.update_guy.manifest.ManifestEntry)}.
 	 * @throws Exception 
 	 */
-	@Test(expected=IllegalArgumentException.class)
+	@Test
 	public void testDownloadRelease_nullManifestEntry() throws Exception
 	{
 		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
 		FTPClient ftpClient = mock(FTPClient.class);
 		FtpRepoConnection repoConnection = new FtpRepoConnection(repoInfo, ftpClient);
 		ManifestEntry versionEntry = null;
-		repoConnection.downloadRelease(versionEntry);
-		
+		Consumer<Path> spiedOnFileComplete = spy(new SpyablePathConsumer());
+		try
+		{
+			repoConnection.downloadRelease(versionEntry, spiedOnFileComplete );
+			//we expect this to fail
+			fail("downloadRelease should have thrown an IllegalArgumentException");
+		}
+		catch(IllegalArgumentException ex)
+		{
+			verify(spiedOnFileComplete, never()).accept(any());
+		}
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#downloadRelease(com.seven10.update_guy.manifest.ManifestEntry)}.
 	 * @throws Exception 
 	 */
-	@Test(expected=RepositoryException.class)
+	@Test
+	public void testDownloadRelease_null_onFileComplete() throws Exception
+	{
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
+		FTPClient ftpClient = mock(FTPClient.class);
+		FtpRepoConnection repoConnection = new FtpRepoConnection(repoInfo, ftpClient);
+		ManifestEntry versionEntry = new ManifestEntry();
+		
+		Consumer<Path> spiedOnFileComplete = null;
+		repoConnection.downloadRelease(versionEntry, spiedOnFileComplete );
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#downloadRelease(com.seven10.update_guy.manifest.ManifestEntry)}.
+	 * @throws Exception 
+	 */
+	@Test
 	public void testDownloadRelease_fileNotFound() throws Exception
 	{
 		String releaseFamily = "getManifest-nf";
@@ -444,6 +473,18 @@ public class FtpRepoConnectionTest
 		// dont copy the files over
 
 		FtpRepoConnection repoConnection = new FtpRepoConnection(repo, create_mocked_ftp_client_file_not_found());
-		repoConnection.downloadRelease(entry);
+		
+		Consumer<Path> spiedOnFileComplete = spy(new SpyablePathConsumer());
+		try
+		{
+			repoConnection.downloadRelease(entry, spiedOnFileComplete );
+			//we expect this to fail
+			fail("downloadRelease should have thrown a RepositoryException");
+		}
+		catch(RepositoryException ex)
+		{
+			verify(spiedOnFileComplete, never()).accept(any());
+		}
+		
 	}
 }

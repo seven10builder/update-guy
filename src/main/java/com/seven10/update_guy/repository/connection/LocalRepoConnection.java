@@ -3,6 +3,7 @@ package com.seven10.update_guy.repository.connection;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 import javax.ws.rs.core.Response.Status;
 
@@ -57,17 +58,22 @@ class LocalRepoConnection implements RepoConnection
 		return manifest;
 	}
 	@Override
-	public void downloadRelease(ManifestEntry versionEntry) throws RepositoryException
+	public void downloadRelease(ManifestEntry versionEntry, Consumer<Path> onFileComplete) throws RepositoryException
 	{
 		if(versionEntry==null)
 		{
 			throw new IllegalArgumentException("versionEntry must not be null");
+		}
+		if(onFileComplete==null)
+		{
+			throw new IllegalArgumentException("onFileComplete must not be null");
 		}
 		for(Entry<String, Path> entry: versionEntry.getAllRolePaths())
 		{
 			Path srcPath = entry.getValue();
 			Path destPath = cachePath.resolve(srcPath.getFileName());
 			copyFileToPath(srcPath, destPath);
+			onFileComplete.accept(destPath);
 		}
 	}
 	@Override

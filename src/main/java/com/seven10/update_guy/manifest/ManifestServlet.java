@@ -20,17 +20,34 @@ import com.seven10.update_guy.Globals;
 import com.seven10.update_guy.GsonFactory;
 import com.seven10.update_guy.exceptions.RepositoryException;
 
-@Path("/manifest")
+@Path("/manifest/{repoId}")
 public class ManifestServlet
 {
 	private static final Logger logger = LogManager.getFormatterLogger(ManifestServlet.class);
 	ManifestMgr manifestMgr;
-	
-	public ManifestServlet()
+	/**
+	 * @param repoId
+	 * @return
+	 */
+	private static java.nio.file.Path getManifestsPath(String repoId)
 	{
 		java.nio.file.Path manifestPath = FileSystems.getDefault()
 				.getPath(System.getProperty(Globals.SETTING_LOCAL_PATH, Globals.DEFAULT_LOCAL_PATH))
+				.resolve(repoId)
 				.resolve("manifests");
+		return manifestPath;
+	}
+	
+	public static Manifest getManifestById(String releaseId, String repoId) throws RepositoryException
+	{
+		java.nio.file.Path manifestPath = getManifestsPath(repoId)
+				.resolve(String.format("%s.manifest", releaseId));
+		return Manifest.loadFromFile(manifestPath);
+	}
+	
+	public ManifestServlet(@PathParam("repoId") String repoId)
+	{
+		java.nio.file.Path manifestPath = getManifestsPath(repoId);
 		manifestMgr = new ManifestMgr(manifestPath);
 	}
 	
@@ -87,6 +104,8 @@ public class ManifestServlet
 		}
 		return resp.build();
 	}
+
+	
 
 	
 }
