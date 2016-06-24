@@ -13,6 +13,8 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
+
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;
@@ -306,5 +308,24 @@ public class RepositoryServletTest extends JerseyTest
 		List<RepositoryInfo> actualInfos = load_repos_from_file(fileName);
 		assertTrue(actualInfos.containsAll(expectedInfos));
 		assertTrue(expectedInfos.containsAll(actualInfos));
+	}
+	
+	@Test
+	public void testGetRepoInfoById_valid() throws IOException, RepositoryException
+	{
+		String testName = "getRepoInfoById-v";
+		
+		Path repoFileName = prepareRepoFile(testName);
+		
+		// get list of extant repos
+		List<RepositoryInfo> expectedInfos = load_repos_from_file(repoFileName);
+		for(RepositoryInfo expectedInfo: expectedInfos)
+		{
+			
+			String repoId = expectedInfo.getShaHash();
+			RepositoryInfo actualInfo = RepositoryServlet.getRepoInfoById(repoId);
+			
+			assertEquals(expectedInfo, actualInfo);
+		}
 	}
 }

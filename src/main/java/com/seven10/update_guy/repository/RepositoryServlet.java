@@ -37,7 +37,7 @@ public class RepositoryServlet
 		boolean rval = false;
 		try
 		{
-			rval = (repoInfo.getShaHash() == target);
+			rval = (repoInfo.getShaHash().equals(target));
 		}
 		catch(RepositoryException ex)
 		{

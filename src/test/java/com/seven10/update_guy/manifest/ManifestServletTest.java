@@ -42,15 +42,14 @@ public class ManifestServletTest extends JerseyTest
 	
 	private static final String manifestServletName = "manifest_servlet";
 	
-	private String setupRepoId(String testName) throws IOException, RepositoryException
+	private static String setup_repdoId(String testName, TemporaryFolder temporaryFolder) throws IOException, RepositoryException
 	{
-		Path destPath = build_repo_info_file_by_testname(testName, folder);
+		Path destPath = build_repo_info_file_by_testname(testName, temporaryFolder);
 		copy_valid_repos_to_test(destPath);
-		List<RepositoryInfo> repoInfoList = RepoInfoHelpers.load_repos_from_file(destPath);
+		List<RepositoryInfo> repoInfoList = load_repos_from_file(destPath);
 		RepositoryInfo repoInfo = repoInfoList.stream().filter(ri->ri.repoType == RepositoryType.local).findFirst().get();
 		return repoInfo.getShaHash();
 	}
-	
 	
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
@@ -97,10 +96,10 @@ public class ManifestServletTest extends JerseyTest
 	@Test
 	public void testGetManifest_show_specific_valid() throws IOException, RepositoryException
 	{
-		String testName = setupRepoId("showSpec-v");
-		Path repoFile = RepoInfoHelpers.build_repo_info_file_by_testname(testName , folder);
-		RepoInfoHelpers.copy_valid_repos_to_test(repoFile);
-		RepositoryInfo repoInfo = RepoInfoHelpers.load_repos_from_file(repoFile).stream()
+		String testName = "show_spec_v";
+		Path repoFile = build_repo_info_file_by_testname(testName , folder);
+		copy_valid_repos_to_test(repoFile);
+		RepositoryInfo repoInfo = load_repos_from_file(repoFile).stream()
 											.filter(repo-> repo.repoType == RepositoryType.local)
 											.findFirst().get();
 		// calc the repoId
@@ -138,7 +137,7 @@ public class ManifestServletTest extends JerseyTest
 	@Test
 	public void testGetManifest_specific_family_not_found() throws IOException, RepositoryException
 	{
-		String repoId = setupRepoId("showSpec-nf");
+		String repoId = setup_repdoId("showSpec-nf", folder);
 		Response resp = target("/manifest/"+ repoId + "/show" + "/this-doesnt-exist").request().get();
 		assertEquals(Status.NOT_FOUND.getStatusCode(), resp.getStatus());
 	}
