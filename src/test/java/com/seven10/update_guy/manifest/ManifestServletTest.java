@@ -27,6 +27,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.seven10.update_guy.Globals;
 import com.seven10.update_guy.GsonFactory;
+import com.seven10.update_guy.ManifestHelpers;
 import com.seven10.update_guy.RepoInfoHelpers;
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.repository.RepositoryInfo;
@@ -96,15 +97,33 @@ public class ManifestServletTest extends JerseyTest
 	@Test
 	public void testGetManifest_show_specific_valid() throws IOException, RepositoryException
 	{
-		String repoId = setupRepoId("showSpec-v");
-		Response resp = target("/manifest/"+ repoId + "/show" + manifestServletName +1)
+		String testName = setupRepoId("showSpec-v");
+		Path repoFile = RepoInfoHelpers.build_repo_info_file_by_testname(testName , folder);
+		RepoInfoHelpers.copy_valid_repos_to_test(repoFile);
+		RepositoryInfo repoInfo = RepoInfoHelpers.load_repos_from_file(repoFile).stream()
+											.filter(repo-> repo.repoType == RepositoryType.local)
+											.findFirst().get();
+		// calc the repoId
+		String repoId = repoInfo.getShaHash();
+		// copy some manifests to the manifest path
+		Path parentPath = repoFile.getParent();
+		Path localManifestPath = parentPath.resolve(repoId).resolve("manifests");
+		List<Manifest> manifestList = ManifestHelpers.create_manifest_list(testName, 5);
+		ManifestHelpers.write_manifest_list_to_folder(localManifestPath, manifestList);
+		// set attribute so servlet picks it up
+		System.setProperty(Globals.SETTING_LOCAL_PATH, parentPath.toString());
+		System.setProperty(Globals.SETTING_REPO_FILENAME, repoFile.getFileName().toString());
+		for(Manifest expected: manifestList)
+		{
+			Response resp = target("/manifest/"+ repoId + "/show/" + expected.releaseFamily)
 						.request()
 						.get();
-		assertEquals(Status.OK.getStatusCode(), resp.getStatus());
-		String json = resp.readEntity(String.class);
-		Gson gson = GsonFactory.getGson();
-		Manifest actual = gson.fromJson(json, Manifest.class);
-		assertNotNull(actual);
+			assertEquals(Status.OK.getStatusCode(), resp.getStatus());
+			String json = resp.readEntity(String.class);
+			Gson gson = GsonFactory.getGson();
+			Manifest actual = gson.fromJson(json, Manifest.class);
+			assertEquals(expected, actual);
+		}
 	}
 	
 
@@ -134,19 +153,37 @@ public class ManifestServletTest extends JerseyTest
 	public void testGetManifests_show_all_valid() throws IOException, RepositoryException
 	{
 		// copy valid repo.json file
+		String testName = "showall-v";
+		Path repoFile = RepoInfoHelpers.build_repo_info_file_by_testname(testName , folder);
+		RepoInfoHelpers.copy_valid_repos_to_test(repoFile);
+		RepositoryInfo repoInfo = RepoInfoHelpers.load_repos_from_file(repoFile).stream()
+											.filter(repo-> repo.repoType == RepositoryType.local)
+											.findFirst().get();
 		// calc the repoId
+		String repoId = repoInfo.getShaHash();
 		// copy some manifests to the manifest path
+		Path parentPath = repoFile.getParent();
+		Path localManifestPath = parentPath.resolve(repoId).resolve("manifests");
+		List<Manifest> expectedManifestList = ManifestHelpers.create_manifest_list(testName, 5);
+		ManifestHelpers.write_manifest_list_to_folder(localManifestPath, expectedManifestList);
+		// set attribute so servlet picks it up
+		System.setProperty(Globals.SETTING_LOCAL_PATH, parentPath.toString());
+		System.setProperty(Globals.SETTING_REPO_FILENAME, repoFile.getFileName().toString());
+		// do request
 		Response resp = target("/manifest/"+ repoId + "/show" + "/").request().get();
+		
 		assertEquals(Status.OK.getStatusCode(), resp.getStatus());
 		String json = resp.readEntity(String.class);
 		Gson gson = GsonFactory.getGson();
 		
-		Type collectionType = new TypeToken<List<RepositoryInfo>>()
+		Type collectionType = new TypeToken<List<Manifest>>()
 		{
 		}.getType();
 		List<Manifest> actual = gson.fromJson(json, collectionType);
 		assertNotNull(actual);
-		assertFalse(actual.isEmpty());
+		assertNotEquals(0, actual.size());
+		assertTrue(expectedManifestList.containsAll(actual));
+		assertTrue(actual.containsAll(expectedManifestList));
 	}
 
 }
