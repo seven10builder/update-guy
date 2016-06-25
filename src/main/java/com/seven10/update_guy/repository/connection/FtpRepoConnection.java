@@ -20,6 +20,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.seven10.update_guy.Globals;
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.manifest.Manifest;
 import com.seven10.update_guy.manifest.ManifestEntry;
@@ -168,6 +169,7 @@ public class FtpRepoConnection implements RepoConnection
 		}
 	}
 	
+	
 	public FtpRepoConnection(RepositoryInfo activeRepo, FTPClient ftpClient)
 	{
 		if (activeRepo == null)
@@ -210,14 +212,6 @@ public class FtpRepoConnection implements RepoConnection
 		}
 	}
 
-	/**
-	 * @param fileName
-	 * @return
-	 */
-	public Path buildDestPath(String fileName)
-	{
-		return activeRepo.getCachePath().resolve(fileName);
-	}
 
 	@Override
 	public void connect() throws RepositoryException
@@ -267,7 +261,8 @@ public class FtpRepoConnection implements RepoConnection
 		}
 		String manifestFileName = String.format("%s.manifest", releaseFamily);
 		Path srcPath = activeRepo.getmanifestPath().resolve(manifestFileName);
-		Path destPath = buildDestPath(manifestFileName);
+		String repoId = activeRepo.getShaHash();
+		Path destPath = Globals.getManifestStorePath(repoId).resolve(manifestFileName);
 		// ensure the path exists
 
 		downloadFile(srcPath, destPath);
@@ -287,14 +282,9 @@ public class FtpRepoConnection implements RepoConnection
 		for (Entry<String, Path> entry : versionEntry.getRolePaths(versionEntry.getRoles())) // get all the  paths
 		{
 			Path srcPath = entry.getValue();
-			Path destPath = buildDestPath(srcPath.getFileName().toString());
+			Path destPath = Globals.buildDownloadTargetPath(activeRepo.getShaHash(), versionEntry, entry);
 			downloadFile(srcPath, destPath);
 			onFileComplete.accept(destPath);
 		}
-	}
-	@Override
-	public Path getCachePath()
-	{
-		return activeRepo.getCachePath();
 	}
 }

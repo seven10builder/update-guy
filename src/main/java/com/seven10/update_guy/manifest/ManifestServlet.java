@@ -1,6 +1,5 @@
 package com.seven10.update_guy.manifest;
 
-import java.nio.file.FileSystems;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -25,29 +24,17 @@ public class ManifestServlet
 {
 	private static final Logger logger = LogManager.getFormatterLogger(ManifestServlet.class);
 	ManifestMgr manifestMgr;
-	/**
-	 * @param repoId
-	 * @return
-	 */
-	private static java.nio.file.Path getManifestsPath(String repoId)
-	{
-		java.nio.file.Path manifestPath = FileSystems.getDefault()
-				.getPath(System.getProperty(Globals.SETTING_LOCAL_PATH, Globals.DEFAULT_LOCAL_PATH))
-				.resolve(repoId)
-				.resolve("manifests");
-		return manifestPath;
-	}
-	
+
 	public static Manifest getManifestById(String releaseId, String repoId) throws RepositoryException
 	{
-		java.nio.file.Path manifestPath = getManifestsPath(repoId)
+		java.nio.file.Path manifestPath = Globals.getManifestStorePath(repoId)
 				.resolve(String.format("%s.manifest", releaseId));
 		return Manifest.loadFromFile(manifestPath);
 	}
 	
 	public ManifestServlet(@PathParam("repoId") String repoId)
 	{
-		java.nio.file.Path manifestPath = getManifestsPath(repoId);
+		java.nio.file.Path manifestPath = Globals.getManifestStorePath(repoId);
 		manifestMgr = new ManifestMgr(manifestPath);
 	}
 	

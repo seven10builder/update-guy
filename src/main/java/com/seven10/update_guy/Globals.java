@@ -1,5 +1,11 @@
 package com.seven10.update_guy;
 
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.util.Map.Entry;
+
+import com.seven10.update_guy.exceptions.RepositoryException;
+import com.seven10.update_guy.manifest.ManifestEntry;
 
 public class Globals
 {
@@ -20,4 +26,40 @@ public class Globals
 	 * The default repo information file name
 	 */
 	public static final String DEFAULT_REPO_FILENAME = "repos.json";
+	
+	public static Path getRootPath()
+	{
+		 return FileSystems.getDefault().getPath(System.getProperty(SETTING_LOCAL_PATH, DEFAULT_LOCAL_PATH));
+	}
+	public static Path getRepoFile()
+	{
+		String repoFileName = System.getProperty(SETTING_REPO_FILENAME, DEFAULT_REPO_FILENAME);
+		return getRootPath().resolve(repoFileName);
+	}
+	public static Path getManifestStorePath(String repoId)
+	{
+		return getRootPath().resolve(repoId).resolve("manifests");
+	}
+	public static Path getFileStorePathForRole(String repoId, String releaseFamily, String version, String roleId)
+	{
+		return getRootPath().resolve(repoId).resolve(releaseFamily).resolve(version).resolve(roleId);
+	}
+	/**
+	 * @param versionEntry
+	 * @param entry
+	 * @param srcPath
+	 * @return
+	 * @throws RepositoryException
+	 */
+	public static Path buildDownloadTargetPath(String repoId, ManifestEntry versionEntry, Entry<String, Path> roleEntry)
+			throws RepositoryException
+	{
+		Path destPath = getFileStorePathForRole(repoId,
+														versionEntry.getReleaseFamily(),
+														versionEntry.getVersion(),
+														roleEntry.getKey());
+		Path filePath = destPath.resolve(roleEntry.getValue().getFileName().toString());
+		return filePath;
+	}
+
 }

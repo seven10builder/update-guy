@@ -13,5 +13,4 @@ public interface RepoConnection
 	public void disconnect() throws RepositoryException;
 	public Manifest getManifest(String releaseFamily) throws RepositoryException;
 	public void downloadRelease(ManifestEntry versionEntry, Consumer<Path> onFileComplete) throws RepositoryException;
-	public Path getCachePath();
 }

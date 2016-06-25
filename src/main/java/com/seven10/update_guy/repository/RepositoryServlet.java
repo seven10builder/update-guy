@@ -1,6 +1,5 @@
 package com.seven10.update_guy.repository;
 
-import java.nio.file.FileSystems;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -48,7 +47,7 @@ public class RepositoryServlet
 	
 	public static RepositoryInfo getRepoInfoById(String repoId) throws RepositoryException
 	{
-		java.nio.file.Path repoFile = RepositoryServlet.getRepoInfoPath();
+		java.nio.file.Path repoFile = Globals.getRepoFile();
 		List<RepositoryInfo> repoList = RepositoryInfoMgr.loadRepos(repoFile);
 		Supplier<? extends RepositoryException> exceptionSupplier = 
 				()->new RepositoryException(Status.NOT_FOUND, "Could not find repository with ID '%s'", repoId);
@@ -63,22 +62,11 @@ public class RepositoryServlet
 	{
 	
 		// blech conflicting type names
-		java.nio.file.Path repoFilePath = getRepoInfoPath();
+		java.nio.file.Path repoFilePath = Globals.getRepoFile();
 		this.repoInfoMgr = new RepositoryInfoMgr(repoFilePath);
 	}
 	
-	public static java.nio.file.Path getRepoInfoPath()
-	{
-		String repoFileName = System.getProperty(Globals.SETTING_REPO_FILENAME, Globals.DEFAULT_REPO_FILENAME);
-		logger.debug(".getRepoInfoPath(): Using '%s' for repo info file name", repoFileName);
-		
-		java.nio.file.Path localRootPath = FileSystems.getDefault().getPath(System.getProperty(Globals.SETTING_LOCAL_PATH, Globals.DEFAULT_LOCAL_PATH));
-		logger.debug(".getRepoInfoPath(): Using path '%s' for local root", localRootPath.toString());
-		java.nio.file.Path repoPath = localRootPath.resolve(repoFileName);
-		logger.debug(".getRepoInfoPath(): Using path '%s' for repo file info", repoPath.toString());
-		return repoPath;
-	}
-	
+
 	@GET
 	@Path("/show")
 	public Response showAllRepos()

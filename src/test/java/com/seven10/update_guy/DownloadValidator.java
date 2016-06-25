@@ -31,15 +31,16 @@ public class DownloadValidator
 		assertTrue(FileUtils.contentEquals(srcFile, destFile));
 	}
 
-	public static void validate_downloaded_release(ManifestEntry versionEntry, Path destFolder)
+	public static void validate_downloaded_release(ManifestEntry versionEntry, String repoId) throws RepositoryException
 	{
-		versionEntry.getAllRolePaths().forEach(entry ->
+		versionEntry.getAllRolePaths().forEach(roleEntry ->
 		{
-			Path srcPath = entry.getValue();
-			Path fileName = srcPath.getFileName();
-			Path destPath = destFolder.resolve(fileName);
+			Path srcPath = null;
+			Path destPath = null;
 			try
 			{
+				srcPath = roleEntry.getValue();
+				destPath = Globals.buildDownloadTargetPath(repoId, versionEntry, roleEntry);
 				validate_download(srcPath, destPath);
 			}
 			catch (Exception e)

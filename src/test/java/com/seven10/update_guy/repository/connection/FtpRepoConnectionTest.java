@@ -31,6 +31,7 @@ import org.mockito.stubbing.Answer;
 
 import static org.mockito.Mockito.*;
 
+import com.seven10.update_guy.Globals;
 import com.seven10.update_guy.TestConstants;
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.manifest.Manifest;
@@ -200,25 +201,7 @@ public class FtpRepoConnectionTest
 		repoConnection.downloadFile(srcFullPath, destPath);
 	}
 	
-	/**
-	 * Test method for {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#buildDestPath(java.lang.String)}.
-	 * @throws Exception 
-	 */
-	@Test
-	public void testBuildDestPath() throws Exception
-	{
-		String fileName = "filename.ext";
 		
-		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
-		FTPClient ftpClient = mock(FTPClient.class);
-		FtpRepoConnection repoConnection = new FtpRepoConnection(repoInfo, ftpClient);
-		
-		Path expected = repoInfo.getCachePath().resolve(fileName);
-		Path actual = repoConnection.buildDestPath(fileName);
-		
-		assertEquals(expected, actual);
-	}
-	
 	/**
 	 * Test method for {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#connect()}.
 	 * @throws Exception 
@@ -395,7 +378,6 @@ public class FtpRepoConnectionTest
 		
 		// point repo at our test cache
 		Path cachePath = build_cache_path_by_testname(releaseFamily, folder);
-		repo.cachePath = cachePath.toString();
 		
 		// setup a manifest entry to get
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
@@ -409,7 +391,7 @@ public class FtpRepoConnectionTest
 		Consumer<Path> spiedOnFileComplete = spy(new SpyablePathConsumer());
 		repoConnection.downloadRelease(entry, spiedOnFileComplete );
 		verify(spiedOnFileComplete, times(roleCount)).accept(any());
-		validate_downloaded_release(entry, repo.getCachePath());
+		validate_downloaded_release(entry, repo.getShaHash());
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#downloadRelease(com.seven10.update_guy.manifest.ManifestEntry)}.
@@ -464,8 +446,7 @@ public class FtpRepoConnectionTest
 		RepositoryInfo repo = get_repo_info_by_type(repos, RepositoryType.ftp);
 		
 		// point repo at our test cache
-		Path cachePath = build_cache_path_by_testname(releaseFamily, folder);
-		repo.cachePath = cachePath.toString();
+		//Path cachePath = build_cache_path_by_testname(releaseFamily, folder);
 		
 		// setup a manifest entry to get
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);

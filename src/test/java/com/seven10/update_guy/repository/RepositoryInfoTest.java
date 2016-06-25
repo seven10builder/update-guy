@@ -104,23 +104,6 @@ public class RepositoryInfoTest
 	 * @throws IOException 
 	 */
 	@Test
-	public void testEqualsObject_cachePath() throws IOException
-	{
-		String testName = "testeEquals-do-dt";
-		Path repoPath = RepoInfoHelpers.build_repo_info_file_by_testname(testName, folder);
-		RepoInfoHelpers.copy_valid_repos_to_test(repoPath);
-		RepositoryInfo repo1 = RepoInfoHelpers.load_repos_from_file(repoPath).get(0);
-		RepositoryInfo repo2 = RepoInfoHelpers.load_repos_from_file(repoPath).get(0);
-		repo2.cachePath = Paths.get("new","cache","path").toString();
-		assertFalse(repo1.equals(repo2));
-		repo2.cachePath = repo1.cachePath;
-		assertTrue(repo1.equals(repo2));
-	}
-	/**
-	 * Test method for {@link com.seven10.update_guy.repository.RepositoryInfo#equals(java.lang.Object)}.
-	 * @throws IOException 
-	 */
-	@Test
 	public void testEqualsObject_description() throws IOException
 	{
 		String testName = "testeEquals-do-dt";
@@ -252,27 +235,7 @@ public class RepositoryInfoTest
 		String secondSha = repo1.getShaHash();
 		assertEquals(firstSha, secondSha);
 	}
-	/**
-	 * Test method for {@link com.seven10.update_guy.repository.RepositoryInfo#getShaHash()}.
-	 * @throws IOException 
-	 * @throws RepositoryException 
-	 */
-	@Test
-	public void testGetShaHash_cachePath() throws IOException, RepositoryException
-	{
-		String testName = "testShaHash_cp";
-		Path repoPath = RepoInfoHelpers.build_repo_info_file_by_testname(testName, folder);
-		RepoInfoHelpers.copy_valid_repos_to_test(repoPath);
-		RepositoryInfo repo1 = RepoInfoHelpers.load_repos_from_file(repoPath).get(0);
-		RepositoryInfo repo2 = RepoInfoHelpers.load_repos_from_file(repoPath).get(0);
-		String firstSha = repo1.getShaHash();
-		repo2.cachePath = Paths.get("diff","path").toString();
-		String secondSha = repo2.getShaHash();
-		assertNotEquals(firstSha, secondSha);
-		repo2.cachePath = repo1.cachePath;
-		secondSha = repo2.getShaHash();
-		assertEquals(firstSha, secondSha);
-	}
+	
 	/**
 	 * Test method for {@link com.seven10.update_guy.repository.RepositoryInfo#getShaHash()}.
 	 * @throws IOException 

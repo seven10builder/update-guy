@@ -24,7 +24,7 @@ public class RepositoryInfo
 		
 		try
 		{
-			outputStream.write( cachePath.getBytes() );
+			//outputStream.write( cachePath.getBytes() );
 			outputStream.write( description.getBytes() );
 			outputStream.write( manifestPath.getBytes() );
 			outputStream.write( password.getBytes() );
@@ -57,7 +57,7 @@ public class RepositoryInfo
     	password = "";
     	manifestPath = ".";
     	repoType = RepositoryType.local;
-    	cachePath = ".";
+    	//cachePath = ".";
     	description = "unknown";
     }
 	@Expose
@@ -81,9 +81,7 @@ public class RepositoryInfo
 	@Expose
 	@XmlElement
     public RepositoryType repoType;
-	@Expose
-	@XmlElement
-    public String cachePath;
+
     
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
@@ -93,7 +91,6 @@ public class RepositoryInfo
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((cachePath == null) ? 0 : cachePath.hashCode());
 		result = prime * result + ((description == null) ? 0 : description.hashCode());
 		result = prime * result + ((manifestPath == null) ? 0 : manifestPath.hashCode());
 		result = prime * result + ((password == null) ? 0 : password.hashCode());
@@ -122,17 +119,7 @@ public class RepositoryInfo
 			return false;
 		}
 		RepositoryInfo other = (RepositoryInfo) obj;
-		if (cachePath == null)
-		{
-			if (other.cachePath != null)
-			{
-				return false;
-			}
-		}
-		else if (!cachePath.equals(other.cachePath))
-		{
-			return false;
-		}
+
 		if (description == null)
 		{
 			if (other.description != null)
@@ -217,10 +204,7 @@ public class RepositoryInfo
 			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "Could not create message digest for RepositoryInfo. reason: %s", e.getMessage());
 		}
 	}
-	public Path getCachePath()
-	{
-		return Paths.get(this.cachePath);
-	}
+
 	public Path getmanifestPath()
 	{
 		return Paths.get(this.manifestPath);

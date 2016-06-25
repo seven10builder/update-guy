@@ -26,9 +26,12 @@ public class ManifestEntry
 	protected Date publishDate;
 	@Expose
 	protected final Map<String, Path> fileMap;
+	@Expose
+	protected String releaseFamily;
 	
 	public ManifestEntry()
 	{
+		releaseFamily = "unknown";
 		version = "unknown";
 		publishDate = new Date();
 		fileMap = new HashMap<String, Path>();
@@ -36,6 +39,7 @@ public class ManifestEntry
 	
 	public ManifestEntry(ManifestEntry versionEntry)
 	{
+		releaseFamily = versionEntry.releaseFamily;
 		version = versionEntry.version;
 		publishDate = versionEntry.publishDate;
 		fileMap = new HashMap<String, Path>(versionEntry.fileMap);
@@ -59,6 +63,7 @@ public class ManifestEntry
 		result = prime * result + ((fileMap == null) ? 0 : fileMap.hashCode());
 		result = prime * result + ((publishDate == null) ? 0 : publishDate.hashCode());
 		result = prime * result + ((version == null) ? 0 : version.hashCode());
+		result = prime * result + ((releaseFamily == null) ? 0 : releaseFamily.hashCode());
 		logger.debug(".hashCode(): result = %s", result);
 		return result;
 	}
@@ -99,6 +104,11 @@ public class ManifestEntry
 			return false;
 		}
 		if (!publishDate.equals(other.publishDate))
+		{
+			logger.debug(".equals(): match = false. publishDate do not match (this=%d, other=%d)", this.publishDate.getTime(), other.publishDate.getTime());
+			return false;
+		}
+		if (!releaseFamily.equals(other.releaseFamily))
 		{
 			logger.debug(".equals(): match = false. publishDate do not match (this=%d, other=%d)", this.publishDate.getTime(), other.publishDate.getTime());
 			return false;
@@ -154,7 +164,10 @@ public class ManifestEntry
 		logger.debug(".setPublishDate(): publishDate=%s", publishDate);
 		this.publishDate = publishDate;
 	}
-	
+	public String getReleaseFamily()
+	{
+		return releaseFamily;
+	}
 	public Path getPath(String fileRole)
 	{
 		if (fileRole == null || fileRole.isEmpty())
@@ -211,6 +224,8 @@ public class ManifestEntry
 		List<String> roles = getRoles();
 		return getRolePaths(roles);
 	}
+
+
 	
 	
 }

@@ -152,22 +152,21 @@ public class LocalRepoConnectionTest
 		RepositoryInfo repo = get_repo_info_by_type(repos, RepositoryType.local);
 		
 		// point repo at our test cache
-		Path cachePath = build_cache_path_by_testname(releaseFamily, folder);
-		repo.cachePath = cachePath.toString();
+		//Path cachePath = build_cache_path_by_testname(releaseFamily, folder);
 		
 		// setup a manifest entry to get
 		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
 		ManifestEntry entry = get_manifest_entry_from_file(manifestPath);
 		int roleCount = entry.getRoles().size();
 		
-		copy_downloads_to_path(entry, cachePath);
+		//copy_downloads_to_path(entry, cachePath);
 
 		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
 		Consumer<Path> spiedOnFileComplete = spy(new SpyablePathConsumer());
 		repoConnection.downloadRelease(entry, spiedOnFileComplete );
 		verify(spiedOnFileComplete, times(roleCount)).accept(any());
 		
-		DownloadValidator.validate_downloaded_release(entry, repo.getCachePath());
+		DownloadValidator.validate_downloaded_release(entry, repo.getShaHash());
 	}
 		/**
 	 * Test method for

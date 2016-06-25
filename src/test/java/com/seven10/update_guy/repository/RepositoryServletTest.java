@@ -58,11 +58,9 @@ public class RepositoryServletTest extends JerseyTest
 	public void testRepositoryServlet_valid() throws RepositoryException, IOException
 	{
 		String testName = "repoServlet-fev";
-		Path fileName = prepareRepoFile(testName);
 		
 		RepositoryServlet servlet = new RepositoryServlet();
 		assertNotNull(servlet);
-		assertEquals(fileName.toString(), RepositoryServlet.getRepoInfoPath().toString());
 	}
 	/**
 	 * Test method for
@@ -80,8 +78,7 @@ public class RepositoryServletTest extends JerseyTest
 		
 		RepositoryServlet servlet = new RepositoryServlet();
 		assertNotNull(servlet);
-		String expectedRepoInfoPath = Paths.get(Globals.DEFAULT_LOCAL_PATH, Globals.DEFAULT_REPO_FILENAME).toString();
-		assertEquals(expectedRepoInfoPath, RepositoryServlet.getRepoInfoPath().toString());
+
 	}
 	
 	/**
