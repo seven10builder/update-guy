@@ -87,11 +87,18 @@ public class ManifestTest
 	{
 		String expected = "getReleaseFamily";
 		Manifest manifest = new Manifest();
+		assertEquals("unknown", manifest.getReleaseFamily());
 
 		manifest.setReleaseFamily(expected);
 		String actual = manifest.getReleaseFamily();
 
 		assertEquals(expected, actual);
+		// now make sure the manifest entries got updated
+		for(ManifestEntry entry: manifest.getVersionEntries())
+		{
+			actual = entry.getReleaseFamily();
+			assertEquals(expected, actual);
+		}
 	}
 
 	/**

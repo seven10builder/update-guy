@@ -430,4 +430,44 @@ public class ManifestEntryTest
 		boolean isEqual = versionEntry.equals(other);
 		assertFalse(isEqual);
 	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.ManifestEntry#getReleaseFamily()}
+	 * and {@link com.seven10.update_guy.manifest.ManifestEntry#setReleaseFamily(java.lang.String)}.
+	 * @throws IOException 
+	 * 
+	 */
+	@Test
+	public void testGetSetReleaseFamily() throws IOException
+	{
+		ManifestEntry versionEntry = new ManifestEntry();
+		assertEquals("unknown", versionEntry.getReleaseFamily());
+		String expectedReleaseFamily = "some-new-family";
+		versionEntry.setReleaseFamily(expectedReleaseFamily);
+		String actualReleaseFamily = versionEntry.getReleaseFamily();
+		assertEquals(expectedReleaseFamily, actualReleaseFamily);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.ManifestEntry#setReleaseFamily(java.lang.String)}.
+	 * @throws IOException 
+	 * 
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void testSetReleaseFamily_null() throws IOException
+	{
+		ManifestEntry versionEntry = new ManifestEntry();
+		String expectedReleaseFamily = null;
+		versionEntry.setReleaseFamily(expectedReleaseFamily);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.ManifestEntry#setReleaseFamily(java.lang.String)}.
+	 * @throws IOException 
+	 * 
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void testSetReleaseFamily_empty() throws IOException
+	{
+		ManifestEntry versionEntry = new ManifestEntry();
+		String expectedReleaseFamily = "";
+		versionEntry.setReleaseFamily(expectedReleaseFamily);
+	}
 }

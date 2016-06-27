@@ -168,6 +168,14 @@ public class ManifestEntry
 	{
 		return releaseFamily;
 	}
+	public void setReleaseFamily(String newReleaseFamily)
+	{
+		if(newReleaseFamily == null || newReleaseFamily.isEmpty())
+		{
+			throw new IllegalArgumentException("newReleaseFamily must not be null");
+		}
+		releaseFamily = newReleaseFamily;
+	}
 	public Path getPath(String fileRole)
 	{
 		if (fileRole == null || fileRole.isEmpty())

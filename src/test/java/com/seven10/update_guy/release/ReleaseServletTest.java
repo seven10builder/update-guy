@@ -358,10 +358,11 @@ public class ReleaseServletTest extends JerseyTest
 		System.setProperty(Globals.SETTING_REPO_FILENAME, repoFile.getFileName().toString());
 		for(Manifest manifest: manifestList)
 		{
-			String releaseFamily = manifest.getReleaseFamily();
 			for(ManifestEntry manifestEntry: manifest.getVersionEntries())
 			{
 				String version = manifestEntry.getVersion();
+				String releaseFamily = manifestEntry.getReleaseFamily();
+				assertNotEquals("unknown", releaseFamily);
 				String path = "/release/"+ repoId + "/" + releaseFamily + "/update-cache";
 				Response resp = target(path).queryParam("version", version).request().get();
 				assertEquals(Status.OK.getStatusCode(), resp.getStatus());

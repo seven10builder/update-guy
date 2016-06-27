@@ -69,6 +69,10 @@ public class Manifest
 			throw new IllegalArgumentException("newReleaseFamily must not be null or empty");
 		}
 		this.releaseFamily = newReleaseFamily;
+		for(ManifestEntry manifestEntry: this.versions.values())
+		{
+			manifestEntry.setReleaseFamily(newReleaseFamily);
+		}
 	}
 
 	public Date getCreated()
@@ -127,6 +131,7 @@ public class Manifest
 		{
 			throw new IllegalArgumentException("versionEntry must not be null");
 		}
+		versionEntry.setReleaseFamily(this.getReleaseFamily());
 		versions.put(versionEntry.version, versionEntry);
 	}
 
