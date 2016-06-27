@@ -12,7 +12,9 @@ import org.apache.commons.io.input.AutoCloseInputStream;
 
 public class FileFingerPrint
 {
-
+	public static final int encodedLength = 32;	// for MD5 or SHA128
+	// public static final int encodedLength = 64; // if we are using SHA256
+	
 	public static String create(File file) throws FileNotFoundException, IOException
 	{
 		final InputStream fis = new AutoCloseInputStream(new FileInputStream(file));
