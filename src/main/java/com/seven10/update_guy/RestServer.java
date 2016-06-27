@@ -4,6 +4,8 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
+import com.seven10.update_guy.repository.RepositoryServlet;
+
 import example.Calculator;
 
 public class RestServer
@@ -19,7 +21,7 @@ public class RestServer
 		ServletHolder jerseyServlet = context.addServlet(org.glassfish.jersey.servlet.ServletContainer.class, "/*");
 		jerseyServlet.setInitOrder(0);
 
-		jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", Calculator.class.getCanonicalName());
+		jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", RepositoryServlet.class.getCanonicalName());
 
 		try
 		{

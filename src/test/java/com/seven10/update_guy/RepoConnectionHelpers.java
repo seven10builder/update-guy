@@ -23,7 +23,7 @@ import org.mockito.stubbing.Answer;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.seven10.update_guy.GsonFactory;
-import com.seven10.update_guy.manifest.ManifestVersionEntry;
+import com.seven10.update_guy.manifest.ManifestEntry;
 import com.seven10.update_guy.repository.RepositoryInfo;
 import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
 
@@ -41,7 +41,7 @@ public class RepoConnectionHelpers
 		return repos;
 	}
 
-	public static void copy_downloads_to_path(ManifestVersionEntry versionEntry, Path cachePath) throws IOException
+	public static void copy_downloads_to_path(ManifestEntry versionEntry, Path cachePath) throws IOException
 	{
 		for(Entry<String, Path> entry: versionEntry.getAllRolePaths())
 		{
@@ -62,11 +62,11 @@ public class RepoConnectionHelpers
 		return folder.newFolder(String.format("%s_cache", releaseFamily)).toPath();
 	}
 
-	public static ManifestVersionEntry get_manifest_entry_from_file(Path manifestPath) throws IOException
+	public static ManifestEntry get_manifest_entry_from_file(Path manifestPath) throws IOException
 	{		
 		copy_manifest_to_path(TestConstants.valid_manifest_name, manifestPath);
 		// grab the first version entry we see
-		ManifestVersionEntry manifestEntry = load_manifest_from_path(manifestPath).getVersionEntries().get(0);
+		ManifestEntry manifestEntry = load_manifest_from_path(manifestPath).getVersionEntries().get(0);
 		return manifestEntry;
 	}
 	

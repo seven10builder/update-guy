@@ -1,7 +1,8 @@
 package com.seven10.update_guy.repository;
 
-import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -10,68 +11,99 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.google.gson.Gson;
+import com.seven10.update_guy.Globals;
+import com.seven10.update_guy.GsonFactory;
 import com.seven10.update_guy.exceptions.RepositoryException;
-import com.seven10.update_guy.manifest.Manifest;
-import com.seven10.update_guy.repository.connection.RepoConnection;
-import com.seven10.update_guy.repository.connection.RepoConnectionFactory;
 
 
-@Path("repository")
+@Path("/repository")
 public class RepositoryServlet
 {
+	private static final Logger logger = LogManager.getFormatterLogger(RepositoryServlet.class);
 	final private RepositoryInfoMgr repoInfoMgr;
-	private String activeRepo;
 	
-	public RepositoryServlet() throws RepositoryException
+	private static boolean compareHashForRepoInfo(RepositoryInfo repoInfo, String target)
 	{
-		repoInfoMgr = new RepositoryInfoMgr(Paths.get("repos.dat"));
-	}
-	private final RepositoryInfo getActiveRepo()
-	{
-		return repoInfoMgr.getRepoMap().get(activeRepo);
-	}
-	@GET
-	@Path("manifest")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Manifest getManifest(@QueryParam("releaseFamily") String releaseFamily)
-	{
-		// open repository connection
-		Manifest manifest; 
+		boolean rval = false;
 		try
 		{
-			RepoConnection repoConnection = RepoConnectionFactory.connect(getActiveRepo());
-			// download manifest file
-			manifest = repoConnection.getManifest(releaseFamily);
+			rval = (repoInfo.getShaHash().equals(target));
 		}
-		catch (RepositoryException e)
+		catch(RepositoryException ex)
 		{
-			manifest = null;
+			logger.error(".compareHashForRepoInfo(): Could not test hash for repoInfo '%s'. Skipping. ", repoInfo.repoAddress);
 		}
-		
-		// return manifest object
-		return manifest;
+		return rval;
 	}
 	
-	@GET
-	@Path("showRepos")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Map<Integer, RepositoryInfo> showRepos()
+	public static RepositoryInfo getRepoInfoById(String repoId) throws RepositoryException
 	{
-		Map<Integer, RepositoryInfo> repoMap = repoInfoMgr.getRepoMap();
-		return repoMap;
-		
+		java.nio.file.Path repoFile = Globals.getRepoFile();
+		List<RepositoryInfo> repoList = RepositoryInfoMgr.loadRepos(repoFile);
+		Supplier<? extends RepositoryException> exceptionSupplier = 
+				()->new RepositoryException(Status.NOT_FOUND, "Could not find repository with ID '%s'", repoId);
+		RepositoryInfo repoInfo = repoList.stream()
+									.filter(ri->compareHashForRepoInfo(ri,repoId))
+									.findFirst()
+									.orElseThrow(exceptionSupplier);
+		return repoInfo;
+	}
+
+	public RepositoryServlet() throws RepositoryException
+	{
+	
+		// blech conflicting type names
+		java.nio.file.Path repoFilePath = Globals.getRepoFile();
+		this.repoInfoMgr = new RepositoryInfoMgr(repoFilePath);
 	}
 	
+
+	@GET
+	@Path("/show")
+	public Response showAllRepos()
+	{
+		Map<String, RepositoryInfo> repoMap = repoInfoMgr.getRepoMap();
+		Gson gson = GsonFactory.getGson();
+		String repoMapJson = gson.toJson(repoMap);
+		ResponseBuilder resp = Response.ok().entity(repoMapJson);
+		return resp.build();
+	}
+	@GET
+	@Path("/show/{repoId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response showRepo(@PathParam("repoId") String repoId)
+	{
+		Map<String, RepositoryInfo> repoMap = repoInfoMgr.getRepoMap();
+		RepositoryInfo repoInfo = repoMap.get(repoId);
+		
+		ResponseBuilder resp = null;
+		if(repoInfo == null)
+		{
+			String msg = String.format("Could not find repo identified by '%s'", repoId.toString());
+			resp = Response.status(Status.NOT_FOUND)
+					.entity( GsonFactory.createJsonFromString("error", msg));
+		}
+		else
+		{
+			Gson gson = GsonFactory.getGson();
+			String repoMapJson = gson.toJson(repoInfo);
+			resp = Response.ok().entity(repoMapJson);	
+		}
+		return resp.build();
+	}
 	
 	@POST
-	@Path("createRepository")
-	@Consumes("application/json")
-	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/create")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response createRepository(final RepositoryInfo repoInfo)
 	{
 		ResponseBuilder resp;
@@ -82,15 +114,14 @@ public class RepositoryServlet
 		}
 		catch(RepositoryException ex)
 		{
-			resp = Response.notModified(ex.getMessage());
+			resp = Response.status(ex.getStatusCode()).entity(String.format("{\"error\": \"%s\"", ex.getMessage()));
 		}
 		return resp.build();
 	}
 	
 	@DELETE
-	@Path("deleteRepository")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response deleteRepository(@PathParam("repositoryId") int repositoryId)
+	@Path("/delete/{repositoryId}")
+	public Response deleteRepository(@PathParam("repositoryId") String repositoryId)
 	{
 		ResponseBuilder resp;
 		try
@@ -100,9 +131,11 @@ public class RepositoryServlet
 		}
 		catch(RepositoryException ex)
 		{
-			resp = Response.notModified();
+			resp = Response.status(ex.getStatusCode()).entity(ex.getMessage());
 		}
 		return resp.build();
 
 	}
+
+	
 }

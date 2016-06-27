@@ -1,18 +1,20 @@
 package com.seven10.update_guy.manifest;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.NoSuchElementException;
+
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
 import com.google.gson.annotations.Expose;
 import com.seven10.update_guy.GsonFactory;
 import com.seven10.update_guy.exceptions.RepositoryException;
@@ -27,21 +29,14 @@ public class Manifest
 	@Expose
 	Date retrieved;
 	@Expose
-	Map<String, ManifestVersionEntry> versions;
-
-	private String formatVersions()
-	{
-		List<String> entryString = versions.entrySet().stream()
-				.map(entry -> String.format("[%s: %s]", entry.getKey(), entry.getValue())).collect(Collectors.toList());
-		return StringUtils.join(entryString.toArray(), ", ");
-	}
+	Map<String, ManifestEntry> versions;
 
 	public Manifest()
 	{
 		releaseFamily = "unknown";
 		created = new Date();
 		retrieved = new Date();
-		versions = new HashMap<String, ManifestVersionEntry>();
+		versions = new HashMap<String, ManifestEntry>();
 	}
 
 	public Manifest(Manifest newManifest)
@@ -53,14 +48,13 @@ public class Manifest
 		this.releaseFamily = newManifest.releaseFamily;
 		this.created = newManifest.created;
 		this.retrieved = newManifest.retrieved;
-		this.versions = new HashMap<String, ManifestVersionEntry>(newManifest.versions);
+		this.versions = new HashMap<String, ManifestEntry>(newManifest.versions);
 	}
 
 	@Override
 	public String toString()
 	{
-		return "Manifest [releaseFamily=" + releaseFamily + ", created=" + created + ", retrieved=" + retrieved
-				+ ", versions=[ " + formatVersions() + "]]";
+		return GsonFactory.getGson().toJson(this);
 	}
 
 	public String getReleaseFamily()
@@ -75,6 +69,10 @@ public class Manifest
 			throw new IllegalArgumentException("newReleaseFamily must not be null or empty");
 		}
 		this.releaseFamily = newReleaseFamily;
+		for(ManifestEntry manifestEntry: this.versions.values())
+		{
+			manifestEntry.setReleaseFamily(newReleaseFamily);
+		}
 	}
 
 	public Date getCreated()
@@ -105,17 +103,35 @@ public class Manifest
 		this.retrieved = newRetrieved;
 	}
 
-	public List<ManifestVersionEntry> getVersionEntries()
+	public ManifestEntry getVersionEntry(String version) throws RepositoryException
 	{
-		return new ArrayList<ManifestVersionEntry>(versions.values());
+		if (version == null || version.isEmpty())
+		{
+			throw new IllegalArgumentException("version must not be null or empty");
+		}
+		try
+		{
+			ManifestEntry entry = versions.values().stream().filter(ver->ver.getVersion().contentEquals(version)).findFirst().get();
+			return entry;
+		}
+		catch(NoSuchElementException ex)
+		{
+			throw new RepositoryException(Status.NOT_FOUND, "Could not find version '%s'", version);
+		}
 	}
 
-	public void addVersionEntry(ManifestVersionEntry versionEntry)
+	public List<ManifestEntry> getVersionEntries()
+	{
+		return new ArrayList<ManifestEntry>(versions.values());
+	}
+	
+	public void addVersionEntry(ManifestEntry versionEntry)
 	{
 		if (versionEntry == null)
 		{
 			throw new IllegalArgumentException("versionEntry must not be null");
 		}
+		versionEntry.setReleaseFamily(this.getReleaseFamily());
 		versions.put(versionEntry.version, versionEntry);
 	}
 
@@ -140,6 +156,10 @@ public class Manifest
 		{
 			throw new IllegalArgumentException("filePath must not be null");
 		}
+		if(Files.exists(filePath) == false)
+		{
+			throw new RepositoryException(Status.NOT_FOUND, "The manifest located at '%s' was not found", filePath.toString());
+		}
 		try
 		{
 			String json = FileUtils.readFileToString(filePath.toFile(), GsonFactory.encodingType);
@@ -147,9 +167,9 @@ public class Manifest
 			Manifest manifest = gson.fromJson(json, Manifest.class);
 			return manifest;
 		}
-		catch (IOException e)
+		catch (JsonParseException|IOException e)
 		{
-			throw new RepositoryException("Could not read file '%s'. Exception: %s", filePath, e.getMessage());
+			throw new RepositoryException(Status.UNSUPPORTED_MEDIA_TYPE, "Could not read file '%s'. Exception: %s", filePath, e.getMessage());
 		}
 	}
 

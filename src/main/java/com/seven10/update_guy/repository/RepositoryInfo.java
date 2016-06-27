@@ -1,15 +1,52 @@
 package com.seven10.update_guy.repository;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import com.google.gson.annotations.Expose;
+import javax.ws.rs.core.Response.Status;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
+import com.google.gson.annotations.Expose;
+import com.seven10.update_guy.FileFingerPrint;
+import com.seven10.update_guy.GsonFactory;
+import com.seven10.update_guy.exceptions.RepositoryException;
+
+@XmlRootElement
 public class RepositoryInfo
 {
+	
+	private byte[] toByteArray() throws RepositoryException
+	{
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+		
+		try
+		{
+			//outputStream.write( cachePath.getBytes() );
+			outputStream.write( description.getBytes() );
+			outputStream.write( manifestPath.getBytes() );
+			outputStream.write( password.getBytes() );
+			outputStream.write( repoAddress.getBytes() );
+			outputStream.write( repoType.toString().getBytes() );
+			outputStream.write( user.getBytes() );
+			outputStream.write( Integer.toString(port).getBytes() );
+		}
+		catch (IOException e)
+		{
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "Could not convert RepoInfo object to byte array. reason: %s", e.getMessage());
+		}
+		return outputStream.toByteArray();
+	}
+	
 	public enum RepositoryType
 	{
+		@Expose
+		@XmlElement
 		local,
+		@Expose
+		@XmlElement
 		ftp
 	}
     public RepositoryInfo()
@@ -18,24 +55,33 @@ public class RepositoryInfo
     	port = 0;
     	user = "";
     	password = "";
-    	manifestPath = Paths.get(".");
+    	manifestPath = ".";
+    	repoType = RepositoryType.local;
+    	//cachePath = ".";
+    	description = "unknown";
     }
 	@Expose
+	@XmlElement
 	public String repoAddress;
 	@Expose
+	@XmlElement
 	public int port;
 	@Expose
+	@XmlElement
 	public String user;
 	@Expose
+	@XmlElement
     public String password;
 	@Expose
-    public Path manifestPath;
+	@XmlElement
+    public String manifestPath;
 	@Expose
+	@XmlElement
     public String description;
 	@Expose
+	@XmlElement
     public RepositoryType repoType;
-	@Expose
-    public Path cachePath;
+
     
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
@@ -45,7 +91,6 @@ public class RepositoryInfo
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((cachePath == null) ? 0 : cachePath.hashCode());
 		result = prime * result + ((description == null) ? 0 : description.hashCode());
 		result = prime * result + ((manifestPath == null) ? 0 : manifestPath.hashCode());
 		result = prime * result + ((password == null) ? 0 : password.hashCode());
@@ -74,17 +119,7 @@ public class RepositoryInfo
 			return false;
 		}
 		RepositoryInfo other = (RepositoryInfo) obj;
-		if (cachePath == null)
-		{
-			if (other.cachePath != null)
-			{
-				return false;
-			}
-		}
-		else if (!cachePath.equals(other.cachePath))
-		{
-			return false;
-		}
+
 		if (description == null)
 		{
 			if (other.description != null)
@@ -149,6 +184,30 @@ public class RepositoryInfo
 			return false;
 		}
 		return true;
+	}
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		return GsonFactory.getGson().toJson(this);
+	}
+	public String getShaHash() throws RepositoryException
+	{
+		try
+		{
+			return FileFingerPrint.create(this.toByteArray());
+		}
+		catch (IOException e)
+		{
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "Could not create message digest for RepositoryInfo. reason: %s", e.getMessage());
+		}
+	}
+
+	public Path getmanifestPath()
+	{
+		return Paths.get(this.manifestPath);
 	}
 	
 }

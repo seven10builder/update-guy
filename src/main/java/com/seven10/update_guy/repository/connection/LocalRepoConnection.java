@@ -3,19 +3,23 @@ package com.seven10.update_guy.repository.connection;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
+
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
 
+import com.seven10.update_guy.Globals;
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.manifest.Manifest;
-import com.seven10.update_guy.manifest.ManifestVersionEntry;
+import com.seven10.update_guy.manifest.ManifestEntry;
 import com.seven10.update_guy.repository.RepositoryInfo;
 
 class LocalRepoConnection implements RepoConnection
 {
 	
 	private final Path repoPath;
-	private final Path cachePath;
+	private final String repoId;
 	
 	private void copyFileToPath(Path srcPath, Path destPath) throws RepositoryException
 	{
@@ -25,13 +29,13 @@ class LocalRepoConnection implements RepoConnection
 		}
 		catch (IOException e)
 		{
-			throw new RepositoryException("Could not copy file '%s' to '%s'. Reason: %s", srcPath, destPath, e.getMessage());
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR,"Could not copy file '%s' to '%s'. Reason: %s", srcPath, destPath, e.getMessage());
 		}
 	}
-	public LocalRepoConnection(RepositoryInfo activeRepo)
+	public LocalRepoConnection(RepositoryInfo activeRepo) throws RepositoryException
 	{
-		repoPath = activeRepo.manifestPath;
-		cachePath = activeRepo.cachePath;
+		repoPath = activeRepo.getmanifestPath();
+		repoId = activeRepo.getShaHash();
 	}
 	@Override
 	public void connect() throws RepositoryException
@@ -55,17 +59,22 @@ class LocalRepoConnection implements RepoConnection
 		return manifest;
 	}
 	@Override
-	public void downloadRelease(ManifestVersionEntry versionEntry) throws RepositoryException
+	public void downloadRelease(ManifestEntry versionEntry, Consumer<Path> onFileComplete) throws RepositoryException
 	{
 		if(versionEntry==null)
 		{
 			throw new IllegalArgumentException("versionEntry must not be null");
 		}
-		for(Entry<String, Path> entry: versionEntry.getAllRolePaths())
+		if(onFileComplete==null)
 		{
-			Path srcPath = entry.getValue();
-			Path destPath = cachePath.resolve(srcPath.getFileName());
+			throw new IllegalArgumentException("onFileComplete must not be null");
+		}
+		for(Entry<String, Path> roleEntry: versionEntry.getAllRolePaths())
+		{
+			Path srcPath = roleEntry.getValue();
+			Path destPath = Globals.buildDownloadTargetPath(repoId, versionEntry, roleEntry); 
 			copyFileToPath(srcPath, destPath);
+			onFileComplete.accept(destPath);
 		}
 	}
 }

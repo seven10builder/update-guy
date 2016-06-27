@@ -5,7 +5,6 @@ package com.seven10.update_guy.repository;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,21 +41,6 @@ public class RepositoryInfoMgrTest
 	public TemporaryFolder folder = new TemporaryFolder();
 
 	
-	/**
-	 * Test method for
-	 * {@link com.seven10.update_guy.repository.RepositoryInfoMgr#RepositoryInfoMgr()}
-	 * .
-	 * 
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 * @throws RepositoryException 
-	 */
-	@Test(expected = IllegalArgumentException.class)
-	public void testRepositoryInfoMgr_null() throws FileNotFoundException, IOException, RepositoryException
-	{
-		Path storeFile = null;
-		new RepositoryInfoMgr(storeFile);
-	}
 
 	/**
 	 * Test method for
@@ -70,12 +54,13 @@ public class RepositoryInfoMgrTest
 	@Test
 	public void testRepositoryInfoMgr_fileNotFound() throws FileNotFoundException, IOException, RepositoryException
 	{
-		File storeFile = folder.newFile("fileNotFound.json");
-		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storeFile.toPath());
+		String fileName = "fileNotfound.json";
+		Path repoInfoFile = folder.newFolder("filenotfound").toPath().resolve(fileName);
+		RepositoryInfoMgr mgr = new RepositoryInfoMgr(repoInfoFile);
 		// there should be no repos if the file doesn't exist
 		assertTrue(mgr.getRepoMap().keySet().isEmpty());
 		// the file should be created if it doesn't exist
-		assertTrue(Files.exists(storeFile.toPath()));
+		assertTrue(Files.exists(repoInfoFile));
 	}
 
 	/**
@@ -87,17 +72,16 @@ public class RepositoryInfoMgrTest
 	@Test
 	public void testAddRepository_valid_no_entries() throws Exception
 	{
-
+		String fileName = "add_valid_no_entries.json";
+		Path repoInfoFile = folder.newFolder("noEntries").toPath().resolve(fileName);
 		
-		Path storeFile = folder.newFile("add_valid_no_entries.json").toPath();
-		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storeFile);
-
+		RepositoryInfoMgr mgr = new RepositoryInfoMgr(repoInfoFile);
 		// get sha of config to compare later
-		String originalHash = RepoInfoHelpers.hashFile(storeFile);
+		String originalHash = RepoInfoHelpers.hashFile(repoInfoFile);
 
 		RepositoryInfo actual = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local);
 		mgr.addRepository(actual);
-		String modifiedHash = RepoInfoHelpers.hashFile(storeFile);
+		String modifiedHash = RepoInfoHelpers.hashFile(repoInfoFile);
 
 		// there should be only one item
 		assertEquals(mgr.getRepoMap().keySet().size(), 1);
@@ -115,14 +99,17 @@ public class RepositoryInfoMgrTest
 	public void testAddRepository_valid_entries_no_colision()
 			throws Exception
 	{
+		
+		
 		String releaseFamily = "addRepo-venc";
 		
-		Path storePath = build_repo_info_file_by_testname(releaseFamily, folder);
-		copy_valid_repos_to_test(storePath);
-		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
+		Path repoInfoFile = build_repo_info_file_by_testname(releaseFamily, folder);
+		copy_valid_repos_to_test(repoInfoFile);
+		
+		RepositoryInfoMgr mgr = new RepositoryInfoMgr(repoInfoFile);
 
 		// get sha of config to compare later
-		String originalHash = RepoInfoHelpers.hashFile(storePath);
+		String originalHash = RepoInfoHelpers.hashFile(repoInfoFile);
 		int originalSize =  mgr.getRepoMap().keySet().size();
 
 		// get the id for the repo
@@ -137,7 +124,7 @@ public class RepositoryInfoMgrTest
 		actual.port = 31337;
 		actual.user = "drApocalypse";
 		mgr.addRepository(actual);
-		String modifiedHash = RepoInfoHelpers.hashFile(storePath);
+		String modifiedHash = RepoInfoHelpers.hashFile(repoInfoFile);
 
 		assertEquals(originalSize+1, mgr.getRepoMap().keySet().size());
 		// the file should have changed (been saved to)
@@ -155,12 +142,13 @@ public class RepositoryInfoMgrTest
 	{
 		String releaseFamily = "addRepo-vec";
 		
-		Path storePath = build_repo_info_file_by_testname(releaseFamily, folder);
-		copy_valid_repos_to_test(storePath);
-		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
+		Path repoInfoFile = build_repo_info_file_by_testname(releaseFamily, folder);
+		copy_valid_repos_to_test(repoInfoFile);
+		
+		RepositoryInfoMgr mgr = new RepositoryInfoMgr(repoInfoFile);
 
 		// get sha of config to compare later
-		String originalHash = RepoInfoHelpers.hashFile(storePath);
+		String originalHash = RepoInfoHelpers.hashFile(repoInfoFile);
 		int originalSize =  mgr.getRepoMap().keySet().size();
 
 		// get the id for the repo
@@ -175,7 +163,7 @@ public class RepositoryInfoMgrTest
 		{
 			assertTrue(e.getMessage().contains(expectedCollisionMsg));
 		}
-		String modifiedHash = RepoInfoHelpers.hashFile(storePath);
+		String modifiedHash = RepoInfoHelpers.hashFile(repoInfoFile);
 
 		// there should still be only one item
 		assertEquals(originalSize, mgr.getRepoMap().keySet().size());
@@ -196,12 +184,13 @@ public class RepositoryInfoMgrTest
 	public void testAddRepository_nullEntries() throws NoSuchAlgorithmException, IOException, RepositoryException
 	{
 		String releaseFamily = "addRepo-ne";
-		Path storePath = build_repo_info_file_by_testname(releaseFamily, folder);
-		copy_valid_repos_to_test(storePath);
-		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
+		Path repoInfoFile = build_repo_info_file_by_testname(releaseFamily, folder);
+		copy_valid_repos_to_test(repoInfoFile);
+		
+		RepositoryInfoMgr mgr = new RepositoryInfoMgr(repoInfoFile);
 
 		// get sha of config to compare later
-		String originalHash = RepoInfoHelpers.hashFile(storePath);
+		String originalHash = RepoInfoHelpers.hashFile(repoInfoFile);
 		int originalSize =  mgr.getRepoMap().keySet().size();
 
 		RepositoryInfo actual = null;
@@ -213,7 +202,7 @@ public class RepositoryInfoMgrTest
 		catch (IllegalArgumentException e)
 		{
 		}
-		String modifiedHash = RepoInfoHelpers.hashFile(storePath);
+		String modifiedHash = RepoInfoHelpers.hashFile(repoInfoFile);
 
 		// there should still be only one item
 		assertEquals(mgr.getRepoMap().keySet().size(), originalSize);
@@ -232,18 +221,19 @@ public class RepositoryInfoMgrTest
 	{
 		String releaseFamily = "delRepo-ve";
 		
-		Path storePath = build_repo_info_file_by_testname(releaseFamily, folder);
-		copy_valid_repos_to_test(storePath);
-		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
+		Path repoInfoFile = build_repo_info_file_by_testname(releaseFamily, folder);
+		copy_valid_repos_to_test(repoInfoFile);
+		
+		RepositoryInfoMgr mgr = new RepositoryInfoMgr(repoInfoFile);
 
 		// get sha of config to compare later
-		String originalHash = RepoInfoHelpers.hashFile(storePath);
+		String originalHash = RepoInfoHelpers.hashFile(repoInfoFile);
 		int originalSize =  mgr.getRepoMap().keySet().size();
 
 		// get the id for the repo
-		int actual = mgr.getRepoMap().values().stream().findAny().get().hashCode();
+		String actual = mgr.getRepoMap().values().stream().findAny().get().getShaHash();
 		mgr.deleteRepository(actual);
-		String modifiedHash = RepoInfoHelpers.hashFile(storePath);
+		String modifiedHash = RepoInfoHelpers.hashFile(repoInfoFile);
 
 		// there should be zero items
 		assertEquals(originalSize-1, mgr.getRepoMap().keySet().size());
@@ -266,6 +256,7 @@ public class RepositoryInfoMgrTest
 		
 		Path storePath = build_repo_info_file_by_testname(releaseFamily, folder);
 		copy_valid_repos_to_test(storePath);
+		
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
 
 		// get sha of config to compare later
@@ -278,7 +269,7 @@ public class RepositoryInfoMgrTest
 		actualRepoInfo.port = 31337;
 		actualRepoInfo.user = "drApocalypse";
 		
-		int actual = actualRepoInfo.hashCode();
+		String actual = actualRepoInfo.getShaHash();
 
 		try
 		{
@@ -425,9 +416,11 @@ public class RepositoryInfoMgrTest
 	@Test
 	public void testGetRepoMap() throws IOException, RepositoryException
 	{
-		File storeFile = folder.newFile("testGetRepoMap.json");
-		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storeFile.toPath());
-		Map<Integer, RepositoryInfo> repoMap = mgr.getRepoMap();
+		
+		Path repoInfoFile = build_repo_info_file_by_testname("getRepoMap", folder);
+		copy_valid_repos_to_test(repoInfoFile);
+		RepositoryInfoMgr mgr = new RepositoryInfoMgr(repoInfoFile);
+		Map<String, RepositoryInfo> repoMap = mgr.getRepoMap();
 		assertNotNull(repoMap);
 	}
 

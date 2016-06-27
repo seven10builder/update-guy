@@ -16,9 +16,9 @@ import org.apache.logging.log4j.Logger;
 import com.google.gson.annotations.Expose;
 import com.seven10.update_guy.GsonFactory;
 
-public class ManifestVersionEntry
+public class ManifestEntry
 {
-	private static final Logger logger = LogManager.getFormatterLogger(ManifestVersionEntry.class);
+	private static final Logger logger = LogManager.getFormatterLogger(ManifestEntry.class);
 	
 	@Expose
 	protected String version;
@@ -26,16 +26,20 @@ public class ManifestVersionEntry
 	protected Date publishDate;
 	@Expose
 	protected final Map<String, Path> fileMap;
+	@Expose
+	protected String releaseFamily;
 	
-	public ManifestVersionEntry()
+	public ManifestEntry()
 	{
+		releaseFamily = "unknown";
 		version = "unknown";
 		publishDate = new Date();
 		fileMap = new HashMap<String, Path>();
 	}
 	
-	public ManifestVersionEntry(ManifestVersionEntry versionEntry)
+	public ManifestEntry(ManifestEntry versionEntry)
 	{
+		releaseFamily = versionEntry.releaseFamily;
 		version = versionEntry.version;
 		publishDate = versionEntry.publishDate;
 		fileMap = new HashMap<String, Path>(versionEntry.fileMap);
@@ -59,6 +63,7 @@ public class ManifestVersionEntry
 		result = prime * result + ((fileMap == null) ? 0 : fileMap.hashCode());
 		result = prime * result + ((publishDate == null) ? 0 : publishDate.hashCode());
 		result = prime * result + ((version == null) ? 0 : version.hashCode());
+		result = prime * result + ((releaseFamily == null) ? 0 : releaseFamily.hashCode());
 		logger.debug(".hashCode(): result = %s", result);
 		return result;
 	}
@@ -81,12 +86,12 @@ public class ManifestVersionEntry
 			logger.debug(".equals(): match = false. other is null");
 			return false;
 		}
-		if (!(obj instanceof ManifestVersionEntry))
+		if (!(obj instanceof ManifestEntry))
 		{
 			logger.debug(".equals(): match = false. other is not a ManifestVersionEntry");
 			return false;
 		}
-		ManifestVersionEntry other = (ManifestVersionEntry) obj;
+		ManifestEntry other = (ManifestEntry) obj;
 		if (fileMap.size() != other.fileMap.size())
 		{
 			logger.debug(".equals(): match = false. other size does not match (this = %d, other = %d)", fileMap.size(),
@@ -99,6 +104,11 @@ public class ManifestVersionEntry
 			return false;
 		}
 		if (!publishDate.equals(other.publishDate))
+		{
+			logger.debug(".equals(): match = false. publishDate do not match (this=%d, other=%d)", this.publishDate.getTime(), other.publishDate.getTime());
+			return false;
+		}
+		if (!releaseFamily.equals(other.releaseFamily))
 		{
 			logger.debug(".equals(): match = false. publishDate do not match (this=%d, other=%d)", this.publishDate.getTime(), other.publishDate.getTime());
 			return false;
@@ -154,7 +164,18 @@ public class ManifestVersionEntry
 		logger.debug(".setPublishDate(): publishDate=%s", publishDate);
 		this.publishDate = publishDate;
 	}
-	
+	public String getReleaseFamily()
+	{
+		return releaseFamily;
+	}
+	public void setReleaseFamily(String newReleaseFamily)
+	{
+		if(newReleaseFamily == null || newReleaseFamily.isEmpty())
+		{
+			throw new IllegalArgumentException("newReleaseFamily must not be null");
+		}
+		releaseFamily = newReleaseFamily;
+	}
 	public Path getPath(String fileRole)
 	{
 		if (fileRole == null || fileRole.isEmpty())
@@ -211,6 +232,8 @@ public class ManifestVersionEntry
 		List<String> roles = getRoles();
 		return getRolePaths(roles);
 	}
+
+
 	
 	
 }

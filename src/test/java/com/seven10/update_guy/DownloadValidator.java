@@ -12,7 +12,7 @@ import java.nio.file.Path;
 import org.apache.commons.io.FileUtils;
 
 import com.seven10.update_guy.exceptions.RepositoryException;
-import com.seven10.update_guy.manifest.ManifestVersionEntry;
+import com.seven10.update_guy.manifest.ManifestEntry;
 
 public class DownloadValidator
 {
@@ -31,15 +31,16 @@ public class DownloadValidator
 		assertTrue(FileUtils.contentEquals(srcFile, destFile));
 	}
 
-	public static void validate_downloaded_release(ManifestVersionEntry versionEntry, Path destFolder)
+	public static void validate_downloaded_release(ManifestEntry versionEntry, String repoId) throws RepositoryException
 	{
-		versionEntry.getAllRolePaths().forEach(entry ->
+		versionEntry.getAllRolePaths().forEach(roleEntry ->
 		{
-			Path srcPath = entry.getValue();
-			Path fileName = srcPath.getFileName();
-			Path destPath = destFolder.resolve(fileName);
+			Path srcPath = null;
+			Path destPath = null;
 			try
 			{
+				srcPath = roleEntry.getValue();
+				destPath = Globals.buildDownloadTargetPath(repoId, versionEntry, roleEntry);
 				validate_download(srcPath, destPath);
 			}
 			catch (Exception e)
