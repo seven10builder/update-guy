@@ -6,8 +6,6 @@ import org.eclipse.jetty.servlet.ServletHolder;
 
 import com.seven10.update_guy.repository.RepositoryServlet;
 
-import example.Calculator;
-
 public class RestServer
 {
 	public static void main(String[] args) throws Exception

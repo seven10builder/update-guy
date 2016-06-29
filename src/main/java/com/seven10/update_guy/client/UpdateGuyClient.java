@@ -1,105 +1,86 @@
 package com.seven10.update_guy.client;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.seven10.update_guy.client.cli.CliMgr;
+import com.seven10.update_guy.client.local.JavaLauncher;
+import com.seven10.update_guy.client.local.LocalCacheUtils;
+import com.seven10.update_guy.client.request.RequesterUtils;
+import com.seven10.update_guy.exceptions.FatalClientException;
 import com.seven10.update_guy.manifest.ManifestEntry;
 
 public class UpdateGuyClient
 {
-	private static final String JAVA_JAR_OPTION = "-jar";
-
-	private static String getJavaBinPath()
-	{
-		String javaHome = System.getProperty("java.home");
-		Path javaBinPath = Paths.get(javaHome).resolve("bin").resolve("java.exe");
-		return javaBinPath.toString();
-	}
+	private static final Logger logger = LogManager.getFormatterLogger(UpdateGuyClient.class.getName());
 	
 	public static void main(String[] args)
 	{
 		// get cli options
 		CliMgr mgr = new CliMgr(args);
-		if( mgr.getIsExecContinued())
+		
+		if(mgr.parse())
 		{
-			UpdateGuyClient client = new UpdateGuyClient(mgr.getClientSettings(), mgr.getRemainingParams());
-			while(true)
+			ClientSettings settings = mgr.getClientSettings();
+			
+			final RequesterUtils requesterUtils = new RequesterUtils(settings);
+			final LocalCacheUtils localCacheUtils = new LocalCacheUtils(settings);
+			final JavaLauncher javaLauncher = new JavaLauncher();
+			UpdateGuyClient client = new UpdateGuyClient(mgr.getRemainingParams());
+			try
 			{
-				client.executeClientLoop();
+				while(true)
+				{
+					client.executeClientLoop(requesterUtils, localCacheUtils, javaLauncher);
+				}
+			}
+			catch(FatalClientException ex)
+			{
+				logger.fatal("%s encountered a fatal error: %s", CliMgr.executableName, ex.getMessage());
 			}
 		}
 	}
 	
-	private final ClientSettings settings;
 	private final List<String> remainingParams;
-	private String jarFileName;
 	
-	public UpdateGuyClient(ClientSettings settings, String[] remainingParams)
+	public UpdateGuyClient(String[] remainingParams)
 	{
-		this.settings = settings;
 		this.remainingParams = Arrays.asList(remainingParams);
+		logger.debug(".ctor(): remainingParams = %s", String.join(remainingParams.toString()));
 	}
 	
-	public void executeClientLoop()
+	public void executeClientLoop(RequesterUtils requestUtils, LocalCacheUtils localCacheUtils, JavaLauncher launcher) throws FatalClientException
 	{
 		// get current active releaseId from server
-		ManifestEntry release = requestActiveRelease();
+		ManifestEntry release = requestUtils.requestActiveRelease();
+		Path jarFilePath = localCacheUtils.buildTargetPath(release);
+		
 		// request checksum for activeRelease->role->file
-		String remoteChecksum = requestRemoteChecksum(release);
+		String remoteChecksum = requestUtils.requestRemoteChecksum(release);
+		logger.debug(".executeClientLoop(): remoteChecksum = '%s'", remoteChecksum);
+		
 		// get checksum for role->localFile
-		String localChecksum = getLocalChecksum();
+		String localChecksum = localCacheUtils.getLocalChecksum(jarFilePath);
+		logger.debug(".executeClientLoop(): localChecksum = '%s'", localChecksum);
+		
 		// if checksums don't match, download role file
 		if(localChecksum.equals(remoteChecksum) == false)
 		{
-			downloadRoleFile();
+			logger.info(".executeClientLoop(): checksums did not match. Will download", localChecksum);
+			requestUtils.requestDownloadRoleFile(release, jarFilePath);
 		}
+		else
+		{
+			logger.info(".executeClientLoop(): checksums matched, no need to download", localChecksum);
+		}
+		
 		//	launch role file with remaining cli options
-		launchExecutable(remainingParams);
-	}
-	
-	private ManifestEntry requestActiveRelease()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	private String requestRemoteChecksum(ManifestEntry release)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	private String getLocalChecksum()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	private void downloadRoleFile()
-	{
-		// TODO Auto-generated method stub
-	}
-	
-	private void launchExecutable(List<String> remainingParams)
-	{
-		List<String> paramList = new ArrayList<String>();
-		paramList.add(getJavaBinPath());
-		paramList.add(JAVA_JAR_OPTION);
-		paramList.add(jarFileName);
-		paramList.addAll(remainingParams);
-		ProcessBuilder pb = new ProcessBuilder(paramList);
-		pb.directory(new File(settings.getCachePath()));
-		try
-		{
-			Process p = pb.start();
-		}
-		catch (IOException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		ProcessBuilder processBuilder = launcher.createProcessBuilder(
+											launcher.buildParamList(remainingParams, jarFilePath),
+											jarFilePath.getParent());
+		launcher.launchExecutable(processBuilder);
 	}
 }

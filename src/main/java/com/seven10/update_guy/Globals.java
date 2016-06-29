@@ -9,6 +9,7 @@ import com.seven10.update_guy.manifest.ManifestEntry;
 
 public class Globals
 {
+	public static final int DEFAULT_PORT_SETTING = 7519;
 	/**
 	 * The path of the local root folder for update-guy. This is the root of the 
 	 * tree where manifests and local caches are stored. 
