@@ -31,7 +31,6 @@ import org.mockito.stubbing.Answer;
 
 import static org.mockito.Mockito.*;
 
-import com.seven10.update_guy.Globals;
 import com.seven10.update_guy.TestConstants;
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.manifest.Manifest;

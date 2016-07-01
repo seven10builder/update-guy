@@ -18,18 +18,122 @@ public class RequesterTest
 	 * Test method for {@link com.seven10.update_guy.client.request.Requester#Requester(java.lang.String, java.lang.String)}.
 	 */
 	@Test
-	public void testRequester()
+	public void testRequester_valid()
 	{
-		fail("Not yet implemented"); // TODO
+		String url = "localhost://some-path/";
+		String methodName = "some-method";
+		Requester requester = new Requester(url, methodName);
+		assertNotNull(requester);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.client.request.Requester#Requester(java.lang.String, java.lang.String)}.
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void testRequester_null_url()
+	{
+		String url = null;
+		String methodName = "some-method";
+		Requester requester = new Requester(url, methodName);
+		assertNotNull(requester);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.client.request.Requester#Requester(java.lang.String, java.lang.String)}.
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void testRequester_empty_url()
+	{
+		String url = "";
+		String methodName = "some-method";
+		Requester requester = new Requester(url, methodName);
+		assertNotNull(requester);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.client.request.Requester#Requester(java.lang.String, java.lang.String)}.
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void testRequester_null_methodName()
+	{
+		String url = "localhost://some-path/";
+		String methodName = null;
+		Requester requester = new Requester(url, methodName);
+		assertNotNull(requester);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.client.request.Requester#Requester(java.lang.String, java.lang.String)}.
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void testRequester_empty_methodName()
+	{
+		String url = "localhost://some-path/";
+		String methodName = "";
+		Requester requester = new Requester(url, methodName);
+		assertNotNull(requester);
 	}
 	
 	/**
 	 * Test method for {@link com.seven10.update_guy.client.request.Requester#addQueryParam(java.lang.String, java.lang.String)}.
 	 */
 	@Test
-	public void testAddQueryParam()
+	public void testAddQueryParam_valid()
 	{
-		fail("Not yet implemented"); // TODO
+		String url = "localhost://some-path/";
+		String methodName = "some-method";
+		Requester requester = new Requester(url, methodName);
+		String name = "paramName";
+		String value = "paramValue";
+		requester.addQueryParam(name, value);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.client.request.Requester#addQueryParam(java.lang.String, java.lang.String)}.
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void testAddQueryParam_null_name()
+	{
+		String url = "localhost://some-path/";
+		String methodName = null;
+		Requester requester = new Requester(url, methodName);
+		String name = null;
+		String value = "paramValue";
+		requester.addQueryParam(name, value);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.client.request.Requester#addQueryParam(java.lang.String, java.lang.String)}.
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void testAddQueryParam_empty_name()
+	{
+		String url = "localhost://some-path/";
+		String methodName = "some-method";
+		Requester requester = new Requester(url, methodName);
+		String name = "";
+		String value = "paramValue";
+		requester.addQueryParam(name, value);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.client.request.Requester#addQueryParam(java.lang.String, java.lang.String)}.
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void testAddQueryParam_null_value()
+	{
+		String url = "localhost://some-path/";
+		String methodName = null;
+		Requester requester = new Requester(url, methodName);
+		String name = "paramName";
+		String value = null;
+		requester.addQueryParam(name, value);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.client.request.Requester#addQueryParam(java.lang.String, java.lang.String)}.
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void testAddQueryParam_empty_value()
+	{
+		String url = "localhost://some-path/";
+		String methodName = "some-method";
+		Requester requester = new Requester(url, methodName);
+		String name = "paramName";
+		String value = "";
+		requester.addQueryParam(name, value);
 	}
 	
 	/**

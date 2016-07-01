@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.client.ClientConfig;
@@ -30,6 +31,14 @@ public class Requester
 	
 	public Requester(String url, String methodName)
 	{
+		if(StringUtils.isBlank(url))
+		{
+			throw new IllegalArgumentException("url must not be null or empty");
+		}
+		if(StringUtils.isBlank(methodName))
+		{
+			throw new IllegalArgumentException("methodName must not be null or empty");
+		}
 		Client client = ClientBuilder.newClient( new ClientConfig() );
 		webTarget = client.target(url).path(methodName);
 		logger.debug(".ctor(): Requester url = '%s', methodName = %s", url, methodName);
@@ -37,6 +46,14 @@ public class Requester
 
 	public void addQueryParam(String name, String value)
 	{
+		if(StringUtils.isBlank(name))
+		{
+			throw new IllegalArgumentException("name must not be null or empty");
+		}
+		if(StringUtils.isBlank(value))
+		{
+			throw new IllegalArgumentException("value must not be null or empty");
+		}
 		webTarget = webTarget.queryParam(name, value);
 		logger.debug(".addQueryParam(): Adding query parameter (%s, %s)", name, value);
 	}
@@ -50,7 +67,6 @@ public class Requester
 		Status statusCode = Status.fromStatusCode(response.getStatus());
 		T result = RequesterUtils.evaluateResponse(response, statusCode, entityType);
 		return result;
-		
 	}
 	
 	public void getFile(Path targetPath) throws FatalClientException

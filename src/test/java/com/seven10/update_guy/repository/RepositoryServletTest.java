@@ -9,12 +9,9 @@ import static com.seven10.update_guy.RepoInfoHelpers.*;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
-
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;
@@ -57,8 +54,6 @@ public class RepositoryServletTest extends JerseyTest
 	@Test
 	public void testRepositoryServlet_valid() throws RepositoryException, IOException
 	{
-		String testName = "repoServlet-fev";
-		
 		RepositoryServlet servlet = new RepositoryServlet();
 		assertNotNull(servlet);
 	}

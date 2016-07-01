@@ -15,9 +15,7 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.ws.rs.core.Application;
@@ -32,20 +30,14 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.seven10.update_guy.FileFingerPrint;
 import com.seven10.update_guy.Globals;
 import com.seven10.update_guy.GsonFactory;
 import com.seven10.update_guy.ManifestHelpers;
-import com.seven10.update_guy.RepoInfoHelpers;
 import com.seven10.update_guy.exceptions.RepositoryException;
 import com.seven10.update_guy.manifest.Manifest;
 import com.seven10.update_guy.manifest.ManifestEntry;
-import com.seven10.update_guy.manifest.ManifestServlet;
 import com.seven10.update_guy.repository.RepositoryInfo;
 import com.seven10.update_guy.repository.RepositoryInfo.RepositoryType;
 
