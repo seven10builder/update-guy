@@ -1,5 +1,6 @@
 package com.seven10.update_guy.manifest;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -130,5 +132,65 @@ public class ManifestMgr
 		return files;
 		
 	}
-	
+
+	public void setActiveVersion(String newVersion, String activeVersId, ActiveVersionEncoder encoder) throws RepositoryException
+	{
+		if(StringUtils.isBlank(newVersion))
+		{
+			throw new IllegalArgumentException("newVersion must not be null or empty");
+		}
+		if(StringUtils.isBlank(activeVersId))
+		{
+			throw new IllegalArgumentException("activeVersId must not be null or empty");
+		}
+		if(encoder == null)
+		{
+			throw new IllegalArgumentException("encoder must not be null");
+		}
+		// find newVersion in manifest
+		ManifestEntry manifestEntry = getManifest(encoder.getReleaseFamily()).getVersionEntry(newVersion);
+		// encode fileName
+		Path fileName = encoder.encodeFileName(activeVersId);
+		// write activeVersion to fileName
+		try
+		{
+			encoder.writeVersionEntry(fileName, manifestEntry);
+		}
+		catch (IOException ex)
+		{
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "Could not write active version entry file '%s'. Reason: %s",
+					fileName, ex.getMessage());
+		}
+	}
+
+	public ManifestEntry getActiveVersion(String activeVersId, ActiveVersionEncoder encoder) throws RepositoryException
+	{
+		if(StringUtils.isBlank(activeVersId))
+		{
+			throw new IllegalArgumentException("activeVersId must not be null or empty");
+		}
+		if(encoder == null)
+		{
+			throw new IllegalArgumentException("encoder must not be null");
+		}
+		// encode fileName
+		Path fileName = encoder.encodeFileName(activeVersId);
+		// load fileName as ManifestEntry
+		try
+		{
+			return encoder.loadVersionEntry(fileName);
+		}
+		catch (FileNotFoundException ex)
+		{
+			String msg = String.format("could not find active version entry for active version id '%s'. Reason: %s", activeVersId,
+										ex.getMessage());
+			throw new RepositoryException(Status.NOT_FOUND, msg);
+
+		}
+		catch (IOException ex)
+		{
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "Could not read active version entry file '%s'. Reason: %s",
+					fileName, ex.getMessage());
+		}
+	}
 }

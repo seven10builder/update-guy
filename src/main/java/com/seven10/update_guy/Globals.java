@@ -9,6 +9,8 @@ import com.seven10.update_guy.manifest.ManifestEntry;
 
 public class Globals
 {
+	public static final String ACTIVE_VERSIONS_FOLDER_NAME = "activeVersions";
+	public static final String MANIFEST_FOLDER_NAME = "manifests";
 	/**
 	 * The path of the local root folder for update-guy. This is the root of the 
 	 * tree where manifests and local caches are stored. 
@@ -38,7 +40,11 @@ public class Globals
 	}
 	public static Path getManifestStorePath(String repoId)
 	{
-		return getRootPath().resolve(repoId).resolve("manifests");
+		return getRootPath().resolve(repoId).resolve(MANIFEST_FOLDER_NAME);
+	}
+	public static Path getActiveVersionStorePath()
+	{
+		return getRootPath().resolve(ACTIVE_VERSIONS_FOLDER_NAME);
 	}
 	public static Path getFileStorePathForRole(String repoId, String releaseFamily, String version, String roleId)
 	{

@@ -144,7 +144,7 @@ public class ManifestServletTest extends JerseyTest
 	
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.manifest.ManifestServlet#getManifests()}.
+	 * {@link com.seven10.update_guy.manifest.ManifestServlet#getActiveRelease()}.
 	 * @throws RepositoryException 
 	 * @throws IOException 
 	 */
@@ -184,5 +184,132 @@ public class ManifestServletTest extends JerseyTest
 		assertTrue(expectedManifestList.containsAll(actual));
 		assertTrue(actual.containsAll(expectedManifestList));
 	}
+	
+	
+	/**
+	 * Test method for
+	 * {@link com.seven10.update_guy.manifest.ManifestServlet#getActiveRelease()}.
+	 * @throws RepositoryException 
+	 * @throws IOException 
+	 */
+	@Test
+	public void testGetactive_release_valid() throws IOException, RepositoryException
+	{
+		// /active-release/{activeVersId}?releaseFamily=derp&newVersion=dapp
+		
+		String testName = "active-rel_v";
+		Path repoFile = build_repo_info_file_by_testname(testName, folder);
+		copy_valid_repos_to_test(repoFile);
+		RepositoryInfo repoInfo = load_repos_from_file(repoFile).stream()
+				.filter(repo -> repo.repoType == RepositoryType.local).findFirst().get();
+		// calc the repoId
+		String repoId = repoInfo.getShaHash();
+		// copy some manifests to the manifest path
+		Path parentPath = repoFile.getParent();
+		Path localManifestPath = parentPath.resolve(repoId).resolve("manifests");
+		List<Manifest> manifestList = ManifestHelpers.create_manifest_list(testName, 5);
+		ManifestHelpers.write_manifest_list_to_folder(localManifestPath, manifestList);
+		
+		// set attribute so servlet picks it up
+		System.setProperty(Globals.SETTING_LOCAL_PATH, parentPath.toString());
+		System.setProperty(Globals.SETTING_REPO_FILENAME, repoFile.getFileName().toString());
+		
+		String activeVersionId = "actVersTest";
+		
+		for (Manifest manifest : manifestList)
+		{
+			for (ManifestEntry entry : manifest.getVersionEntries())
+			{
+				// set the active version
+				Response resp = target("/manifest/" + repoId + "/active-release/" + manifest.getReleaseFamily() + "/" + activeVersionId)
+						.queryParam("newVersion", entry.version)
+						.request().get();
+				assertEquals(Status.OK.getStatusCode(), resp.getStatus());
+				String json = resp.readEntity(String.class);
+				ManifestEntry actualEntry1 = GsonFactory.getGson().fromJson(json, ManifestEntry.class);
+				
+				// get the active version
+				resp = target("/manifest/" + repoId + "/active-release/"  + manifest.getReleaseFamily() + "/" + activeVersionId)
+						.queryParam("releaseFamily", manifest.getReleaseFamily())
+						.request().get();
+				assertEquals(Status.OK.getStatusCode(), resp.getStatus());
+				json = resp.readEntity(String.class);
+				ManifestEntry actualEntry2 = GsonFactory.getGson().fromJson(json, ManifestEntry.class);
+				assertEquals(actualEntry1, actualEntry2);
+			}
+			
+		}
+	}
+	/**
+	 * Test method for
+	 * {@link com.seven10.update_guy.manifest.ManifestServlet#getActiveRelease()}.
+	 * @throws RepositoryException 
+	 * @throws IOException 
+	 */
+	@Test
+	public void testGetactive_release_versionId_notFound() throws IOException, RepositoryException
+	{
+		// /active-release/{activeVersId}?releaseFamily=derp&newVersion=dapp
+		
+		String testName = "active-rel_vidnf";
+		Path repoFile = build_repo_info_file_by_testname(testName, folder);
+		copy_valid_repos_to_test(repoFile);
+		RepositoryInfo repoInfo = load_repos_from_file(repoFile).stream()
+				.filter(repo -> repo.repoType == RepositoryType.local).findFirst().get();
+		// calc the repoId
+		String repoId = repoInfo.getShaHash();
+		// copy some manifests to the manifest path
+		Path parentPath = repoFile.getParent();
+		Path localManifestPath = parentPath.resolve(repoId).resolve("manifests");
+		List<Manifest> manifestList = ManifestHelpers.create_manifest_list(testName, 1);
+		ManifestHelpers.write_manifest_list_to_folder(localManifestPath, manifestList);
+		
+		// set attribute so servlet picks it up
+		System.setProperty(Globals.SETTING_LOCAL_PATH, parentPath.toString());
+		System.setProperty(Globals.SETTING_REPO_FILENAME, repoFile.getFileName().toString());
+		
+		String activeVersionId = "not-found";
+		
+		Manifest manifest = manifestList.stream().findFirst().get();
 
+		Response resp = target("/manifest/" + repoId + "/active-release/"  + manifest.getReleaseFamily() + "/"+ activeVersionId)
+						.request().get();
+		assertEquals(Status.NOT_FOUND.getStatusCode(), resp.getStatus());
+	}
+	/**
+	 * Test method for
+	 * {@link com.seven10.update_guy.manifest.ManifestServlet#getActiveRelease()}.
+	 * @throws RepositoryException 
+	 * @throws IOException 
+	 */
+	@Test
+	public void testGetactive_release_relfam_notFound() throws IOException, RepositoryException
+	{
+		// /active-release/{activeVersId}?releaseFamily=derp&newVersion=dapp
+		
+		String testName = "active-rel_vidnf";
+		Path repoFile = build_repo_info_file_by_testname(testName, folder);
+		copy_valid_repos_to_test(repoFile);
+		RepositoryInfo repoInfo = load_repos_from_file(repoFile).stream()
+				.filter(repo -> repo.repoType == RepositoryType.local).findFirst().get();
+		// calc the repoId
+		String repoId = repoInfo.getShaHash();
+		// copy some manifests to the manifest path
+		Path parentPath = repoFile.getParent();
+		Path localManifestPath = parentPath.resolve(repoId).resolve("manifests");
+		List<Manifest> manifestList = ManifestHelpers.create_manifest_list(testName, 1);
+		ManifestHelpers.write_manifest_list_to_folder(localManifestPath, manifestList);
+		
+		// set attribute so servlet picks it up
+		System.setProperty(Globals.SETTING_LOCAL_PATH, parentPath.toString());
+		System.setProperty(Globals.SETTING_REPO_FILENAME, repoFile.getFileName().toString());
+		
+		String activeVersionId = "not-found";
+		
+		String releaseFamily = "some-fake-release-fam";
+		Response resp = target("/manifest/" + repoId + "/active-release/"  + releaseFamily + "/" + activeVersionId)
+						.request().get();
+		
+		assertEquals(Status.NOT_FOUND.getStatusCode(), resp.getStatus());
+	}
 }
