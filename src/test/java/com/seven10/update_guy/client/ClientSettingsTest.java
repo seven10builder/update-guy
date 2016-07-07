@@ -12,8 +12,9 @@ import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
-import com.seven10.update_guy.GsonFactory;
-import com.seven10.update_guy.exceptions.ClientParameterException;
+import com.seven10.update_guy.common.GsonFactory;
+import com.seven10.update_guy.client.ClientSettings;
+import com.seven10.update_guy.client.exceptions.ClientParameterException;
 
 /**
  * @author kmm

@@ -7,6 +7,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import com.seven10.update_guy.client.request.Requester;
+
 /**
  * @author kmm
  *

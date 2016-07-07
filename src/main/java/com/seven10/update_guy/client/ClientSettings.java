@@ -10,9 +10,9 @@ import org.apache.commons.io.FileUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.Expose;
-import com.seven10.update_guy.Globals;
-import com.seven10.update_guy.GsonFactory;
-import com.seven10.update_guy.exceptions.ClientParameterException;
+import com.seven10.update_guy.common.Globals;
+import com.seven10.update_guy.common.GsonFactory;
+import com.seven10.update_guy.client.exceptions.ClientParameterException;
 
 public class ClientSettings
 {

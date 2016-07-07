@@ -7,11 +7,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.seven10.update_guy.client.cli.CliMgr;
+import com.seven10.update_guy.client.exceptions.FatalClientException;
 import com.seven10.update_guy.client.local.JavaLauncher;
 import com.seven10.update_guy.client.local.LocalCacheUtils;
 import com.seven10.update_guy.client.request.RequesterUtils;
-import com.seven10.update_guy.exceptions.FatalClientException;
-import com.seven10.update_guy.manifest.ManifestEntry;
+import com.seven10.update_guy.common.manifest.ManifestEntry;
 
 public class UpdateGuyClient
 {

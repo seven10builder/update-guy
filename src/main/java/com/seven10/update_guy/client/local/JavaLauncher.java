@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.seven10.update_guy.exceptions.FatalClientException;
+import com.seven10.update_guy.client.exceptions.FatalClientException;
 
 public class JavaLauncher
 {

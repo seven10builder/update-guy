@@ -10,9 +10,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,13 +21,14 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.google.gson.JsonSyntaxException;
-import com.seven10.update_guy.FileFingerPrint;
-import com.seven10.update_guy.GsonFactory;
-import com.seven10.update_guy.ManifestEntryHelpers;
-import com.seven10.update_guy.ManifestHelpers;
+import com.seven10.update_guy.common.FileFingerPrint;
+import com.seven10.update_guy.common.GsonFactory;
+import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.ManifestEntryHelpers;
 import com.seven10.update_guy.client.ClientSettings;
-import com.seven10.update_guy.exceptions.FatalClientException;
-import com.seven10.update_guy.manifest.ManifestEntry;
+import com.seven10.update_guy.client.local.LocalCacheUtils;
+import com.seven10.update_guy.client.exceptions.FatalClientException;
+
 
 /**
  * @author kmm
@@ -165,7 +163,7 @@ public class LocalCacheUtilsTest
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.client.local.LocalCacheUtils#buildTargetPath(com.seven10.update_guy.manifest.ManifestEntry)}.
+	 * Test method for {@link com.seven10.update_guy.client.local.LocalCacheUtils#buildTargetPath(com.seven10.update_guy.common.manifest.ManifestEntry)}.
 	 * @throws IOException 
 	 * @throws JsonSyntaxException 
 	 * @throws FatalClientException 
@@ -186,7 +184,7 @@ public class LocalCacheUtilsTest
 		assertEquals(expected, actual);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.client.local.LocalCacheUtils#buildTargetPath(com.seven10.update_guy.manifest.ManifestEntry)}.
+	 * Test method for {@link com.seven10.update_guy.client.local.LocalCacheUtils#buildTargetPath(com.seven10.update_guy.common.manifest.ManifestEntry)}.
 	 * @throws IOException 
 	 * @throws JsonSyntaxException 
 	 * @throws FatalClientException 
@@ -205,7 +203,7 @@ public class LocalCacheUtilsTest
 		localCacheUtils.buildTargetPath(release);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.client.local.LocalCacheUtils#buildTargetPath(com.seven10.update_guy.manifest.ManifestEntry)}.
+	 * Test method for {@link com.seven10.update_guy.client.local.LocalCacheUtils#buildTargetPath(com.seven10.update_guy.common.manifest.ManifestEntry)}.
 	 * @throws IOException 
 	 * @throws JsonSyntaxException 
 	 * @throws FatalClientException 

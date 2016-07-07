@@ -16,7 +16,8 @@ import java.util.List;
 import org.apache.logging.log4j.Logger;
 
 import com.seven10.update_guy.client.ClientSettings;
-import com.seven10.update_guy.exceptions.ClientParameterException;
+import com.seven10.update_guy.client.exceptions.ClientParameterException;
+
 import org.apache.logging.log4j.LogManager;
 
 public class CliMgr

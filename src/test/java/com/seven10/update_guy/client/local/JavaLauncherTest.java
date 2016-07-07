@@ -4,17 +4,13 @@
 package com.seven10.update_guy.client.local;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
 import java.io.File;
 import java.io.IOException;
 
 import org.junit.Test;
 
-
-
-
-import com.seven10.update_guy.exceptions.FatalClientException;
+import com.seven10.update_guy.client.local.JavaLauncher;
+import com.seven10.update_guy.client.exceptions.FatalClientException;
 
 
 /**
