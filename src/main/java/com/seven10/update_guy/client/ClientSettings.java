@@ -59,8 +59,11 @@ public class ClientSettings
 	public String roleName;
 	@Expose
 	public String releaseFamily;
+	@Expose 
+	public String activeVersionId;
 	@Expose
 	private String cachePath;
+	
 	
 	public ClientSettings()
 	{
@@ -70,6 +73,7 @@ public class ClientSettings
 		repoId = "";
 		roleName = "";
 		releaseFamily = "unknown";
+		activeVersionId = "";
 	}
 	/**
 	 * @return the serverAddress
@@ -128,6 +132,17 @@ public class ClientSettings
 		return roleName;
 	}
 	/**
+	 * 
+	 */
+	public void setActiveVersion(String newVersion)
+	{
+		this.activeVersionId = newVersion;
+	}
+	public String getActiveVersion()
+	{
+		return this.activeVersionId;
+	}
+	/**
 	 * @param roleName the roleName to set
 	 */
 	public void setRoleName(String roleName)
@@ -176,6 +191,7 @@ public class ClientSettings
 		result = prime * result + ((repoId == null) ? 0 : repoId.hashCode());
 		result = prime * result + ((roleName == null) ? 0 : roleName.hashCode());
 		result = prime * result + ((serverAddress == null) ? 0 : serverAddress.hashCode());
+		result = prime * result + ((activeVersionId == null)? 0 : activeVersionId.hashCode());
 		result = prime * result + serverPort;
 		return result;
 	}
@@ -254,6 +270,17 @@ public class ClientSettings
 			return false;
 		}
 		if (serverPort != other.serverPort)
+		{
+			return false;
+		}
+		if(activeVersionId == null)
+		{
+			if(other.activeVersionId != null)
+			{
+				return false;
+			}
+		}
+		else if(!activeVersionId.equals(other.activeVersionId))
 		{
 			return false;
 		}

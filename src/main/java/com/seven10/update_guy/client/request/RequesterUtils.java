@@ -42,11 +42,10 @@ public class RequesterUtils
 	
 	public ManifestEntry requestActiveRelease() throws FatalClientException
 	{
-		String methodName = "active-release";
+		String methodName = String.format("active-release/%s/%s", settings.releaseFamily, settings.activeVersionId);
 		String url = buildManifestReq();		
 		Requester requester = new Requester(url, methodName);
 		
-		requester.addQueryParam("releaseFamily", settings.releaseFamily);
 		ManifestEntry activeVersion = requester.get(ManifestEntry.class);
 		logger.debug(".requestActiveRelease(): activeVersion = '%s'", activeVersion.getVersion());
 		return activeVersion;
