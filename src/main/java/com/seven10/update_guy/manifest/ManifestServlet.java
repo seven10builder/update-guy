@@ -7,6 +7,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -24,6 +25,7 @@ public class ManifestServlet
 {
 	private static final Logger logger = LogManager.getFormatterLogger(ManifestServlet.class);
 	ManifestMgr manifestMgr;
+	String repoId;
 
 	public static Manifest getManifestById(String releaseId, String repoId) throws RepositoryException
 	{
@@ -34,6 +36,7 @@ public class ManifestServlet
 	
 	public ManifestServlet(@PathParam("repoId") String repoId)
 	{
+		this.repoId = repoId;
 		java.nio.file.Path manifestPath = Globals.getManifestStorePath(repoId);
 		manifestMgr = new ManifestMgr(manifestPath);
 	}
@@ -91,7 +94,38 @@ public class ManifestServlet
 		}
 		return resp.build();
 	}
-
+	
+	@GET
+	@Path("/active-release/{releaseFamily}/{activeVersId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getActiveRelease( @PathParam("activeVersId") String activeVersId, @PathParam("releaseFamily") String releaseFamily, @QueryParam("newVersion") String newVersion)
+	{
+		logger.debug(".getActiveRelease(): activeVersId = '%s', releaseFamily = '%s', newVersion = '%s'",
+						activeVersId, releaseFamily, newVersion == null ? "<null>" : newVersion);
+		ResponseBuilder resp;
+		try
+		{
+			ActiveVersionEncoder encoder = new ActiveVersionEncoder(repoId, releaseFamily);
+			// if newVersion is set, process setVersion
+			if(newVersion != null)
+			{
+				this.manifestMgr.setActiveVersion(newVersion, activeVersId, encoder);
+			}
+			ManifestEntry entry = manifestMgr.getActiveVersion(activeVersId, encoder);
+			// return manifest entry
+			String json = GsonFactory.getGson().toJson(entry);
+			logger.debug(".getManifest(): activeVersion = %s", json);
+			resp = Response.ok().entity(json);
+		}
+		catch (RepositoryException ex)
+		{
+			String msg = String.format("could not process active version for activeVersionId '%s'. Reason: %s", activeVersId,
+									ex.getMessage());
+			logger.debug(String.format(".getActiveRelease(): %s",msg));
+			resp = Response.status(ex.getStatusCode()).entity(GsonFactory.createJsonFromString("error", msg));
+		}
+		return resp.build();
+	}
 	
 
 	
