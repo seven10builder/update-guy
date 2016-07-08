@@ -3,6 +3,8 @@ package com.seven10.update_guy.server;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -13,6 +15,7 @@ import com.seven10.update_guy.server.repository.RepositoryServlet;
 
 public class RestServer
 {
+	private static final Logger logger = LogManager.getFormatterLogger(RestServer.class);
 	private static String createServletsString()
 	{
 		List<String> servlets = new ArrayList<String>();
@@ -42,6 +45,10 @@ public class RestServer
 		{
 			jettyServer.start();
 			jettyServer.join();
+		}
+		catch(Exception ex)
+		{
+			logger.error(".main(): caught exception - %s ", ex.getMessage());
 		}
 		finally
 		{

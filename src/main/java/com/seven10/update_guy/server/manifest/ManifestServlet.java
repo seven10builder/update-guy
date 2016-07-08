@@ -1,5 +1,6 @@
 package com.seven10.update_guy.server.manifest;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -22,6 +23,10 @@ import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
+import com.seven10.update_guy.server.repository.RepositoryInfo;
+import com.seven10.update_guy.server.repository.RepositoryInfoMgr;
+import com.seven10.update_guy.server.repository.connection.RepoConnection;
+import com.seven10.update_guy.server.repository.connection.RepoConnectionFactory;
 
 @Path("/manifest/{repoId}")
 public class ManifestServlet
@@ -30,12 +35,13 @@ public class ManifestServlet
 	ManifestMgr manifestMgr;
 	String repoId;
 
-	public static Manifest getManifestById(String releaseId, String repoId) throws RepositoryException
+	public static Manifest getManifestById(String releaseFamily, String repoId) throws RepositoryException
 	{
 		java.nio.file.Path manifestPath = Globals.getManifestStorePath(repoId)
-				.resolve(String.format("%s.manifest", releaseId));
+				.resolve(String.format("%s.manifest", releaseFamily));
 		try
 		{
+			refreshLocalManifest(repoId, manifestPath, releaseFamily);
 			return Manifest.loadFromFile(manifestPath);
 		}
 		catch (UpdateGuyException ex)
@@ -45,6 +51,27 @@ public class ManifestServlet
 		}
 	}
 	
+	
+
+	private static void refreshLocalManifest(String repoId, java.nio.file.Path manifestPath, String releaseFamily) throws RepositoryException
+	{
+			logger.info(".refreshLocalManifest(): attempting to refresh local copy of manifest");
+			RepositoryInfo repoInfo = RepositoryInfoMgr.loadRepo(Globals.getRepoFile(), repoId);
+			RepoConnection repoConnection = RepoConnectionFactory.connect(repoInfo);		
+			Manifest manifest = repoConnection.getManifest(releaseFamily);
+			try
+			{
+				Manifest.writeToFile(manifestPath, manifest);
+			}
+			catch (IOException ex)
+			{
+				logger.error(".refreshLocalManifest(): could not write manifest '%s' to file '%s' - ", manifest.toString(), manifestPath, ex.getMessage());
+				throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "could not update local manifest");
+			}
+	}
+
+
+
 	public ManifestServlet(@PathParam("repoId") String repoId)
 	{
 		this.repoId = repoId;

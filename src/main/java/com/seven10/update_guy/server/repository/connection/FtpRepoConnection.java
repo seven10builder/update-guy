@@ -261,7 +261,7 @@ public class FtpRepoConnection implements RepoConnection
 			throw new IllegalArgumentException("releaseFamily cannot be null or empty");
 		}
 		String manifestFileName = String.format("%s.manifest", releaseFamily);
-		Path srcPath = activeRepo.getmanifestPath().resolve(manifestFileName);
+		Path srcPath = activeRepo.getRemoteManifestPath().resolve(manifestFileName);
 		String repoId = activeRepo.getShaHash();
 		Path destPath = Globals.getManifestStorePath(repoId).resolve(manifestFileName);
 		// ensure the path exists

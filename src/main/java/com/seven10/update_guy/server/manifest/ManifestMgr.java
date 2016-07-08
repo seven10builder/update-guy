@@ -23,6 +23,7 @@ import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 
+
 public class ManifestMgr
 {
 	private static final Logger logger = LogManager.getFormatterLogger(ManifestMgr.class);
@@ -46,12 +47,10 @@ public class ManifestMgr
 		catch (UpdateGuyNotFoundException ex)
 		{
 			logger.error(".convertPathToManifest(): manifest file not found. Reason: %s", ex.getMessage());
-			//throw new RepositoryException(Status.NOT_FOUND, "Could not find manifest file '%s'", path.getFileName().toString());
 		}
 		catch(UpdateGuyException ex)
 		{
 			logger.error(".convertPathToManifest(): Could not convert file '%s' to manifest object. Reason: %s", path, ex.getMessage());
-			//throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "Could not convert file '%s' to manifest",  path.getFileName().toString());
 		}
 		return manifest;
 	}
@@ -121,7 +120,7 @@ public class ManifestMgr
 		this.manifestPath = manifestPath;
 	}
 	
-	
+
 	/**
 	 * Retrieves an instance of the manifest identified by the release family.
 	 * This method loads the file from disk

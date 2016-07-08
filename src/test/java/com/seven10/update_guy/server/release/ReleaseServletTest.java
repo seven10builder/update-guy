@@ -134,7 +134,7 @@ public class ReleaseServletTest extends JerseyTest
 		for(Manifest manifest: manifestList)
 		{
 			String releaseFamily = manifest.getReleaseFamily();
-			ReleaseServlet releaseServlet = new ReleaseServlet(repoId, releaseFamily);
+			ReleaseServlet releaseServlet = new ReleaseServlet(repoId, "valid");
 			assertNotNull(releaseServlet);
 		}
 	}

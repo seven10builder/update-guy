@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import javax.ws.rs.core.Response.Status;
 
@@ -23,6 +24,36 @@ import com.seven10.update_guy.server.exceptions.RepositoryException;
 public class RepositoryInfoMgr
 {
 	private static final Logger logger = LogManager.getFormatterLogger(RepositoryInfoMgr.class);
+	
+	private static void createDefaultFile(Path repoStorePath) throws RepositoryException
+	{
+		Path parent = repoStorePath.getParent();
+		try
+		{
+			parent.toFile().mkdirs();
+			Files.createFile(repoStorePath);
+		}
+		catch (IOException e)
+		{
+			logger.error(".createDefaultFile(): could not create default file '%s'. Reason: %s", repoStorePath.toString(), e.getMessage());
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "could not initialize repo config file");
+		}
+	}
+	
+	private static boolean matchRepoId(RepositoryInfo info, String repoId)
+	{
+		try
+		{
+			boolean rval = info.getShaHash().equals(repoId);
+			logger.info(".matchRepoId(): found repo id for '%s' - %s", repoId, info.toString());
+			return rval;
+		}
+		catch(RepositoryException ex)
+		{
+			logger.error(".matchRepoId(): Could not match repo id '%s', returning false - %s", info.toString(), ex.getMessage());
+			return false;
+		}
+	}
 	
 	private final Path repositoryStorePath;
 	private Map<String, RepositoryInfo> repoMap;
@@ -41,6 +72,7 @@ public class RepositoryInfoMgr
 	
 	private void init() throws RepositoryException
 	{
+		logger.info(".init(): initializing RepositoryInfoMgr");
 		if(Files.exists(repositoryStorePath)==false)
 		{
 			createDefaultFile(repositoryStorePath);
@@ -63,6 +95,7 @@ public class RepositoryInfoMgr
 		String shaHash = repoInfo.getShaHash();
 		if (repoMap.containsKey(shaHash))
 		{
+			logger.error(".addRepository(): repoMap already contains hash '%s' - delete first.", shaHash);
 			throw new RepositoryException(Status.NOT_MODIFIED, "repoMap already contains hash '%s'. Delete first.", shaHash);
 		}
 		// store repositoryInfo list
@@ -75,6 +108,7 @@ public class RepositoryInfoMgr
 		// find repositoryInfo object for repositoryId in list
 		if (repoMap.containsKey(repositoryId) == false)
 		{
+			logger.error(".deleteRepository(): repository entry id='%s' does not exist", repositoryId);
 			throw new RepositoryException(Status.NOT_FOUND, "Repository entry id='%s' does not exist", repositoryId);
 		}
 		// remove repositoryInfo object from list
@@ -100,10 +134,11 @@ public class RepositoryInfoMgr
 		}
 		catch (IOException e)
 		{
-			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "Could not write file '%s'. Exception: %s", repoStorePath, e.getMessage());
+			logger.error(".writeRepos(): could not write file '%s' - %s", repoStorePath, e.getMessage());
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "could not write repo file" );
 		}
 	}
-
+	
 	public static List<RepositoryInfo> loadRepos(Path repoStorePath) throws RepositoryException
 	{
 		if(repoStorePath == null)
@@ -128,25 +163,26 @@ public class RepositoryInfoMgr
 		}
 		catch (IOException e)
 		{
-			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "Could not read file '%s'. Exception: %s", repoStorePath, e.getMessage());
+			logger.error(".loadRepos(): could not read repo config file '%s' - %s", repoStorePath, e.getMessage());
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "Could not read repo config file");
 		}
 	}
-
-	private static void createDefaultFile(Path repoStorePath) throws RepositoryException
+	
+	public static RepositoryInfo loadRepo(Path repoStorePath, String repoId) throws RepositoryException
 	{
-		Path parent = repoStorePath.getParent();
+		logger.info(".loadRepo(): loading repo '%s' from file '%s'", repoId, repoStorePath);
+		List<RepositoryInfo> repoList = loadRepos(repoStorePath);
 		try
 		{
-			parent.toFile().mkdirs();
-			Files.createFile(repoStorePath);
+			return repoList.stream().filter(ri->matchRepoId(ri, repoId)).findFirst().get();
 		}
-		catch (IOException e)
+		catch(NoSuchElementException ex)
 		{
-			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, 
-					"Could not create default file '%s'. Reason: %s", repoStorePath.toString(), e.getMessage());
+			logger.error(".loadRepo(): could not load repo '%s' - %s", repoId, ex.getMessage());
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "could not load repo '%s'", repoId);
 		}
 	}
-
+	
 	public Map<String, RepositoryInfo> getRepoMap()
 	{
 		return repoMap;

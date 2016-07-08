@@ -24,7 +24,6 @@ public class RepositoryInfo
 		
 		try
 		{
-			//outputStream.write( cachePath.getBytes() );
 			outputStream.write( description.getBytes() );
 			outputStream.write( manifestPath.getBytes() );
 			outputStream.write( password.getBytes() );
@@ -61,25 +60,18 @@ public class RepositoryInfo
     	description = "unknown";
     }
 	@Expose
-	@XmlElement
 	public String repoAddress;
 	@Expose
-	@XmlElement
 	public int port;
 	@Expose
-	@XmlElement
 	public String user;
 	@Expose
-	@XmlElement
     public String password;
 	@Expose
-	@XmlElement
     public String manifestPath;
 	@Expose
-	@XmlElement
     public String description;
 	@Expose
-	@XmlElement
     public RepositoryType repoType;
 
     
@@ -205,7 +197,7 @@ public class RepositoryInfo
 		}
 	}
 
-	public Path getmanifestPath()
+	public Path getRemoteManifestPath()
 	{
 		return Paths.get(this.manifestPath);
 	}

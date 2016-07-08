@@ -11,8 +11,11 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.google.gson.Gson;
-import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
@@ -20,7 +23,7 @@ import com.seven10.update_guy.common.exceptions.UpdateGuyNotFoundException;
 
 public class Manifest
 {
-
+	private static final Logger logger = LogManager.getFormatterLogger(Manifest.class);
 	@Expose
 	String releaseFamily;
 	@Expose
@@ -115,6 +118,7 @@ public class Manifest
 		}
 		catch(NoSuchElementException ex)
 		{
+			logger.error(".getVersionEntry(): could not get version entry for id '%s' - %s", version, ex.getMessage());
 			throw new UpdateGuyNotFoundException("Could not find version '%s'", version);
 		}
 	}
@@ -157,7 +161,8 @@ public class Manifest
 		}
 		if(Files.exists(filePath) == false)
 		{
-			throw new UpdateGuyNotFoundException( "The manifest located at '%s' was not found", filePath.toString());
+			logger.error(".loadFromFile(): could not locate manifest file '%s'",filePath);
+			throw new UpdateGuyNotFoundException( "The manifest file '%s' was not found", filePath.getFileName().toString());
 		}
 		try
 		{
@@ -166,9 +171,15 @@ public class Manifest
 			Manifest manifest = gson.fromJson(json, Manifest.class);
 			return manifest;
 		}
-		catch (JsonParseException|IOException ex)
+		catch (IOException ex)
 		{
-			throw new UpdateGuyException("Could not read file '%s'. Exception: %s", filePath, ex.getMessage());
+			logger.error(".loadFromFile(): could not read manifest file '%s' - %s",filePath.toString(), ex.getMessage());
+			throw new UpdateGuyException("Could not read manifest file '%s'", filePath.getFileName().toString());
+		}
+		catch(JsonSyntaxException ex)
+		{
+			logger.error(".loadFromFile(): could not parse manifest file '%s' - %s",filePath.toString(), ex.getMessage());
+			throw new UpdateGuyException("Could not parse manifest file '%s'", filePath.getFileName().toString());
 		}
 	}
 

@@ -38,7 +38,7 @@ class LocalRepoConnection implements RepoConnection
 	}
 	public LocalRepoConnection(RepositoryInfo activeRepo) throws RepositoryException
 	{
-		repoPath = activeRepo.getmanifestPath();
+		repoPath = activeRepo.getRemoteManifestPath();
 		repoId = activeRepo.getShaHash();
 	}
 	@Override
