@@ -9,15 +9,21 @@
 
 	<properties>
 		<powermock.version>1.6.5</powermock.version>
+		<jetty.version>9.3.10.v20160621</jetty.version>
+		<jersey.version>2.23.1</jersey.version>
 	</properties>
 
 	<dependencies>
+	
+		<!-- JSON -->
 		<!-- http://mvnrepository.com/artifact/com.google.code.gson/gson -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>2.6.2</version>
 		</dependency>
+		
+		<!-- Apache Commons -->
 		<!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
 		<dependency>
     		<groupId>commons-cli</groupId>
@@ -48,49 +54,62 @@
 			<artifactId>commons-io</artifactId>
 			<version>2.5</version>
 		</dependency>
+		
+		<!-- JERSEY -->
 		<!-- http://mvnrepository.com/artifact/org.glassfish.jersey.test-framework.providers/jersey-test-framework-provider-jetty -->
 		<dependency>
 			<groupId>org.glassfish.jersey.test-framework.providers</groupId>
 			<artifactId>jersey-test-framework-provider-jetty</artifactId>
-			<version>2.23.1</version>
+			<version>${jersey.version}</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-server -->
 		<dependency>
 		    <groupId>org.glassfish.jersey.core</groupId>
 		    <artifactId>jersey-server</artifactId>
-		    <version>2.23.1</version>
+		    <version>${jersey.version}</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-client -->
 		<dependency>
 		    <groupId>org.glassfish.jersey.core</groupId>
 		    <artifactId>jersey-client</artifactId>
-		    <version>2.23.1</version>
+		    <version>${jersey.version}</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.containers/jersey-container-servlet-core -->
 		<dependency>
 		    <groupId>org.glassfish.jersey.containers</groupId>
 		    <artifactId>jersey-container-servlet-core</artifactId>
-		    <version>2.23.1</version>
+		    <version>${jersey.version}</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.containers/jersey-container-jetty-http -->
 		<dependency>
 		    <groupId>org.glassfish.jersey.containers</groupId>
 		    <artifactId>jersey-container-jetty-http</artifactId>
-		    <version>2.23.1</version>
+		    <version>${jersey.version}</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.media/jersey-media-moxy -->
 		<dependency>
 		    <groupId>org.glassfish.jersey.media</groupId>
 		    <artifactId>jersey-media-moxy</artifactId>
-		    <version>2.23.1</version>
+		    <version>${jersey.version}</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.containers/jersey-container-jetty-servlet -->
+<dependency>
+    <groupId>org.glassfish.jersey.containers</groupId>
+    <artifactId>jersey-container-jetty-servlet</artifactId>
+    <version>${jersey.version}</version>
+</dependency>
+		
+		
+		<!-- JETTY -->
 		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty.aggregate/jetty-all -->
 		<dependency>
 		    <groupId>org.eclipse.jetty.aggregate</groupId>
 		    <artifactId>jetty-all</artifactId>
-		    <version>9.4.0.M0</version>
+		    <version>${jetty.version}</version>
 		    <type>pom</type>
 		</dependency>
+		
+		<!-- JUNIT -->
 		<!-- https://mvnrepository.com/artifact/junit/junit -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -104,7 +123,9 @@
 		    <artifactId>junit-addons</artifactId>
 		    <version>1.4</version>
 		    <scope>test</scope>
-		</dependency>		
+		</dependency>	
+		
+		<!-- MOCKING -->	
 		<!-- https://mvnrepository.com/artifact/org.powermock/powermock-module-junit4 -->
 		<dependency>
 		    <groupId>org.powermock</groupId>
@@ -119,6 +140,8 @@
 		    <version>1.6.5</version>
 		    <scope>test</scope>
 		</dependency>
+		
+		<!-- LOGGING -->
 		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
 		<dependency>
 		    <groupId>org.apache.logging.log4j</groupId>
