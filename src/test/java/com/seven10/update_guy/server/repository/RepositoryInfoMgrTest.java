@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -99,13 +100,9 @@ public class RepositoryInfoMgrTest
 	public void testAddRepository_valid_entries_no_colision()
 			throws Exception
 	{
-		
-		
-		String releaseFamily = "addRepo-venc";
-		
-		Path repoInfoFile = build_repo_info_file_by_testname(releaseFamily, folder);
-		copy_valid_repos_to_test(repoInfoFile);
-		
+		String testName = "addRepo-venc";
+		Path repoInfoFile = folder.newFolder(testName).toPath().resolve(testName + ".json");
+		FileUtils.copyFile(get_valid_repos_path().toFile(), repoInfoFile.toFile());
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(repoInfoFile);
 
 		// get sha of config to compare later
@@ -113,16 +110,12 @@ public class RepositoryInfoMgrTest
 		int originalSize =  mgr.getRepoMap().keySet().size();
 
 		// get the id for the repo
-		RepositoryInfo actualRepoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local);
-		actualRepoInfo.description = "this is completely different";
-		actualRepoInfo.port = 31337;
-		actualRepoInfo.user = "drApocalypse";
-		
-		
-		RepositoryInfo actual = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local);
+	
+		RepositoryInfo actual =  new RepositoryInfo();
 		actual.description = "this is completely different";
 		actual.port = 31337;
 		actual.user = "drApocalypse";
+		actual.repoType = RepositoryType.ftp;
 		mgr.addRepository(actual);
 		String modifiedHash = RepoInfoHelpers.hashFile(repoInfoFile);
 
@@ -140,10 +133,10 @@ public class RepositoryInfoMgrTest
 	@Test
 	public void testAddRepository_valid_entries_colision() throws Exception
 	{
-		String releaseFamily = "addRepo-vec";
+		String testName = "addRepo-vec";
 		
-		Path repoInfoFile = build_repo_info_file_by_testname(releaseFamily, folder);
-		copy_valid_repos_to_test(repoInfoFile);
+		Path repoInfoFile = folder.newFolder(testName).toPath().resolve(testName + ".json");
+		FileUtils.copyFile(get_valid_repos_path().toFile(), repoInfoFile.toFile());
 		
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(repoInfoFile);
 
@@ -183,9 +176,9 @@ public class RepositoryInfoMgrTest
 	@Test
 	public void testAddRepository_nullEntries() throws NoSuchAlgorithmException, IOException, RepositoryException
 	{
-		String releaseFamily = "addRepo-ne";
-		Path repoInfoFile = build_repo_info_file_by_testname(releaseFamily, folder);
-		copy_valid_repos_to_test(repoInfoFile);
+		String testName = "addRepo-ne";
+		Path repoInfoFile = folder.newFolder(testName).toPath().resolve(testName + ".json");
+		FileUtils.copyFile(get_valid_repos_path().toFile(), repoInfoFile.toFile());
 		
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(repoInfoFile);
 
@@ -219,10 +212,10 @@ public class RepositoryInfoMgrTest
 	@Test
 	public void testDeleteRepository_valid_exists()	throws Exception
 	{
-		String releaseFamily = "delRepo-ve";
+		String testName = "delRepo-ve";
 		
-		Path repoInfoFile = build_repo_info_file_by_testname(releaseFamily, folder);
-		copy_valid_repos_to_test(repoInfoFile);
+		Path repoInfoFile = folder.newFolder(testName).toPath().resolve(testName + ".json");
+		FileUtils.copyFile(get_valid_repos_path().toFile(), repoInfoFile.toFile());
 		
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(repoInfoFile);
 
@@ -251,11 +244,10 @@ public class RepositoryInfoMgrTest
 	public void testDeleteRepository_valid_not_exists()
 			throws Exception
 	{
-		String releaseFamily = "delRepo-vne";
+		String testName = "delRepo-vne";
 		
-		
-		Path storePath = build_repo_info_file_by_testname(releaseFamily, folder);
-		copy_valid_repos_to_test(storePath);
+		Path storePath = folder.newFolder(testName).toPath().resolve(testName + ".json");
+		FileUtils.copyFile(get_valid_repos_path().toFile(), storePath.toFile());
 		
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(storePath);
 
@@ -300,8 +292,8 @@ public class RepositoryInfoMgrTest
 	@Test
 	public void testWriteReadRepos() throws IOException, RepositoryException, NoSuchAlgorithmException
 	{
-		String releaseFamily = "writeReadRepos";
-		Path storePath = build_repo_info_file_by_testname(releaseFamily, folder);
+		String testName = "writeReadRepos";
+		Path storePath = folder.newFolder(testName).toPath().resolve(testName + ".json");
 		
 		List<RepositoryInfo> expectedRepos = load_repos_from_file(get_valid_repos_path());
 		
@@ -416,9 +408,9 @@ public class RepositoryInfoMgrTest
 	@Test
 	public void testGetRepoMap() throws IOException, RepositoryException
 	{
-		
-		Path repoInfoFile = build_repo_info_file_by_testname("getRepoMap", folder);
-		copy_valid_repos_to_test(repoInfoFile);
+		String testName = "getRepoMap";
+		Path repoInfoFile = folder.newFolder(testName).toPath().resolve(testName + ".json");
+		FileUtils.copyFile(get_valid_repos_path().toFile(), repoInfoFile.toFile());
 		RepositoryInfoMgr mgr = new RepositoryInfoMgr(repoInfoFile);
 		Map<String, RepositoryInfo> repoMap = mgr.getRepoMap();
 		assertNotNull(repoMap);

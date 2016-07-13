@@ -56,7 +56,7 @@ public class ManifestEntryHelpers
 	}
 	public static Path get_valid_download_file_path()
 	{
-		return Paths.get("src","test","resources","repoPaths","1.0","file1");
+		return Paths.get("src","test","resources","remote_repo","files","1.0","file1");
 	}
 
 

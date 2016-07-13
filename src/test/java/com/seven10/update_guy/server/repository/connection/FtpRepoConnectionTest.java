@@ -15,14 +15,18 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -31,6 +35,8 @@ import org.mockito.stubbing.Answer;
 
 import static org.mockito.Mockito.*;
 
+import com.seven10.update_guy.common.ManifestHelpers;
+import com.seven10.update_guy.common.RepoInfoHelpers;
 import com.seven10.update_guy.common.TestConstants;
 
 import com.seven10.update_guy.common.manifest.Manifest;
@@ -110,7 +116,11 @@ public class FtpRepoConnectionTest
 	@Test
 	public void testDownloadFile_valid() throws Exception
 	{
-		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.ftp);
+		Path repoPath = RepoInfoHelpers.get_valid_repos_path();
+		RepositoryInfo repoInfo = load_repos_from_file(repoPath).stream()
+											.filter(repo-> repo.repoType == RepositoryType.local)
+											.findFirst().get();
+		
 		Path srcPath = get_valid_download_file_path();
 		Path destPath = folder.newFolder().toPath().resolve(srcPath.getFileName().toString());
 		
@@ -466,6 +476,79 @@ public class FtpRepoConnectionTest
 		{
 			verify(spiedOnFileComplete, never()).accept(any());
 		}
+	}
+	
+	/**
+	 * Test method for
+	 * {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#downloadRelease(com.seven10.update_guy.repository.Manifest.VersionEntry)}
+	 * .
+	 * @throws Exception 
+	 */
+	@Test
+	public void testGetFileNames_valid() throws Exception
+	{
+		Path targetDir = ManifestHelpers.get_manifests_path();
+		List<String> expectedFiles = Files.walk(targetDir).filter(Files::isRegularFile)
+				.filter(Objects::nonNull)
+				.map(file->file.getFileName().toString())
+				.collect(Collectors.toList());
 		
+		FTPFile[] filesArr = expectedFiles.stream().map(fname -> 
+		{
+			FTPFile ftpFile = mock(FTPFile.class);
+			doReturn(fname).when(ftpFile).getName();
+			return ftpFile;
+		}).toArray(size->new FTPFile[size]);
+		
+		FTPClient ftpClient = mock(FTPClient.class);
+		doReturn(true).when(ftpClient).changeWorkingDirectory(anyString());
+		doReturn(filesArr).when(ftpClient).listFiles(anyString());
+		
+		RepositoryInfo repo = load_valid_repo_info(RepositoryType.ftp);
+		FtpRepoConnection repoConnection = new FtpRepoConnection(repo, ftpClient);
+		
+		List<String> actualFiles = repoConnection.getFileNames(targetDir);
+		assertNotEquals(0, actualFiles.size());
+		assertTrue(expectedFiles.containsAll(actualFiles));
+		assertTrue(actualFiles.containsAll(expectedFiles));
+	}
+	
+	/**
+	 * Test method for
+	 * {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#downloadRelease(com.seven10.update_guy.repository.Manifest.VersionEntry)}
+	 * .
+	 * @throws Exception 
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void testGetFileNames_null_targetPath() throws Exception
+	{
+		Path targetDir = null;
+		
+		FTPClient ftpClient = mock(FTPClient.class);
+		
+		RepositoryInfo repo = load_valid_repo_info(RepositoryType.ftp);
+		FtpRepoConnection repoConnection = new FtpRepoConnection(repo, ftpClient);
+		
+		repoConnection.getFileNames(targetDir);
+	}
+	/**
+	 * Test method for
+	 * {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#downloadRelease(com.seven10.update_guy.repository.Manifest.VersionEntry)}
+	 * .
+	 * @throws Exception 
+	 */
+	@Test(expected=RepositoryException.class)
+	public void testGetFileNames_path_not_exist() throws Exception
+	{
+		Path targetDir = Paths.get("this","doesnt", "exist");
+		
+	
+		FTPClient ftpClient = mock(FTPClient.class);
+		doReturn(false).when(ftpClient).changeWorkingDirectory(anyString());
+		
+		RepositoryInfo repo = load_valid_repo_info(RepositoryType.ftp);
+		FtpRepoConnection repoConnection = new FtpRepoConnection(repo, ftpClient);
+		
+		repoConnection.getFileNames(targetDir);
 	}
 }

@@ -9,14 +9,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -305,4 +309,92 @@ public class FtpRepoConnection implements RepoConnection
 			onFileComplete.accept(destPath);
 		}
 	}
+	
+	@Override
+	public List<String> getFileNames(Path targetDir) throws RepositoryException
+	{
+		if(targetDir == null)
+		{
+			throw new IllegalArgumentException("targetDir must not be null");
+		}
+		
+		try
+		{
+			logger.info(".getFileNames(): attempting to walk path '%s'", targetDir);
+			if(ftpClient.changeWorkingDirectory(targetDir.toString()))
+			{				
+				FTPFile[] arr = ftpClient.listFiles(targetDir.toString());
+				List<String> list = Arrays.asList(arr)				// convert array to list
+									.stream()						// convert list to stream
+									.map(ftpFile->ftpFile.getName())// convert each FTPFile to filename
+									.collect(Collectors.toList());	// collect stream to list
+				logger.debug(".getFileNames(): results from walk of path '%s' - %s", targetDir, String.join(", ", list) );
+				return list;
+			}
+			else
+			{
+				logger.error(".getFileNames(): target directory '%s' does not exist", targetDir.toString());
+				throw new RepositoryException(Status.NOT_FOUND, "Could not find target directory");
+			}
+		}
+		catch (IOException ex)
+		{
+			logger.error(".getFileNames(): could not get list of filenames for '%s' - ", targetDir.toString(), ex.getMessage());
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, " Could not get list of filenames");
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((activeRepo == null) ? 0 : activeRepo.hashCode());
+		result = prime * result + ((ftpClient == null) ? 0 : ftpClient.hashCode());
+		return result;
+	}
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+		{
+			return true;
+		}
+		if (obj == null)
+		{
+			return false;
+		}
+		if (!(obj instanceof FtpRepoConnection))
+		{
+			return false;
+		}
+		FtpRepoConnection other = (FtpRepoConnection) obj;
+		if (activeRepo == null)
+		{
+			if (other.activeRepo != null)
+			{
+				return false;
+			}
+		}
+		else if (!activeRepo.equals(other.activeRepo))
+		{
+			return false;
+		}
+		if (ftpClient == null)
+		{
+			if (other.ftpClient != null)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 }

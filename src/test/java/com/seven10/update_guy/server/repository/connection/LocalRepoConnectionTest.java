@@ -5,6 +5,7 @@ package com.seven10.update_guy.server.repository.connection;
 
 import static com.seven10.update_guy.common.ManifestHelpers.*;
 import static com.seven10.update_guy.common.RepoConnectionHelpers.*;
+import static com.seven10.update_guy.common.RepoInfoHelpers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
@@ -13,9 +14,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,7 +28,7 @@ import org.junit.rules.TemporaryFolder;
 
 import com.seven10.update_guy.common.RepoInfoHelpers;
 import com.seven10.update_guy.common.DownloadValidator;
-import com.seven10.update_guy.common.TestConstants;
+import com.seven10.update_guy.common.ManifestHelpers;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
 import com.seven10.update_guy.server.repository.SpyablePathConsumer;
@@ -64,22 +69,16 @@ public class LocalRepoConnectionTest
 	@Test
 	public void testgetManifest_valid() throws Exception
 	{
-		String releaseFamily = "getManifest-v";
-		
-		// setup a manifest to get
-		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
-		copy_manifest_to_path(TestConstants.valid_manifest_name, manifestPath);
-		Manifest expected = load_manifest_from_path(manifestPath);
+		String releaseFamily = "relfam";
+	
+		Manifest expected = load_manifest_from_path(get_valid_manifest_file_path());
 		
 		// set up our local repo
-		String repoInfoFileName = "localRepo.json";
-		List<RepositoryInfo> repos = create_repo_infos_from_filename(repoInfoFileName);
+		List<RepositoryInfo> repos = load_repos_from_file(get_valid_repos_path());
 		RepositoryInfo repo = get_repo_info_by_type(repos, RepositoryType.local);
 		
-		// make sure we're using the path the manifest is stored at
-		repo.manifestPath = manifestPath.getParent().toString();
 		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
-		
+	
 		Manifest actual = repoConnection.getManifest(releaseFamily);
 		
 		assertEquals(expected, actual);
@@ -207,5 +206,62 @@ public class LocalRepoConnectionTest
 		ManifestEntry versionEntry = new ManifestEntry();
 		Consumer<Path> spiedOnFileComplete = null;
 		repoConnection.downloadRelease(versionEntry, spiedOnFileComplete );
+	}
+	
+	/**
+	 * Test method for
+	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadRelease(com.seven10.update_guy.repository.Manifest.VersionEntry)}
+	 * .
+	 * @throws Exception 
+	 */
+	@Test
+	public void testGetFileNames_valid() throws Exception
+	{
+		Path targetDir = ManifestHelpers.get_manifests_path();
+		List<String> expectedFiles = Files.walk(targetDir).filter(Files::isRegularFile)
+				.filter(Objects::nonNull)
+				.map(file->file.getFileName().toString())
+				.collect(Collectors.toList());
+		
+		RepositoryInfo repo = load_valid_repo_info(RepositoryType.local);
+		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
+		
+		List<String> actualFiles = repoConnection.getFileNames(targetDir);
+		assertNotEquals(0, actualFiles.size());
+		assertTrue(expectedFiles.containsAll(actualFiles));
+		assertTrue(actualFiles.containsAll(expectedFiles));
+	}
+	
+	/**
+	 * Test method for
+	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadRelease(com.seven10.update_guy.repository.Manifest.VersionEntry)}
+	 * .
+	 * @throws Exception 
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void testGetFileNames_null_targetPath() throws Exception
+	{
+		Path targetDir = null;
+		
+		RepositoryInfo repo = load_valid_repo_info(RepositoryType.local);
+		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
+		
+		repoConnection.getFileNames(targetDir);
+	}
+	/**
+	 * Test method for
+	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadRelease(com.seven10.update_guy.repository.Manifest.VersionEntry)}
+	 * .
+	 * @throws Exception 
+	 */
+	@Test(expected=RepositoryException.class)
+	public void testGetFileNames_path_not_exist() throws Exception
+	{
+		Path targetDir = Paths.get("this","doesnt", "exist");
+		
+		RepositoryInfo repo = load_valid_repo_info(RepositoryType.local);
+		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
+		
+		repoConnection.getFileNames(targetDir);
 	}
 }

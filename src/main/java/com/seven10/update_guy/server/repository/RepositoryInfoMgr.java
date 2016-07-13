@@ -44,8 +44,8 @@ public class RepositoryInfoMgr
 	{
 		try
 		{
-			boolean rval = info.getShaHash().equals(repoId);
-			logger.info(".matchRepoId(): found repo id for '%s' - %s", repoId, info.toString());
+			boolean rval = info.getShaHash().contentEquals(repoId);
+			logger.info(".matchRepoId(): %s repo id for '%s' - %s", rval ? "found": "not found", repoId, info.toString());
 			return rval;
 		}
 		catch(RepositoryException ex)

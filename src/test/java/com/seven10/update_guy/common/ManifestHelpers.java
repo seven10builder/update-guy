@@ -1,11 +1,15 @@
 package com.seven10.update_guy.common;
 
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.rules.TemporaryFolder;
@@ -16,6 +20,8 @@ import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 
+import jersey.repackaged.com.google.common.util.concurrent.UncheckedExecutionException;
+
 public class ManifestHelpers
 {
 	public static Path get_valid_manifest_file_path()
@@ -25,7 +31,7 @@ public class ManifestHelpers
 	}
 	public static Path get_manifests_path()
 	{
-		Path srcFile = Paths.get("src","test","resources","manifests");
+		Path srcFile = Paths.get("src","test","resources","remote_repo","2f4be34b3680b5a2556b1830f3c24232", "manifests");
 		return srcFile;
 	}
 	public static Manifest load_manifest_from_path(Path manifestPath) throws IOException
@@ -33,6 +39,34 @@ public class ManifestHelpers
 		String json = FileUtils.readFileToString(manifestPath.toFile(), GsonFactory.encodingType);
 		Gson gson = GsonFactory.getGson();
 		return gson.fromJson(json, Manifest.class);
+	}
+	
+	public static List<Manifest> load_manifest_list_from_path(Path manifestsPath) throws IOException
+	{
+		
+		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**.manifest");
+		
+		List<Manifest> files		
+				= Files.walk(manifestsPath).filter(Files::isRegularFile)
+						.filter(path -> matcher.matches(path))
+						.map(path->
+						{
+							String json;
+							try
+							{
+								json = FileUtils.readFileToString(path.toFile(), GsonFactory.encodingType);
+							}
+							catch (Exception e)
+							{
+								throw new UncheckedExecutionException(e);
+							}
+							Gson gson = GsonFactory.getGson();
+							Manifest manifest = gson.fromJson(json, Manifest.class);
+							return manifest;
+						})
+						.filter(Objects::nonNull)
+						.collect(Collectors.toList());
+		return files;
 	}
 
 	public static void copy_manifest_to_path(String manifestFileName, Path destFile) throws IOException

@@ -134,8 +134,5 @@ public class RepositoryServlet
 			resp = Response.status(ex.getStatusCode()).entity(ex.getMessage());
 		}
 		return resp.build();
-
 	}
-
-	
 }

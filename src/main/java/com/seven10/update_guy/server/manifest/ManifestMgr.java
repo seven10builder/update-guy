@@ -56,6 +56,7 @@ public class ManifestMgr
 	}
 
 	private final Path manifestPath;
+	private ManifestRefresher manifestRefresher;
 	
 	private ManifestEntry getNewVersionEntry(String newVersion, ActiveVersionEncoder encoder) throws RepositoryException
 	{
@@ -107,7 +108,7 @@ public class ManifestMgr
 	}
 	
 	
-	public ManifestMgr(Path manifestPath)
+	public ManifestMgr(Path manifestPath, String repoId)
 	{
 		if( manifestPath == null)
 		{
@@ -118,6 +119,7 @@ public class ManifestMgr
 			manifestPath.toFile().mkdirs();
 		}
 		this.manifestPath = manifestPath;
+		this.manifestRefresher = new ManifestRefresher(repoId, manifestPath);
 	}
 	
 
@@ -140,6 +142,7 @@ public class ManifestMgr
 		Path manifestFile = getLocalManifestFilePath(releaseFamily);
 		try
 		{
+			manifestRefresher.refreshLocalManifest(releaseFamily);
 			return Manifest.loadFromFile(manifestFile);
 		}
 		catch (UpdateGuyNotFoundException ex)
@@ -162,6 +165,7 @@ public class ManifestMgr
 	 */
 	public List<Manifest> getManifests() throws RepositoryException
 	{
+		
 		PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**.manifest");
 		
 		List<Manifest> files;

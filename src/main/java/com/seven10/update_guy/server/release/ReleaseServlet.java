@@ -19,11 +19,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.seven10.update_guy.common.FileFingerPrint;
+import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.RepositoryServlet;
+import com.seven10.update_guy.server.manifest.ManifestRefresher;
 import com.seven10.update_guy.server.manifest.ManifestServlet;
 
 
@@ -71,8 +73,7 @@ public class ReleaseServlet
 	public ReleaseServlet(@PathParam("repoId") String repoId, @PathParam("releaseFamily") String releaseFamily) throws RepositoryException
 	{
 		RepositoryInfo repoInfo = RepositoryServlet.getRepoInfoById(repoId);
-		Manifest manifest = ManifestServlet.getManifestById(releaseFamily, repoId);
-
+		Manifest manifest = ManifestServlet.getManifestById(releaseFamily, repoId, new ManifestRefresher(repoId, Globals.getManifestStorePath(repoId)));
 		this.releaseMgr = new ReleaseMgr(manifest, repoInfo);
 	}
 
@@ -146,6 +147,4 @@ public class ReleaseServlet
 		ResponseBuilder	resp = Response.ok();
 		return resp.build();
 	}
-	
-	
 }

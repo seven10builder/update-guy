@@ -3,9 +3,7 @@
  */
 package com.seven10.update_guy.server.release;
 
-import static com.seven10.update_guy.common.RepoInfoHelpers.build_repo_info_file_by_testname;
-import static com.seven10.update_guy.common.RepoInfoHelpers.copy_valid_repos_to_test;
-import static com.seven10.update_guy.common.RepoInfoHelpers.load_repos_from_file;
+import static com.seven10.update_guy.common.RepoInfoHelpers.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -22,6 +20,7 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
@@ -66,23 +65,7 @@ public class ReleaseServletTest extends JerseyTest
 		File expectedFile = entry.getPath(roleName).toFile();
 		FileAssert.assertBinaryEquals(expectedFile, actualFile);
 	}
-	/**
-	 * @param testName
-	 * @param repoId
-	 * @param parentPath
-	 * @return
-	 * @throws RepositoryException
-	 * @throws IOException
-	 * @throws UpdateGuyException 
-	 */
-	private List<Manifest> populateManifestList(String testName, String repoId, Path parentPath)
-			throws RepositoryException, IOException, UpdateGuyException
-	{
-		Path localManifestPath = parentPath.resolve(repoId).resolve("manifests");
-		List<Manifest> manifestList = ManifestHelpers.create_manifest_list(testName, 5);
-		ManifestHelpers.write_manifest_list_to_folder(localManifestPath, manifestList);
-		return manifestList;
-	}
+	
 	/**
 	 * @param testName
 	 * @param resp
@@ -116,25 +99,21 @@ public class ReleaseServletTest extends JerseyTest
 	@Test
 	public void testReleaseServlet_valid() throws RepositoryException, IOException, UpdateGuyException
 	{
-		String testName = "ctor-v";
-		Path repoFile = build_repo_info_file_by_testname(testName , folder);
-		copy_valid_repos_to_test(repoFile);
-		RepositoryInfo repoInfo = load_repos_from_file(repoFile).stream()
-											.filter(repo-> repo.repoType == RepositoryType.local)
-											.findFirst().get();
+		RepositoryInfo repoInfo = load_valid_repos_list().stream()
+				.filter(repo-> repo.repoType == RepositoryType.local)
+				.findFirst().get();
 		// calc the repoId
 		String repoId = repoInfo.getShaHash();
-		// copy some manifests to the manifest path
-		Path parentPath = repoFile.getParent();
-		List<Manifest> manifestList = populateManifestList(testName, repoId, parentPath);
-		// set attribute so servlet picks it up
-		System.setProperty(Globals.SETTING_LOCAL_PATH, parentPath.toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, repoFile.getFileName().toString());
 		
+		// set attribute so servlet picks it up
+		System.setProperty(Globals.SETTING_LOCAL_PATH, get_repos_path().toString());
+		System.setProperty(Globals.SETTING_REPO_FILENAME, get_valid_repos_path().getFileName().toString());
+		
+		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
 		for(Manifest manifest: manifestList)
 		{
 			String releaseFamily = manifest.getReleaseFamily();
-			ReleaseServlet releaseServlet = new ReleaseServlet(repoId, "valid");
+			ReleaseServlet releaseServlet = new ReleaseServlet(repoId, releaseFamily);
 			assertNotNull(releaseServlet);
 		}
 	}
@@ -147,21 +126,17 @@ public class ReleaseServletTest extends JerseyTest
 	@Test(expected=RepositoryException.class)
 	public void testReleaseServlet_repoId_notFound() throws RepositoryException, IOException, UpdateGuyException
 	{
-		String testName = "ctor-rnf";
-		Path repoFile = build_repo_info_file_by_testname(testName , folder);
-		copy_valid_repos_to_test(repoFile);
-		RepositoryInfo repoInfo = load_repos_from_file(repoFile).stream()
-											.filter(repo-> repo.repoType == RepositoryType.local)
-											.findFirst().get();
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.local);
 		// calc an invalid repoId
 		String repoId = repoInfo.getShaHash() + "breakrepoid";
-		// copy some manifests to the manifest path
-		Path parentPath = repoFile.getParent();
-		List<Manifest> manifestList = populateManifestList(testName, repoId, parentPath);
-		// set attribute so servlet picks it up
-		System.setProperty(Globals.SETTING_LOCAL_PATH, parentPath.toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, repoFile.getFileName().toString());
 		
+		// set attribute so servlet picks it up
+		System.setProperty(Globals.SETTING_LOCAL_PATH, get_repos_path().toString());
+		System.setProperty(Globals.SETTING_REPO_FILENAME, get_valid_repos_path().getFileName().toString());
+		
+		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
+		
+	    
 		Manifest manifest = manifestList.get(0);
 		String releaseFamily = manifest.getReleaseFamily();
 		new ReleaseServlet(repoId, releaseFamily);
@@ -174,20 +149,12 @@ public class ReleaseServletTest extends JerseyTest
 	@Test(expected=RepositoryException.class)
 	public void testReleaseServlet_rf_notFound() throws RepositoryException, IOException
 	{
-		String testName = "ctor-rfnf";
-		Path repoFile = build_repo_info_file_by_testname(testName , folder);
-		copy_valid_repos_to_test(repoFile);
-		RepositoryInfo repoInfo = load_repos_from_file(repoFile).stream()
-											.filter(repo-> repo.repoType == RepositoryType.local)
-											.findFirst().get();
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.local);
 		// calc an invalid repoId
 		String repoId = repoInfo.getShaHash();
-		// copy some manifests to the manifest path
-		Path parentPath = repoFile.getParent();
-
-		// set attribute so servlet picks it up
-		System.setProperty(Globals.SETTING_LOCAL_PATH, parentPath.toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, repoFile.getFileName().toString());
+		
+		System.setProperty(Globals.SETTING_LOCAL_PATH, get_repos_path().toString());
+		System.setProperty(Globals.SETTING_REPO_FILENAME, get_valid_repos_path().getFileName().toString());
 		
 		String releaseFamily = "someunknownRelease";
 		new ReleaseServlet(repoId, releaseFamily);
@@ -203,20 +170,20 @@ public class ReleaseServletTest extends JerseyTest
 	@Test
 	public void testGetRoles() throws IOException, RepositoryException, UpdateGuyException
 	{
-		String testName = "getroles_v";
-		Path repoFile = build_repo_info_file_by_testname(testName , folder);
-		copy_valid_repos_to_test(repoFile);
-		RepositoryInfo repoInfo = load_repos_from_file(repoFile).stream()
-											.filter(repo-> repo.repoType == RepositoryType.local)
-											.findFirst().get();
+		String testName = "getRoles-v";
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.local);
 		// calc the repoId
 		String repoId = repoInfo.getShaHash();
-		// copy some manifests to the manifest path
-		Path parentPath = repoFile.getParent();
-		List<Manifest> manifestList = populateManifestList(testName, repoId, parentPath);
+		
+		Path rootPath = folder.newFolder(testName).toPath();
+		String fileName = get_valid_repos_path().getFileName().toString();
 		// set attribute so servlet picks it up
-		System.setProperty(Globals.SETTING_LOCAL_PATH, parentPath.toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, repoFile.getFileName().toString());
+		System.setProperty(Globals.SETTING_LOCAL_PATH, rootPath.toString());
+		System.setProperty(Globals.SETTING_REPO_FILENAME, fileName);
+		
+		FileUtils.copyFile(get_valid_repos_path().toFile(), rootPath.resolve(fileName).toFile());
+		
+		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
 		for(Manifest manifest: manifestList)
 		{
 			String releaseFamily = manifest.getReleaseFamily();
@@ -253,20 +220,17 @@ public class ReleaseServletTest extends JerseyTest
 	@Test
 	public void testGetFingerprint_valid() throws IOException, RepositoryException, UpdateGuyException
 	{
-		String testName = "getFingerprint_v";
-		Path repoFile = build_repo_info_file_by_testname(testName , folder);
-		copy_valid_repos_to_test(repoFile);
-		RepositoryInfo repoInfo = load_repos_from_file(repoFile).stream()
-											.filter(repo-> repo.repoType == RepositoryType.local)
-											.findFirst().get();
+		RepositoryInfo repoInfo = load_valid_repos_list().stream()
+				.filter(repo-> repo.repoType == RepositoryType.local)
+				.findFirst().get();
 		// calc the repoId
 		String repoId = repoInfo.getShaHash();
-		// copy some manifests to the manifest path
-		Path parentPath = repoFile.getParent();
-		List<Manifest> manifestList = populateManifestList(testName, repoId, parentPath);
+		
 		// set attribute so servlet picks it up
-		System.setProperty(Globals.SETTING_LOCAL_PATH, parentPath.toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, repoFile.getFileName().toString());
+		System.setProperty(Globals.SETTING_LOCAL_PATH, get_repos_path().toString());
+		System.setProperty(Globals.SETTING_REPO_FILENAME, get_valid_repos_path().getFileName().toString());
+		
+		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
 		for(Manifest manifest: manifestList)
 		{
 			String releaseFamily = manifest.getReleaseFamily();
@@ -299,19 +263,17 @@ public class ReleaseServletTest extends JerseyTest
 	public void testGetFile_valid() throws IOException, RepositoryException, UpdateGuyException
 	{
 		String testName = "getFiles_v";
-		Path repoFile = build_repo_info_file_by_testname(testName , folder);
-		copy_valid_repos_to_test(repoFile);
-		RepositoryInfo repoInfo = load_repos_from_file(repoFile).stream()
-											.filter(repo-> repo.repoType == RepositoryType.local)
-											.findFirst().get();
+		RepositoryInfo repoInfo = load_valid_repos_list().stream()
+				.filter(repo-> repo.repoType == RepositoryType.local)
+				.findFirst().get();
 		// calc the repoId
 		String repoId = repoInfo.getShaHash();
-		// copy some manifests to the manifest path
-		Path parentPath = repoFile.getParent();
-		List<Manifest> manifestList = populateManifestList(testName, repoId, parentPath);
+		
 		// set attribute so servlet picks it up
-		System.setProperty(Globals.SETTING_LOCAL_PATH, parentPath.toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, repoFile.getFileName().toString());
+		System.setProperty(Globals.SETTING_LOCAL_PATH, get_repos_path().toString());
+		System.setProperty(Globals.SETTING_REPO_FILENAME, get_valid_repos_path().getFileName().toString());
+		
+		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
 		for(Manifest manifest: manifestList)
 		{
 			String releaseFamily = manifest.getReleaseFamily();
@@ -343,20 +305,17 @@ public class ReleaseServletTest extends JerseyTest
 	@Test
 	public void testDoUpdateCache() throws IOException, RepositoryException, UpdateGuyException
 	{
-		String testName = "update-cache";
-		Path repoFile = build_repo_info_file_by_testname(testName , folder);
-		copy_valid_repos_to_test(repoFile);
-		RepositoryInfo repoInfo = load_repos_from_file(repoFile).stream()
-											.filter(repo-> repo.repoType == RepositoryType.local)
-											.findFirst().get();
+		RepositoryInfo repoInfo = load_valid_repos_list().stream()
+				.filter(repo-> repo.repoType == RepositoryType.local)
+				.findFirst().get();
 		// calc the repoId
 		String repoId = repoInfo.getShaHash();
-		// copy some manifests to the manifest path
-		Path parentPath = repoFile.getParent();
-		List<Manifest> manifestList = populateManifestList(testName, repoId, parentPath);
+		
 		// set attribute so servlet picks it up
-		System.setProperty(Globals.SETTING_LOCAL_PATH, parentPath.toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, repoFile.getFileName().toString());
+		System.setProperty(Globals.SETTING_LOCAL_PATH, get_repos_path().toString());
+		System.setProperty(Globals.SETTING_REPO_FILENAME, get_valid_repos_path().getFileName().toString());
+		
+		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
 		for(Manifest manifest: manifestList)
 		{
 			for(ManifestEntry manifestEntry: manifest.getVersionEntries())

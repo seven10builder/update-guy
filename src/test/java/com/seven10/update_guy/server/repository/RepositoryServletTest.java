@@ -29,6 +29,7 @@ import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.RepositoryServlet;
 
+import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 
@@ -111,12 +112,12 @@ public class RepositoryServletTest extends JerseyTest
 	private Path prepareRepoFile(String testName) throws IOException
 	{
 		//prepare repoFile
-		Path fileName = build_repo_info_file_by_testname(testName, folder);
-		copy_valid_repos_to_test(fileName);
-		Path rootPath = fileName.getParent();
+		Path repoInfoFile = folder.newFolder(testName).toPath().resolve(testName + ".json");
+		FileUtils.copyFile(get_valid_repos_path().toFile(), repoInfoFile.toFile());
+		Path rootPath = repoInfoFile.getParent();
 		System.setProperty(Globals.SETTING_LOCAL_PATH, rootPath.toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, fileName.getFileName().toString());
-		return fileName;
+		System.setProperty(Globals.SETTING_REPO_FILENAME, repoInfoFile.getFileName().toString());
+		return repoInfoFile;
 	}
 	
 	/**

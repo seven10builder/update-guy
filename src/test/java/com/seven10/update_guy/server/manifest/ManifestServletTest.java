@@ -16,9 +16,9 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -27,6 +27,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.GsonFactory;
+import com.seven10.update_guy.common.RepoInfoHelpers;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
@@ -42,14 +43,9 @@ import com.seven10.update_guy.server.exceptions.RepositoryException;
 public class ManifestServletTest extends JerseyTest
 {
 	
-	private static final String manifestServletName = "manifest_servlet";
-	
 	private static String setup_repdoId(String testName, TemporaryFolder temporaryFolder) throws IOException, RepositoryException
 	{
-		Path destPath = build_repo_info_file_by_testname(testName, temporaryFolder);
-		copy_valid_repos_to_test(destPath);
-		List<RepositoryInfo> repoInfoList = load_repos_from_file(destPath);
-		RepositoryInfo repoInfo = repoInfoList.stream().filter(ri->ri.repoType == RepositoryType.local).findFirst().get();
+		RepositoryInfo repoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local);
 		return repoInfo.getShaHash();
 	}
 	
@@ -63,17 +59,6 @@ public class ManifestServletTest extends JerseyTest
 		return resourceConfig;
 	}
 	
-	@Before public void setUpManifests() throws IOException, RepositoryException, UpdateGuyException
-	{
-		// create list of valid manifests
-		List<Manifest> expected = create_manifest_list(manifestServletName, 5);
-		// save list to files in folder
-		Path rootPath = folder.newFolder(manifestServletName).toPath();
-		write_manifest_list_to_folder(rootPath.resolve("manifests"), expected);
-		
-		// create globals variable
-		System.setProperty(Globals.SETTING_LOCAL_PATH, rootPath.toString());
-	}
 	/**
 	 * Test method for
 	 * {@link com.seven10.update_guy.manifest.ManifestServlet#ManifestServlet(com.seven10.update_guy.manifest.ManifestMgr)}
@@ -99,22 +84,20 @@ public class ManifestServletTest extends JerseyTest
 	@Test
 	public void testGetManifest_show_specific_valid() throws IOException, RepositoryException, UpdateGuyException
 	{
-		String testName = "show_spec_v";
-		Path repoFile = build_repo_info_file_by_testname(testName , folder);
-		copy_valid_repos_to_test(repoFile);
-		RepositoryInfo repoInfo = load_repos_from_file(repoFile).stream()
-											.filter(repo-> repo.repoType == RepositoryType.local)
-											.findFirst().get();
+		String testName = "showSpec_v";
+		Path repoPath = RepoInfoHelpers.get_valid_repos_path();
 		// calc the repoId
-		String repoId = repoInfo.getShaHash();
-		// copy some manifests to the manifest path
-		Path parentPath = repoFile.getParent();
-		Path localManifestPath = parentPath.resolve(repoId).resolve("manifests");
-		List<Manifest> manifestList = create_manifest_list(testName, 5);
-		write_manifest_list_to_folder(localManifestPath, manifestList);
+		String repoId = load_valid_repo_info(RepositoryType.local).getShaHash();
+		Path rootPath = folder.newFolder(testName).toPath();
+		String fileName = testName + ".json";
+		FileUtils.copyFile(repoPath.toFile(), rootPath.resolve(fileName).toFile());
+		
 		// set attribute so servlet picks it up
-		System.setProperty(Globals.SETTING_LOCAL_PATH, parentPath.toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, repoFile.getFileName().toString());
+		System.setProperty(Globals.SETTING_LOCAL_PATH, rootPath.toString());
+		System.setProperty(Globals.SETTING_REPO_FILENAME, fileName);
+		List<Manifest> manifestList = load_manifest_list_from_path(get_manifests_path());
+		Path destManifestPath = rootPath.resolve(repoId).resolve("manifests");
+		destManifestPath.toFile().mkdirs();
 		for(Manifest expected: manifestList)
 		{
 			Response resp = target("/manifest/"+ repoId + "/show/" + expected.getReleaseFamily())
@@ -127,8 +110,6 @@ public class ManifestServletTest extends JerseyTest
 			assertEquals(expected, actual);
 		}
 	}
-	
-
 
 	/**
 	 * Test method for
@@ -155,23 +136,23 @@ public class ManifestServletTest extends JerseyTest
 	@Test
 	public void testGetManifests_show_all_valid() throws IOException, RepositoryException, UpdateGuyException
 	{
-		// copy valid repo.json file
-		String testName = "showall-v";
-		Path repoFile = build_repo_info_file_by_testname(testName , folder);
-		copy_valid_repos_to_test(repoFile);
-		RepositoryInfo repoInfo = load_repos_from_file(repoFile).stream()
-											.filter(repo-> repo.repoType == RepositoryType.local)
-											.findFirst().get();
+		String testName = "showAll-v";
+		Path repoPath = RepoInfoHelpers.get_valid_repos_path();
 		// calc the repoId
-		String repoId = repoInfo.getShaHash();
-		// copy some manifests to the manifest path
-		Path parentPath = repoFile.getParent();
-		Path localManifestPath = parentPath.resolve(repoId).resolve("manifests");
-		List<Manifest> expectedManifestList = create_manifest_list(testName, 5);
-		write_manifest_list_to_folder(localManifestPath, expectedManifestList);
+		String repoId = load_valid_repo_info(RepositoryType.local).getShaHash();
+		Path rootPath = folder.newFolder(testName).toPath();
+		String fileName = testName + ".json";
+		FileUtils.copyFile(repoPath.toFile(), rootPath.resolve(fileName).toFile());
+		
 		// set attribute so servlet picks it up
-		System.setProperty(Globals.SETTING_LOCAL_PATH, parentPath.toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, repoFile.getFileName().toString());
+		System.setProperty(Globals.SETTING_LOCAL_PATH, rootPath.toString());
+		System.setProperty(Globals.SETTING_REPO_FILENAME, fileName);
+		List<Manifest> expectedManifestList = load_manifest_list_from_path(get_manifests_path());
+		Path destManifestPath = rootPath.resolve(repoId).resolve("manifests");
+		destManifestPath.toFile().mkdirs();
+
+		String activeVersionId = "actVersTest";
+		
 		// do request
 		Response resp = target("/manifest/"+ repoId + "/show" + "/").request().get();
 		
@@ -200,25 +181,21 @@ public class ManifestServletTest extends JerseyTest
 	@Test
 	public void testGetactive_release_valid() throws IOException, RepositoryException, UpdateGuyException
 	{
-		// /active-release/{activeVersId}?releaseFamily=derp&newVersion=dapp
-		
-		String testName = "active-rel_v";
-		Path repoFile = build_repo_info_file_by_testname(testName, folder);
-		copy_valid_repos_to_test(repoFile);
-		RepositoryInfo repoInfo = load_repos_from_file(repoFile).stream()
-				.filter(repo -> repo.repoType == RepositoryType.local).findFirst().get();
+		String testName = "getact-rv";
+		Path repoPath = RepoInfoHelpers.get_valid_repos_path();
 		// calc the repoId
-		String repoId = repoInfo.getShaHash();
-		// copy some manifests to the manifest path
-		Path parentPath = repoFile.getParent();
-		Path localManifestPath = parentPath.resolve(repoId).resolve("manifests");
-		List<Manifest> manifestList = create_manifest_list(testName, 5);
-		write_manifest_list_to_folder(localManifestPath, manifestList);
+		String repoId = load_valid_repo_info(RepositoryType.local).getShaHash();
+		Path rootPath = folder.newFolder(testName).toPath();
+		String fileName = testName + ".json";
+		FileUtils.copyFile(repoPath.toFile(), rootPath.resolve(fileName).toFile());
 		
 		// set attribute so servlet picks it up
-		System.setProperty(Globals.SETTING_LOCAL_PATH, parentPath.toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, repoFile.getFileName().toString());
-		
+		System.setProperty(Globals.SETTING_LOCAL_PATH, rootPath.toString());
+		System.setProperty(Globals.SETTING_REPO_FILENAME, fileName);
+		List<Manifest> manifestList = load_manifest_list_from_path(get_manifests_path());
+		Path destManifestPath = rootPath.resolve(repoId).resolve("manifests");
+		destManifestPath.toFile().mkdirs();
+
 		String activeVersionId = "actVersTest";
 		
 		for (Manifest manifest : manifestList)
@@ -257,23 +234,19 @@ public class ManifestServletTest extends JerseyTest
 	{
 		// /active-release/{activeVersId}?releaseFamily=derp&newVersion=dapp
 		
-		String testName = "active-rel_vidnf";
-		Path repoFile = build_repo_info_file_by_testname(testName, folder);
-		copy_valid_repos_to_test(repoFile);
-		RepositoryInfo repoInfo = load_repos_from_file(repoFile).stream()
-				.filter(repo -> repo.repoType == RepositoryType.local).findFirst().get();
+		Path repoPath = RepoInfoHelpers.get_valid_repos_path();
+		RepositoryInfo repoInfo = load_repos_from_file(repoPath).stream()
+											.filter(repo-> repo.repoType == RepositoryType.local)
+											.findFirst().get();
 		// calc the repoId
 		String repoId = repoInfo.getShaHash();
-		// copy some manifests to the manifest path
-		Path parentPath = repoFile.getParent();
-		Path localManifestPath = parentPath.resolve(repoId).resolve("manifests");
-		List<Manifest> manifestList = create_manifest_list(testName, 1);
-		write_manifest_list_to_folder(localManifestPath, manifestList);
-		
+				
 		// set attribute so servlet picks it up
-		System.setProperty(Globals.SETTING_LOCAL_PATH, parentPath.toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, repoFile.getFileName().toString());
+		System.setProperty(Globals.SETTING_LOCAL_PATH, repoPath.getParent().toString());
+		System.setProperty(Globals.SETTING_REPO_FILENAME, repoPath.getFileName().toString());
+		List<Manifest> manifestList = load_manifest_list_from_path(get_manifests_path());
 		
+	
 		String activeVersionId = "not-found";
 		
 		Manifest manifest = manifestList.stream().findFirst().get();
@@ -294,22 +267,17 @@ public class ManifestServletTest extends JerseyTest
 	{
 		// /active-release/{activeVersId}?releaseFamily=derp&newVersion=dapp
 		
-		String testName = "active-rel_vidnf";
-		Path repoFile = build_repo_info_file_by_testname(testName, folder);
-		copy_valid_repos_to_test(repoFile);
-		RepositoryInfo repoInfo = load_repos_from_file(repoFile).stream()
-				.filter(repo -> repo.repoType == RepositoryType.local).findFirst().get();
+		Path repoPath = RepoInfoHelpers.get_valid_repos_path();
+		RepositoryInfo repoInfo = load_repos_from_file(repoPath).stream()
+											.filter(repo-> repo.repoType == RepositoryType.local)
+											.findFirst().get();
 		// calc the repoId
 		String repoId = repoInfo.getShaHash();
-		// copy some manifests to the manifest path
-		Path parentPath = repoFile.getParent();
-		Path localManifestPath = parentPath.resolve(repoId).resolve("manifests");
-		List<Manifest> manifestList = create_manifest_list(testName, 1);
-		write_manifest_list_to_folder(localManifestPath, manifestList);
-		
+				
 		// set attribute so servlet picks it up
-		System.setProperty(Globals.SETTING_LOCAL_PATH, parentPath.toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, repoFile.getFileName().toString());
+		System.setProperty(Globals.SETTING_LOCAL_PATH, repoPath.getParent().toString());
+		System.setProperty(Globals.SETTING_REPO_FILENAME, repoPath.getFileName().toString());
+		
 		
 		String activeVersionId = "not-found";
 		

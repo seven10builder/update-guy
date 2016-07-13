@@ -20,6 +20,8 @@ import org.mockito.stubbing.Answer;
 
 import com.google.gson.JsonSyntaxException;
 import com.seven10.update_guy.common.ManifestEntryHelpers;
+import com.seven10.update_guy.common.ManifestHelpers;
+import com.seven10.update_guy.common.RepoInfoHelpers;
 import com.seven10.update_guy.common.TestConstants;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
@@ -27,6 +29,7 @@ import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
 import com.seven10.update_guy.server.manifest.ActiveVersionEncoder;
 import com.seven10.update_guy.server.manifest.ManifestMgr;
+import com.seven10.update_guy.server.repository.RepositoryInfo.RepositoryType;
 
 /**
  * @author kmm
@@ -55,14 +58,16 @@ public class ManifestMgrTest
 	/**
 	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#ManifestMgr(com.seven10.update_guy.Globals)}.
 	 * @throws IOException 
+	 * @throws RepositoryException 
 	 */
 	@Test
-	public void testManifestMgr_valid_path_not_exists() throws IOException
+	public void testManifestMgr_valid_path_not_exists() throws IOException, RepositoryException
 	{
 		
 		Path path = folder.getRoot().toPath().resolve("path-not-exist-yet"); 
 		assertFalse(Files.exists(path));
-		ManifestMgr manifestMgr = new ManifestMgr(path);
+		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		ManifestMgr manifestMgr = new ManifestMgr(path, repoId);
 		assertNotNull(manifestMgr);
 		assertTrue(Files.exists(path));
 	}
@@ -77,7 +82,8 @@ public class ManifestMgrTest
 		Path path = folder.newFolder("manmgr").toPath(); 
 		Files.createDirectories(path);
 		assertTrue(Files.exists(path));
-		ManifestMgr manifestMgr = new ManifestMgr(path);
+		String repoId = "some-repo-id";
+		ManifestMgr manifestMgr = new ManifestMgr(path, repoId);
 		assertNotNull(manifestMgr);
 		assertTrue(Files.exists(path));
 	}
@@ -85,12 +91,32 @@ public class ManifestMgrTest
 	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#ManifestMgr(com.seven10.update_guy.Globals)}.
 	 */
 	@Test(expected=IllegalArgumentException.class)
-	public void testManifestMgr_null()
+	public void testManifestMgr_null_path()
 	{
 		Path path = null;
-		new ManifestMgr(path);
+		String repoId = "shoudln't matter";
+		new ManifestMgr(path, repoId);
 	}
-	
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#ManifestMgr(com.seven10.update_guy.Globals)}.
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void testManifestMgr_null_repoId()
+	{
+		Path path = Paths.get("tmp");
+		String repoId = null;
+		new ManifestMgr(path, repoId);
+	}
+	/**
+	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#ManifestMgr(com.seven10.update_guy.Globals)}.
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void testManifestMgr_empty_repoId()
+	{
+		Path path = Paths.get("tmp");
+		String repoId = "";
+		new ManifestMgr(path, repoId);
+	}
 	
 	/**
 	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getManifest(java.lang.String)}.
@@ -102,11 +128,12 @@ public class ManifestMgrTest
 	{
 		String testName = "getManifest";
 		
-		Path manifestPath = build_manifest_path_by_testname(testName, folder);
-		Path manifestDir = manifestPath.getParent();
-		copy_manifest_to_path(TestConstants.valid_manifest_name, manifestPath);
-		Manifest expected = load_manifest_from_path(manifestPath);
-		ManifestMgr manifestMgr = new ManifestMgr(manifestDir);
+		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		Path manifestPath = folder.newFolder(testName).toPath().resolve(repoId);
+		
+		Manifest expected = load_manifest_from_path(get_valid_manifest_file_path());
+		
+		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);
 		Manifest actual = manifestMgr.getManifest(testName);
 		
 		assertEquals(expected, actual);
@@ -121,7 +148,8 @@ public class ManifestMgrTest
 	{
 		String testName = "manifest-nf";
 		Path manifestPath = folder.newFolder(testName).toPath();
-		ManifestMgr manifestMgr = new ManifestMgr(manifestPath);
+		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);
 		manifestMgr.getManifest(testName);
 		
 	}
@@ -135,7 +163,8 @@ public class ManifestMgrTest
 	{
 		String testName = "getmanifest-n";
 		Path manifestPath = folder.newFolder(testName).toPath();
-		ManifestMgr manifestMgr = new ManifestMgr(manifestPath);
+		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);
 		String releaseFamily = null;
 		manifestMgr.getManifest(releaseFamily);
 	}
@@ -149,7 +178,8 @@ public class ManifestMgrTest
 	{
 		String testName = "getmanifest-emp";
 		Path manifestPath = folder.newFolder(testName).toPath();
-		ManifestMgr manifestMgr = new ManifestMgr(manifestPath);
+		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);
 		String releaseFamily = "";
 		manifestMgr.getManifest(releaseFamily);
 	}
@@ -165,13 +195,13 @@ public class ManifestMgrTest
 	{
 		String testName = "getManifests";
 		// create list of valid manifests
-		List<Manifest> expected = create_manifest_list(testName,5);
-		// save list to files in folder
+		List<Manifest> expected = load_manifest_list_from_path(get_manifests_path());
 		Path rootPath = folder.newFolder(testName).toPath();
 		write_manifest_list_to_folder(rootPath, expected);
 
 		// create object to test
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath);		
+		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);		
 		List<Manifest> actual = manifestMgr.getManifests();
 		assertEquals(expected.size(), actual.size());
 		assertTrue(expected.containsAll(actual));
@@ -188,13 +218,13 @@ public class ManifestMgrTest
 	{
 		String testName = "getManifests";
 		// create list of valid manifests
-		List<Manifest> expected = create_manifest_list(testName,5);
+		List<Manifest> expected = load_manifest_list_from_path(get_manifests_path());
 		// save list to files in folder
 		Path rootPath = folder.newFolder(testName).toPath();
 		write_manifest_list_to_folder(rootPath, expected);
-		write_dummy_files_to_folder(rootPath, 5);
 		// create object to test
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath);		
+		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);		
 		List<Manifest> actual = manifestMgr.getManifests();
 		// list should still only contain the expected entries.
 		assertTrue(expected.containsAll(actual));
@@ -211,7 +241,7 @@ public class ManifestMgrTest
 	{
 		String testName = "getManifests";
 		// create list of valid manifests
-		List<Manifest> expected = create_manifest_list(testName,5);
+		List<Manifest> expected = load_manifest_list_from_path(get_manifests_path());
 		// save list to files in folder
 		Path rootPath = folder.newFolder(testName).toPath();
 		
@@ -219,7 +249,8 @@ public class ManifestMgrTest
 		// create a defective manifest file
 		create_invalid_manifest_file(rootPath);
 		// create object to test
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath);		
+		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);		
 		List<Manifest> actual = manifestMgr.getManifests();
 		// list should still only contain the expected (valid) entries.
 		
@@ -240,7 +271,8 @@ public class ManifestMgrTest
 		String testName = "getManifests-0f";
 		Path rootPath = folder.newFolder(testName).toPath();
 		// create object to test
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath);		
+		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);		
 		List<Manifest> actual = manifestMgr.getManifests();
 		
 		assertTrue(actual.isEmpty());
@@ -278,7 +310,8 @@ public class ManifestMgrTest
 		String testName = "getActiveVers";
 		Path rootPath = folder.newFolder(testName).toPath();
 		// create object to test
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath);
+		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
 		
 		ManifestEntry actualManifestEntry = manifestMgr.getActiveVersion(expectedVersionId, encoder);
 		assertEquals(expectedManifestEntry, actualManifestEntry);
@@ -301,7 +334,7 @@ public class ManifestMgrTest
 		String testName = "getActiveVers-inv";
 		Path rootPath = folder.newFolder(testName).toPath();
 		// create object to test
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath);
+		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
 		
 		manifestMgr.getActiveVersion(expectedVersionId, encoder);
 	}
@@ -321,7 +354,8 @@ public class ManifestMgrTest
 		Path rootPath = folder.newFolder(testName).toPath();
 		// create object to test
 		String versionId = null;
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath);
+		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
 		manifestMgr.getActiveVersion(versionId, encoder);
 	}
 	/**
@@ -340,7 +374,8 @@ public class ManifestMgrTest
 		Path rootPath = folder.newFolder(testName).toPath();
 		// create object to test
 		String versionId = "";
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath);
+		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
 		manifestMgr.getActiveVersion(versionId, encoder);
 	}
 	/**
@@ -359,7 +394,8 @@ public class ManifestMgrTest
 		Path rootPath = folder.newFolder(testName).toPath();
 		// create object to test
 		String versionId = "some-active-version";
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath);
+		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
 		manifestMgr.getActiveVersion(versionId, encoder);
 	}
 	
@@ -416,7 +452,8 @@ public class ManifestMgrTest
 	{
 		String testName = "setActiveVers-nnv";
 		Path rootPath = folder.newFolder(testName).toPath();
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath);
+		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
 		String newVersion = null;
 		String expectedVersionId = "versionId";
 		ActiveVersionEncoder encoder = mock(ActiveVersionEncoder.class);
@@ -433,7 +470,8 @@ public class ManifestMgrTest
 	{
 		String testName = "setActiveVers-env";
 		Path rootPath = folder.newFolder(testName).toPath();
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath);
+		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
 		String newVersion = "";
 		String expectedVersionId = "versionId";
 		ActiveVersionEncoder encoder = mock(ActiveVersionEncoder.class);
@@ -489,7 +527,8 @@ public class ManifestMgrTest
 	{
 		String testName = "setActiveVers-nvid";
 		Path rootPath = folder.newFolder(testName).toPath();
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath);
+		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
 		String newVersion = "version";
 		String expectedVersionId = null;
 		ActiveVersionEncoder encoder = mock(ActiveVersionEncoder.class);
@@ -506,7 +545,8 @@ public class ManifestMgrTest
 	{
 		String testName = "setActiveVers-evid";
 		Path rootPath = folder.newFolder(testName).toPath();
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath);
+		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
 		String newVersion = "version";
 		String expectedVersionId = "";
 		ActiveVersionEncoder encoder = mock(ActiveVersionEncoder.class);
@@ -523,7 +563,8 @@ public class ManifestMgrTest
 	{
 		String testName = "setActiveVers-ne";
 		Path rootPath = folder.newFolder(testName).toPath();
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath);
+		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
 		String newVersion = "version";
 		String expectedVersionId = "versionId";
 		ActiveVersionEncoder encoder = null;

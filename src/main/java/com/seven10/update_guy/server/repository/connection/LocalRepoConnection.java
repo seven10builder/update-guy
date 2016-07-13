@@ -1,9 +1,13 @@
 package com.seven10.update_guy.server.repository.connection;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response.Status;
 
@@ -99,4 +103,90 @@ class LocalRepoConnection implements RepoConnection
 			onFileComplete.accept(destPath);
 		}
 	}
+	
+	@Override
+	public List<String> getFileNames(Path targetDir) throws RepositoryException
+	{
+		if(targetDir == null)
+		{
+			throw new IllegalArgumentException("targetDir must not be null");
+		}
+		if(Files.exists(targetDir) == false)
+		{
+			logger.error(".getFileNames(): target directory '%s' does not exist", targetDir.toString());
+			throw new RepositoryException(Status.NOT_FOUND, "Could not find target directory");
+		}
+		try
+		{
+			logger.info(".getFileNames(): attempting to walk path '%s'", targetDir);
+			List<String> files = Files.walk(targetDir).filter(Files::isRegularFile)
+					.filter(Objects::nonNull)
+					.map(file->file.getFileName().toString())
+					.collect(Collectors.toList());
+			logger.debug(".getFileNames(): results from walk of path '%s' - %s", targetDir, String.join(", ", files) );
+			return files;
+		}
+		catch (IOException ex)
+		{
+			logger.error(".getFileNames(): could not walk directory '%s' - %s", targetDir.toString(), ex.getMessage() );
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "could not walk remote repo directory");
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((repoId == null) ? 0 : repoId.hashCode());
+		result = prime * result + ((repoPath == null) ? 0 : repoPath.hashCode());
+		return result;
+	}
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+		{
+			return true;
+		}
+		if (obj == null)
+		{
+			return false;
+		}
+		if (!(obj instanceof LocalRepoConnection))
+		{
+			return false;
+		}
+		LocalRepoConnection other = (LocalRepoConnection) obj;
+		if (repoId == null)
+		{
+			if (other.repoId != null)
+			{
+				return false;
+			}
+		}
+		else if (!repoId.equals(other.repoId))
+		{
+			return false;
+		}
+		if (repoPath == null)
+		{
+			if (other.repoPath != null)
+			{
+				return false;
+			}
+		}
+		else if (!repoPath.equals(other.repoPath))
+		{
+			return false;
+		}
+		return true;
+	}
+	
 }
