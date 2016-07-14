@@ -76,9 +76,9 @@ public class LocalCacheUtils
 					.collect(Collectors.toList());						// convert to a list
 			logger.debug(".buildTargetPath(): roleList = %s", String.join(", ", roleList));
 			
-			Path jarFileName = release.getRolePaths(roleList)
+			Path jarFileName = release.getRoleInfos(roleList)
 					.stream()											// convert to stream
-					.map(entry->entry.getValue().getFileName())			// change each entry to just the value
+					.map(entry->entry.getValue().getFilePath().getFileName())			// change each entry to just the value
 					.findFirst()										// find our file
 					.get();												// convert it from stream
 			logger.debug(".buildTargetPath(): jarFileName = %s", jarFileName.toString());

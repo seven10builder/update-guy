@@ -16,7 +16,6 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -226,42 +225,10 @@ public class LocalRepoConnectionTest
 		RepositoryInfo repo = load_valid_repo_info(RepositoryType.local);
 		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
 		
-		List<String> actualFiles = repoConnection.getFileNames(targetDir);
+		List<String> actualFiles = repoConnection.getFileNames();
 		assertNotEquals(0, actualFiles.size());
 		assertTrue(expectedFiles.containsAll(actualFiles));
 		assertTrue(actualFiles.containsAll(expectedFiles));
 	}
-	
-	/**
-	 * Test method for
-	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadRelease(com.seven10.update_guy.repository.Manifest.VersionEntry)}
-	 * .
-	 * @throws Exception 
-	 */
-	@Test(expected=IllegalArgumentException.class)
-	public void testGetFileNames_null_targetPath() throws Exception
-	{
-		Path targetDir = null;
-		
-		RepositoryInfo repo = load_valid_repo_info(RepositoryType.local);
-		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
-		
-		repoConnection.getFileNames(targetDir);
-	}
-	/**
-	 * Test method for
-	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadRelease(com.seven10.update_guy.repository.Manifest.VersionEntry)}
-	 * .
-	 * @throws Exception 
-	 */
-	@Test(expected=RepositoryException.class)
-	public void testGetFileNames_path_not_exist() throws Exception
-	{
-		Path targetDir = Paths.get("this","doesnt", "exist");
-		
-		RepositoryInfo repo = load_valid_repo_info(RepositoryType.local);
-		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
-		
-		repoConnection.getFileNames(targetDir);
-	}
+
 }

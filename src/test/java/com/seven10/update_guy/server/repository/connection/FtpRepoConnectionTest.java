@@ -507,48 +507,11 @@ public class FtpRepoConnectionTest
 		RepositoryInfo repo = load_valid_repo_info(RepositoryType.ftp);
 		FtpRepoConnection repoConnection = new FtpRepoConnection(repo, ftpClient);
 		
-		List<String> actualFiles = repoConnection.getFileNames(targetDir);
+		List<String> actualFiles = repoConnection.getFileNames();
 		assertNotEquals(0, actualFiles.size());
 		assertTrue(expectedFiles.containsAll(actualFiles));
 		assertTrue(actualFiles.containsAll(expectedFiles));
 	}
 	
-	/**
-	 * Test method for
-	 * {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#downloadRelease(com.seven10.update_guy.repository.Manifest.VersionEntry)}
-	 * .
-	 * @throws Exception 
-	 */
-	@Test(expected=IllegalArgumentException.class)
-	public void testGetFileNames_null_targetPath() throws Exception
-	{
-		Path targetDir = null;
-		
-		FTPClient ftpClient = mock(FTPClient.class);
-		
-		RepositoryInfo repo = load_valid_repo_info(RepositoryType.ftp);
-		FtpRepoConnection repoConnection = new FtpRepoConnection(repo, ftpClient);
-		
-		repoConnection.getFileNames(targetDir);
-	}
-	/**
-	 * Test method for
-	 * {@link com.seven10.update_guy.repository.connection.FtpRepoConnection#downloadRelease(com.seven10.update_guy.repository.Manifest.VersionEntry)}
-	 * .
-	 * @throws Exception 
-	 */
-	@Test(expected=RepositoryException.class)
-	public void testGetFileNames_path_not_exist() throws Exception
-	{
-		Path targetDir = Paths.get("this","doesnt", "exist");
-		
 	
-		FTPClient ftpClient = mock(FTPClient.class);
-		doReturn(false).when(ftpClient).changeWorkingDirectory(anyString());
-		
-		RepositoryInfo repo = load_valid_repo_info(RepositoryType.ftp);
-		FtpRepoConnection repoConnection = new FtpRepoConnection(repo, ftpClient);
-		
-		repoConnection.getFileNames(targetDir);
-	}
 }

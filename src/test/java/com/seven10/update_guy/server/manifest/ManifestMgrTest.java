@@ -19,16 +19,16 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.google.gson.JsonSyntaxException;
+import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.ManifestEntryHelpers;
-import com.seven10.update_guy.common.ManifestHelpers;
 import com.seven10.update_guy.common.RepoInfoHelpers;
-import com.seven10.update_guy.common.TestConstants;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
 import com.seven10.update_guy.server.manifest.ActiveVersionEncoder;
 import com.seven10.update_guy.server.manifest.ManifestMgr;
+import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.RepositoryInfo.RepositoryType;
 
 /**
@@ -127,14 +127,15 @@ public class ManifestMgrTest
 	public void testGetManifest_valid() throws IOException, RepositoryException
 	{
 		String testName = "getManifest";
-		
-		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
-		Path manifestPath = folder.newFolder(testName).toPath().resolve(repoId);
-		
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		String repoId = repoInfo.getShaHash();
+		Path manifestPath = Paths.get(System.getProperty(Globals.SETTING_LOCAL_PATH))
+				.resolve(repoId)
+				.resolve("manifests");
 		Manifest expected = load_manifest_from_path(get_valid_manifest_file_path());
 		
 		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);
-		Manifest actual = manifestMgr.getManifest(testName);
+		Manifest actual = manifestMgr.getManifest("relfam");
 		
 		assertEquals(expected, actual);
 	}
@@ -147,8 +148,9 @@ public class ManifestMgrTest
 	public void testGetManifest_not_found() throws IOException, RepositoryException
 	{
 		String testName = "manifest-nf";
-		Path manifestPath = folder.newFolder(testName).toPath();
-		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		String repoId = repoInfo.getShaHash();
+		Path manifestPath = Paths.get(System.getProperty(Globals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
 		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);
 		manifestMgr.getManifest(testName);
 		
@@ -162,8 +164,10 @@ public class ManifestMgrTest
 	public void testGetManifest_null() throws RepositoryException, IOException
 	{
 		String testName = "getmanifest-n";
-		Path manifestPath = folder.newFolder(testName).toPath();
-		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		String repoId = repoInfo.getShaHash();
+		Path manifestPath = Paths.get(System.getProperty(Globals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
+		
 		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);
 		String releaseFamily = null;
 		manifestMgr.getManifest(releaseFamily);
@@ -177,8 +181,11 @@ public class ManifestMgrTest
 	public void testGetManifest_empty() throws RepositoryException, IOException
 	{
 		String testName = "getmanifest-emp";
-		Path manifestPath = folder.newFolder(testName).toPath();
-		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		String repoId = repoInfo.getShaHash();
+		Path manifestPath = Paths.get(System.getProperty(Globals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
+		
 		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);
 		String releaseFamily = "";
 		manifestMgr.getManifest(releaseFamily);
@@ -194,14 +201,15 @@ public class ManifestMgrTest
 	public void testGetManifests_valid_manifests_only() throws RepositoryException, IOException, UpdateGuyException
 	{
 		String testName = "getManifests";
+		
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		String repoId = repoInfo.getShaHash();
+		Path manifestPath = Paths.get(System.getProperty(Globals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
 		// create list of valid manifests
 		List<Manifest> expected = load_manifest_list_from_path(get_manifests_path());
-		Path rootPath = folder.newFolder(testName).toPath();
-		write_manifest_list_to_folder(rootPath, expected);
-
+		
 		// create object to test
-		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);		
+		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);		
 		List<Manifest> actual = manifestMgr.getManifests();
 		assertEquals(expected.size(), actual.size());
 		assertTrue(expected.containsAll(actual));
@@ -217,14 +225,14 @@ public class ManifestMgrTest
 	public void testGetManifests_many_files() throws RepositoryException, IOException, UpdateGuyException
 	{
 		String testName = "getManifests";
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		String repoId = repoInfo.getShaHash();
+		Path manifestPath = Paths.get(System.getProperty(Globals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
+		
 		// create list of valid manifests
 		List<Manifest> expected = load_manifest_list_from_path(get_manifests_path());
-		// save list to files in folder
-		Path rootPath = folder.newFolder(testName).toPath();
-		write_manifest_list_to_folder(rootPath, expected);
-		// create object to test
-		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);		
+
+		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);		
 		List<Manifest> actual = manifestMgr.getManifests();
 		// list should still only contain the expected entries.
 		assertTrue(expected.containsAll(actual));
@@ -242,15 +250,16 @@ public class ManifestMgrTest
 		String testName = "getManifests";
 		// create list of valid manifests
 		List<Manifest> expected = load_manifest_list_from_path(get_manifests_path());
-		// save list to files in folder
-		Path rootPath = folder.newFolder(testName).toPath();
 		
-		write_manifest_list_to_folder(rootPath, expected);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		String repoId = repoInfo.getShaHash();
+		Path manifestPath = Paths.get(System.getProperty(Globals.SETTING_LOCAL_PATH))
+				.resolve(repoId)
+				.resolve("manifests");
 		// create a defective manifest file
-		create_invalid_manifest_file(rootPath);
+		create_invalid_manifest_file(manifestPath);
 		// create object to test
-		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);		
+		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);		
 		List<Manifest> actual = manifestMgr.getManifests();
 		// list should still only contain the expected (valid) entries.
 		
@@ -259,23 +268,6 @@ public class ManifestMgrTest
 		// and the expected behavior of this test is incorrect.
 		// assertTrue(expected.containsAll(actual));
 		assertTrue(actual.containsAll(expected));
-	}
-	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getManifests()}.
-	 * @throws RepositoryException 
-	 * @throws IOException 
-	 */
-	@Test
-	public void testGetManifests_zero_files() throws RepositoryException, IOException
-	{
-		String testName = "getManifests-0f";
-		Path rootPath = folder.newFolder(testName).toPath();
-		// create object to test
-		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);		
-		List<Manifest> actual = manifestMgr.getManifests();
-		
-		assertTrue(actual.isEmpty());
 	}
 
 	/**
@@ -308,10 +300,12 @@ public class ManifestMgrTest
 		});
 		
 		String testName = "getActiveVers";
-		Path rootPath = folder.newFolder(testName).toPath();
-		// create object to test
-		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		String repoId = repoInfo.getShaHash();
+		Path manifestPath = Paths.get(System.getProperty(Globals.SETTING_LOCAL_PATH))
+				.resolve(repoId)
+				.resolve("manifests");
+		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);
 		
 		ManifestEntry actualManifestEntry = manifestMgr.getActiveVersion(expectedVersionId, encoder);
 		assertEquals(expectedManifestEntry, actualManifestEntry);

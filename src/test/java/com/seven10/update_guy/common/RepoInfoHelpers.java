@@ -13,6 +13,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.AutoCloseInputStream;
+import org.junit.rules.TemporaryFolder;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -68,6 +69,32 @@ public class RepoInfoHelpers
 	{
 		List<RepositoryInfo> repoList = load_valid_repos_list();
 		return repoList.stream().filter(ri->ri.repoType == repoType).findFirst().get();
+	}
+
+	/**
+	 * @param testName
+	 * @param temporaryFolder TODO
+	 * @return
+	 * @throws IOException
+	 */
+	public static RepositoryInfo setup_test_repo(String testName, TemporaryFolder temporaryFolder) throws IOException
+	{
+		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.local);
+		// calc the repoId
+		
+		// create local root path
+		Path localDir = temporaryFolder.newFolder(testName).toPath();
+	
+		// copy repo config to localDir
+		String fileName = "repos.json";
+		Path repoInfoFile = localDir.resolve(fileName);
+		FileUtils.copyFile(get_valid_repos_path().toFile(), repoInfoFile.toFile());
+		
+		// set attribute so servlet picks it up
+		System.setProperty(Globals.SETTING_LOCAL_PATH, localDir.toString());
+		System.setProperty(Globals.SETTING_REPO_FILENAME, fileName);
+	
+		return repoInfo;
 	}
 
 }

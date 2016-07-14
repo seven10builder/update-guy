@@ -36,11 +36,10 @@ public interface RepoConnection
 	public void downloadRelease(ManifestEntry versionEntry, Consumer<Path> onFileComplete) throws RepositoryException;
 	/**
 	 * Retrieves a list of all files in the path on the given repo
-	 * @param targetDir The path of the folder to retrieve files from
 	 * @return The list of files
 	 * @throws RepositoryException thrown if targetDir does not exist
 	 */
-	public List<String> getFileNames(Path targetDir) throws RepositoryException;
+	public List<String> getFileNames() throws RepositoryException;
 	@Override
 	public int hashCode();
 	@Override

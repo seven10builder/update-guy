@@ -67,7 +67,7 @@ public class ReleaseMgr
 		}
 		if( activeVersion.getRoles().contains(roleName))
 		{
-			return activeVersion.getPath(roleName).toFile();
+			return activeVersion.getRoleInfo(roleName).getFilePath().toFile();
 		}
 		else
 		{

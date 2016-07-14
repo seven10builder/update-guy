@@ -13,7 +13,7 @@
     "port": 0,
     "user": "",
     "password": "",
-    "manifestPath":  "src/test/resources/remote_repo/repoId/manifests/",
+    "manifestPath":  "src/test/resources/remote_repo/2f4be34b3680b5a2556b1830f3c24232/manifests/",
     "description": "This is a regular local repo",
     "repoType": "local"
   }

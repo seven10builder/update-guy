@@ -11,19 +11,22 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.manifest.UpdateGuyRole;
 
 public class ManifestEntryHelpers
 {
-	public static Map<String, Path> create_entry_folder_list(int roleCount, Path rootFolder) throws IOException
+	public static Map<String, UpdateGuyRole> create_entry_folder_list(int roleCount, Path rootFolder) throws IOException
 	{
-		Map<String, Path> rvalue = new HashMap<String, Path>();
+		Map<String, UpdateGuyRole> rvalue = new HashMap<String, UpdateGuyRole>();
 		rootFolder.toFile().mkdirs();
 		for(int i = 1; i <= roleCount; i++)
 		{
 			String key = "role_" + i;
 			Path target = rootFolder.resolve(key + ".txt");
 			Files.createFile(target);
-			rvalue.put(key,  target);
+			UpdateGuyRole role = new UpdateGuyRole();
+			role.setFilePath(target);
+			rvalue.put(key,  role);
 		}
 		return rvalue;
 	}
@@ -32,8 +35,8 @@ public class ManifestEntryHelpers
 		ManifestEntry mve = new ManifestEntry();
 		String version = "v"+ testName + index;
 		mve.setVersion(version);
-		Map<String, Path> entries = create_entry_folder_list(index, rootFolder);
-		entries.forEach((key,value)->mve.addPath(key, value));
+		Map<String, UpdateGuyRole> entries = create_entry_folder_list(index, rootFolder);
+		entries.forEach((key,value)->mve.addRoleInfo(key, value));
 		return mve;
 	}
 	
@@ -49,7 +52,7 @@ public class ManifestEntryHelpers
 		}
 		return versionEntries;
 	}
-	public static List<String> create_subset_of_roles(Map<String, Path> roleMap)
+	public static List<String> create_subset_of_roles(Map<String, UpdateGuyRole> roleMap)
 	{
 		// filter out keys with odd hashs. This should give us a subset of the keys
 		return roleMap.keySet().stream().filter(key->key.hashCode()%2 == 0).collect(Collectors.toList());

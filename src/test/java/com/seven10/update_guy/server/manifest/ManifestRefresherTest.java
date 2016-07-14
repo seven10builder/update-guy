@@ -4,8 +4,6 @@
 package com.seven10.update_guy.server.manifest;
 
 import static org.mockito.Mockito.*;
-import static com.seven10.update_guy.common.RepoInfoHelpers.get_valid_repos_path;
-import static com.seven10.update_guy.common.RepoInfoHelpers.get_repos_path;
 import static com.seven10.update_guy.common.ManifestHelpers.load_manifest_from_path;
 import static com.seven10.update_guy.common.ManifestHelpers.get_valid_manifest_file_path;
 import static org.junit.Assert.*;
@@ -14,17 +12,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 
-import com.seven10.update_guy.common.Globals;
+import com.seven10.update_guy.common.ManifestHelpers;
 import com.seven10.update_guy.common.RepoInfoHelpers;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
+import com.seven10.update_guy.server.manifest.ManifestRefresher.FileCreator;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.connection.RepoConnection;
 import com.seven10.update_guy.server.repository.connection.RepoConnectionFactory;
@@ -38,15 +35,7 @@ public class ManifestRefresherTest
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
 	
-	private Path prepareRepoFile(String testName) throws IOException
-	{
-		//prepare repoFile
-		RepoInfoHelpers.get_valid_repos_path();
-		System.setProperty(Globals.SETTING_LOCAL_PATH, get_repos_path().toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, get_valid_repos_path().getFileName().toString());
-		return get_valid_repos_path();
-	}
-	
+
 	/**
 	 * Test method for {@link com.seven10.update_guy.server.manifest.ManifestRefresher#ManifestRefresher(java.lang.String, java.nio.file.Path)}.
 	 * @throws RepositoryException 
@@ -111,19 +100,19 @@ public class ManifestRefresherTest
 	public void testRefreshLocalManifest() throws RepositoryException, FileNotFoundException, IOException
 	{
 		String testName = "refresh_local_man";
-		prepareRepoFile(testName);
+		RepoInfoHelpers.setup_test_repo(testName, folder);
 		
-		String releaseFamily = "valid";
-		Path manifestPath = folder.newFolder(testName + "local-cache").toPath();
-		
+		String releaseFamily = "relfam";
 		
 		Manifest expectedManifest = load_manifest_from_path(get_valid_manifest_file_path());
+		Path manifestPath = ManifestHelpers.get_manifests_path();
 		
 		RepoConnection mockedConnection = mock(RepoConnection.class);
 		doReturn(expectedManifest).when(mockedConnection).getManifest(releaseFamily);
 		
 		ManifestRefresher mr = mock(ManifestRefresher.class);
 		doReturn(mockedConnection).when(mr).createRepoConnectionForId();
+		
 		doReturn(manifestPath).when(mr).getDestinationPath();
 		doCallRealMethod().when(mr).refreshLocalManifest(releaseFamily);
 		
@@ -170,16 +159,29 @@ public class ManifestRefresherTest
 	public void testCreateRepoConnectionForId() throws RepositoryException, FileNotFoundException, IOException
 	{
 		String testName = "refresh_local_man";
-		Path repoPath = prepareRepoFile(testName);
-		List<RepositoryInfo> repos = RepoInfoHelpers.load_repos_from_file(repoPath);
-		for(RepositoryInfo repo: repos)
-		{
-			RepoConnection expected = RepoConnectionFactory.connect(repo);
+		RepositoryInfo repo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepoConnection expected = RepoConnectionFactory.connect(repo);
 		
-			ManifestRefresher mr = new ManifestRefresher(repo.getShaHash(), Paths.get("this", "shouldnt", "matter") );		
-			RepoConnection actual = mr.createRepoConnectionForId();
-			assertEquals(expected, actual);
-		}
+		ManifestRefresher mr = new ManifestRefresher(repo.getShaHash(), Paths.get("this", "shouldnt", "matter") );		
+		RepoConnection actual = mr.createRepoConnectionForId();
+		assertEquals(expected, actual);
 	}
 	
+	/**
+	 * Test method for {@link com.seven10.update_guy.server.manifest.ManifestRefresher#updateManifestNameList(java.lang.String)}.
+	 * @throws RepositoryException 
+	 * @throws IOException 
+	 * @throws FileNotFoundException 
+	 */
+	@Test
+	public void testUpdateManifestNameList() throws RepositoryException, FileNotFoundException, IOException
+	{
+		String testName = "refresh_local_man";
+		RepositoryInfo repo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		
+		ManifestRefresher mr = new ManifestRefresher(repo.getShaHash(), Paths.get("this", "shouldnt", "matter") );	
+		FileCreator fileCreator = mock(ManifestRefresher.FileCreator.class);
+		mr.updateManifestNameList(fileCreator);
+		verify(fileCreator, atLeastOnce()).run(any());
+	}
 }

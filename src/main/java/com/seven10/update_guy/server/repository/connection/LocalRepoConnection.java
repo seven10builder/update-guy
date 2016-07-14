@@ -17,15 +17,17 @@ import org.apache.logging.log4j.Logger;
 
 import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
+import com.seven10.update_guy.common.exceptions.UpdateGuyNotFoundException;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.manifest.UpdateGuyRole;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 
 class LocalRepoConnection implements RepoConnection
 {
 	private static final Logger logger = LogManager.getFormatterLogger(LocalRepoConnection.class);
-	private final Path repoPath;
+	private final Path manifestPath;
 	private final String repoId;
 	
 	private void copyFileToPath(Path srcPath, Path destPath) throws RepositoryException
@@ -42,7 +44,7 @@ class LocalRepoConnection implements RepoConnection
 	}
 	public LocalRepoConnection(RepositoryInfo activeRepo) throws RepositoryException
 	{
-		repoPath = activeRepo.getRemoteManifestPath();
+		manifestPath = activeRepo.getRemoteManifestPath();
 		repoId = activeRepo.getShaHash();
 	}
 	@Override
@@ -60,18 +62,21 @@ class LocalRepoConnection implements RepoConnection
 	{
 		if(releaseFamily==null || releaseFamily.isEmpty())
 		{
-			throw new IllegalArgumentException("releaseFamily must not be null or emptyu");
+			throw new IllegalArgumentException("releaseFamily must not be null or empty");
 		}
-		Path filePath = repoPath.resolve(String.format("%s.manifest", releaseFamily));
+		Path filePath = manifestPath.resolve(String.format("%s.manifest", releaseFamily));
 		try
 		{
 			Manifest manifest = Manifest.loadFromFile(filePath);
 			return manifest;
 		}
+		
 		catch(UpdateGuyException ex)
 		{
 			logger.error(".getManifest(): could not load Manifest from path '%s'. Reason: %s", filePath, ex.getMessage());
-			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "could not load manifest '%s'", filePath.getFileName().toString());
+			
+			Status errorCode = (ex instanceof UpdateGuyNotFoundException) ? Status.NOT_FOUND : Status.INTERNAL_SERVER_ERROR;
+			throw new RepositoryException(errorCode, "could not load manifest '%s'", filePath.getFileName().toString());
 		}
 	}
 	@Override
@@ -85,9 +90,9 @@ class LocalRepoConnection implements RepoConnection
 		{
 			throw new IllegalArgumentException("onFileComplete must not be null");
 		}
-		for(Entry<String, Path> roleEntry: versionEntry.getAllRolePaths())
+		for(Entry<String, UpdateGuyRole> roleEntry: versionEntry.getAllRoleInfos())
 		{
-			Path srcPath = roleEntry.getValue();
+			UpdateGuyRole srcPath = roleEntry.getValue();
 			Path destPath;
 			try
 			{
@@ -99,36 +104,32 @@ class LocalRepoConnection implements RepoConnection
 				throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "could not build target download path");
 			}
 			
-			copyFileToPath(srcPath, destPath);
+			copyFileToPath(srcPath.getFilePath(), destPath);
 			onFileComplete.accept(destPath);
 		}
 	}
 	
 	@Override
-	public List<String> getFileNames(Path targetDir) throws RepositoryException
+	public List<String> getFileNames() throws RepositoryException
 	{
-		if(targetDir == null)
+		if(Files.exists(manifestPath) == false)
 		{
-			throw new IllegalArgumentException("targetDir must not be null");
-		}
-		if(Files.exists(targetDir) == false)
-		{
-			logger.error(".getFileNames(): target directory '%s' does not exist", targetDir.toString());
+			logger.error(".getFileNames(): target directory '%s' does not exist", manifestPath.toString());
 			throw new RepositoryException(Status.NOT_FOUND, "Could not find target directory");
 		}
 		try
 		{
-			logger.info(".getFileNames(): attempting to walk path '%s'", targetDir);
-			List<String> files = Files.walk(targetDir).filter(Files::isRegularFile)
+			logger.info(".getFileNames(): attempting to walk path '%s'", manifestPath);
+			List<String> files = Files.walk(manifestPath).filter(Files::isRegularFile)
 					.filter(Objects::nonNull)
 					.map(file->file.getFileName().toString())
 					.collect(Collectors.toList());
-			logger.debug(".getFileNames(): results from walk of path '%s' - %s", targetDir, String.join(", ", files) );
+			logger.debug(".getFileNames(): results from walk of path '%s' - %s", manifestPath, String.join(", ", files) );
 			return files;
 		}
 		catch (IOException ex)
 		{
-			logger.error(".getFileNames(): could not walk directory '%s' - %s", targetDir.toString(), ex.getMessage() );
+			logger.error(".getFileNames(): could not walk directory '%s' - %s", manifestPath.toString(), ex.getMessage() );
 			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "could not walk remote repo directory");
 		}
 	}
@@ -142,7 +143,7 @@ class LocalRepoConnection implements RepoConnection
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((repoId == null) ? 0 : repoId.hashCode());
-		result = prime * result + ((repoPath == null) ? 0 : repoPath.hashCode());
+		result = prime * result + ((manifestPath == null) ? 0 : manifestPath.hashCode());
 		return result;
 	}
 	/* (non-Javadoc)
@@ -175,14 +176,14 @@ class LocalRepoConnection implements RepoConnection
 		{
 			return false;
 		}
-		if (repoPath == null)
+		if (manifestPath == null)
 		{
-			if (other.repoPath != null)
+			if (other.manifestPath != null)
 			{
 				return false;
 			}
 		}
-		else if (!repoPath.equals(other.repoPath))
+		else if (!manifestPath.equals(other.manifestPath))
 		{
 			return false;
 		}

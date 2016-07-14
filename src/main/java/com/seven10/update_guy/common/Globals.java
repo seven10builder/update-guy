@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.manifest.UpdateGuyRole;
 
 public class Globals
 {
@@ -58,14 +59,14 @@ public class Globals
 	 * @return
 	 * @throws RepositoryException
 	 */
-	public static Path buildDownloadTargetPath(String repoId, ManifestEntry versionEntry, Entry<String, Path> roleEntry)
+	public static Path buildDownloadTargetPath(String repoId, ManifestEntry versionEntry, Entry<String, UpdateGuyRole> roleEntry)
 			throws UpdateGuyException
 	{
 		Path destPath = getFileStorePathForRole(repoId,
 														versionEntry.getReleaseFamily(),
 														versionEntry.getVersion(),
 														roleEntry.getKey());
-		Path filePath = destPath.resolve(roleEntry.getValue().getFileName().toString());
+		Path filePath = destPath.resolve(roleEntry.getValue().getFilePath().getFileName().toString());
 		return filePath;
 	}
 

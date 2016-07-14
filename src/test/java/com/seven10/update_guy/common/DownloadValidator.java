@@ -34,13 +34,13 @@ public class DownloadValidator
 
 	public static void validate_downloaded_release(ManifestEntry versionEntry, String repoId) throws RepositoryException
 	{
-		versionEntry.getAllRolePaths().forEach(roleEntry ->
+		versionEntry.getAllRoleInfos().forEach(roleEntry ->
 		{
 			Path srcPath = null;
 			Path destPath = null;
 			try
 			{
-				srcPath = roleEntry.getValue();
+				srcPath = roleEntry.getValue().getFilePath();
 				destPath = Globals.buildDownloadTargetPath(repoId, versionEntry, roleEntry);
 				validate_download(srcPath, destPath);
 			}

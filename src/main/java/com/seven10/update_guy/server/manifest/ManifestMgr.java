@@ -2,6 +2,7 @@ package com.seven10.update_guy.server.manifest;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,33 +30,20 @@ public class ManifestMgr
 {
 	private static final Logger logger = LogManager.getFormatterLogger(ManifestMgr.class);
 	
-	/**
-	 * Used in a steam map to produce a Manifest from a given path
-	 * 
-	 * @param path
-	 *            a path to the manifest file
-	 * @return The manifest or NULL if the manifest file could not be opened
-	 * @throws RepositoryException 
-	 */
-	private static Manifest convertPathToManifest(Path path)
+	private static void touchFile(Path path) throws IOException
 	{
-		Manifest manifest = null;
 		try
 		{
-			logger.trace("Loading manifest file '%s'", path);
-			manifest = Manifest.loadFromFile(path);
+			Files.createFile(path);
+			logger.info(".touchFile(): touched file '%s'", path);
 		}
-		catch (UpdateGuyNotFoundException ex)
+		catch(FileAlreadyExistsException ex)
 		{
-			logger.error(".convertPathToManifest(): manifest file not found. Reason: %s", ex.getMessage());
+			logger.trace(".touchFile(): path '%s' already exists, ignoring", path);
+			return;
 		}
-		catch(UpdateGuyException ex)
-		{
-			logger.error(".convertPathToManifest(): Could not convert file '%s' to manifest object. Reason: %s", path, ex.getMessage());
-		}
-		return manifest;
 	}
-
+	
 	private final Path manifestPath;
 	private ManifestRefresher manifestRefresher;
 	
@@ -92,22 +81,32 @@ public class ManifestMgr
 		}
 	}
 	
-	/**
-	 * Generates a path for the local copy of the manifest based on the family
-	 * name
-	 * 
-	 * @param releaseFamily
-	 *            The release family name that identifies the manifest to open
-	 * @return A path to the local copy of the manifest
-	 */
-	private Path getLocalManifestFilePath(String releaseFamily)
+	private Manifest doGetManifest(String releaseFamily, Path manifestFile) throws RepositoryException
 	{
-		String manifestFileName = String.format("%s.manifest", releaseFamily);
-		Path manifestFile = manifestPath.resolve(manifestFileName);
-		return manifestFile;
+		Manifest manifest = null;
+		try
+		{
+			manifestRefresher.refreshLocalManifest(releaseFamily);
+			logger.trace("Loading manifest file '%s'", manifestFile);
+			manifest = Manifest.loadFromFile(manifestFile);
+		}
+		catch (UpdateGuyNotFoundException ex)
+		{
+			logger.error(".convertPathToManifest(): manifest file not found. Reason: %s", ex.getMessage());
+			throw new RepositoryException(Status.NOT_FOUND, "Could not find manifest file for release family");
+		}
+		catch(UpdateGuyException ex)
+		{
+			logger.error(".convertPathToManifest(): Could not convert file '%s' to manifest object. Reason: %s", manifestFile, ex.getMessage());
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "Could not get manifest for release family");
+		}
+		return manifest;
 	}
-	
-	
+	/**
+	 * Constructor for ManifestMgr
+	 * @param manifestPath The folder path where the manifests can be found
+	 * @param repoId The id of the repo to associate with this manager
+	 */
 	public ManifestMgr(Path manifestPath, String repoId)
 	{
 		if( manifestPath == null)
@@ -122,6 +121,7 @@ public class ManifestMgr
 		this.manifestRefresher = new ManifestRefresher(repoId, manifestPath);
 	}
 	
+	
 
 	/**
 	 * Retrieves an instance of the manifest identified by the release family.
@@ -135,26 +135,12 @@ public class ManifestMgr
 	 */
 	public Manifest getManifest(String releaseFamily) throws RepositoryException
 	{
-		if (releaseFamily == null || releaseFamily.isEmpty())
+		if (StringUtils.isBlank(releaseFamily))
 		{
 			throw new IllegalArgumentException("releaseFamily must not be null or empty");
 		}
-		Path manifestFile = getLocalManifestFilePath(releaseFamily);
-		try
-		{
-			manifestRefresher.refreshLocalManifest(releaseFamily);
-			return Manifest.loadFromFile(manifestFile);
-		}
-		catch (UpdateGuyNotFoundException ex)
-		{
-			logger.error(".getManifest(): Could not find manifest for path '%s'. reason: %s", manifestFile, ex.getMessage());
-			throw new RepositoryException(Status.NOT_FOUND, "Could not find manifest file for release family '%s'", releaseFamily);
-		}
-		catch (UpdateGuyException ex)
-		{
-			logger.error(".getManifest(): Could not get manifest for path '%s'. reason: %s", manifestFile, ex.getMessage());
-			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "Could not get manifest for release family '%s'", releaseFamily);
-		}
+		Path manifestFile = manifestPath.resolve(String.format(releaseFamily + ".manifest"));
+		return doGetManifest(releaseFamily, manifestFile);		
 	}
 	
 	/**
@@ -173,9 +159,23 @@ public class ManifestMgr
 		{
 			try
 			{
+				manifestRefresher.updateManifestNameList(ManifestMgr::touchFile);
 				files = Files.walk(manifestPath).filter(Files::isRegularFile)
 						.filter(path -> matcher.matches(path))
-						.map(path -> convertPathToManifest(path))
+						.map(path ->
+						{
+							try
+							{	
+								String fileName = path.getFileName().toString();
+								String releaseFamily = FilenameUtils.getBaseName(fileName);
+								return doGetManifest(releaseFamily, path);
+							}
+							catch(RepositoryException ex)
+							{
+								logger.error(".getManifests(): convertPathToManifest() failed for path '%s', removing");
+								return null;
+							}
+						})
 						.filter(Objects::nonNull)
 						.collect(Collectors.toList());
 			}
@@ -194,7 +194,7 @@ public class ManifestMgr
 		return files;
 		
 	}
-
+	
 	public void setActiveVersion(String newVersion, String activeVersId, ActiveVersionEncoder encoder) throws RepositoryException
 	{
 		if(StringUtils.isBlank(newVersion))

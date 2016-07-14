@@ -28,6 +28,7 @@ import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.manifest.UpdateGuyRole;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 
@@ -292,9 +293,9 @@ public class FtpRepoConnection implements RepoConnection
 		{
 			throw new IllegalArgumentException("versionEntry cannot be null");
 		}
-		for (Entry<String, Path> entry : versionEntry.getRolePaths(versionEntry.getRoles())) // get all the  paths
+		for (Entry<String, UpdateGuyRole> entry : versionEntry.getRoleInfos(versionEntry.getRoles())) // get all the  paths
 		{
-			Path srcPath = entry.getValue();
+			UpdateGuyRole srcPath = entry.getValue();
 			Path destPath;
 			try
 			{
@@ -305,22 +306,18 @@ public class FtpRepoConnection implements RepoConnection
 				logger.error(".downloadRelease(): Could not build download target path. Reason: %s", ex.getMessage());
 				throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "Could not get target path for download.");
 			}
-			downloadFile(srcPath, destPath);
+			downloadFile(srcPath.getFilePath(), destPath);
 			onFileComplete.accept(destPath);
 		}
 	}
 	
 	@Override
-	public List<String> getFileNames(Path targetDir) throws RepositoryException
+	public List<String> getFileNames() throws RepositoryException
 	{
-		if(targetDir == null)
-		{
-			throw new IllegalArgumentException("targetDir must not be null");
-		}
-		
+		Path targetDir = activeRepo.getRemoteManifestPath();
 		try
 		{
-			logger.info(".getFileNames(): attempting to walk path '%s'", targetDir);
+			logger.info(".getFileNames(): attempting to walk path '%s'", targetDir.toString());
 			if(ftpClient.changeWorkingDirectory(targetDir.toString()))
 			{				
 				FTPFile[] arr = ftpClient.listFiles(targetDir.toString());

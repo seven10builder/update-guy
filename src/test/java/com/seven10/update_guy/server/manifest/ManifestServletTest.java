@@ -42,13 +42,6 @@ import com.seven10.update_guy.server.exceptions.RepositoryException;
  */
 public class ManifestServletTest extends JerseyTest
 {
-	
-	private static String setup_repdoId(String testName, TemporaryFolder temporaryFolder) throws IOException, RepositoryException
-	{
-		RepositoryInfo repoInfo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local);
-		return repoInfo.getShaHash();
-	}
-	
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
 	
@@ -121,7 +114,9 @@ public class ManifestServletTest extends JerseyTest
 	@Test
 	public void testGetManifest_specific_family_not_found() throws IOException, RepositoryException
 	{
-		String repoId = setup_repdoId("showSpec-nf", folder);
+		String testName = "getManifest-sfnf";
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		String repoId = repoInfo.getShaHash();
 		Response resp = target("/manifest/"+ repoId + "/show" + "/this-doesnt-exist").request().get();
 		assertEquals(Status.NOT_FOUND.getStatusCode(), resp.getStatus());
 	}
@@ -137,22 +132,11 @@ public class ManifestServletTest extends JerseyTest
 	public void testGetManifests_show_all_valid() throws IOException, RepositoryException, UpdateGuyException
 	{
 		String testName = "showAll-v";
-		Path repoPath = RepoInfoHelpers.get_valid_repos_path();
-		// calc the repoId
-		String repoId = load_valid_repo_info(RepositoryType.local).getShaHash();
-		Path rootPath = folder.newFolder(testName).toPath();
-		String fileName = testName + ".json";
-		FileUtils.copyFile(repoPath.toFile(), rootPath.resolve(fileName).toFile());
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		String repoId = repoInfo.getShaHash();
 		
-		// set attribute so servlet picks it up
-		System.setProperty(Globals.SETTING_LOCAL_PATH, rootPath.toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, fileName);
 		List<Manifest> expectedManifestList = load_manifest_list_from_path(get_manifests_path());
-		Path destManifestPath = rootPath.resolve(repoId).resolve("manifests");
-		destManifestPath.toFile().mkdirs();
 
-		String activeVersionId = "actVersTest";
-		
 		// do request
 		Response resp = target("/manifest/"+ repoId + "/show" + "/").request().get();
 		
@@ -233,19 +217,11 @@ public class ManifestServletTest extends JerseyTest
 	public void testGetactive_release_versionId_notFound() throws IOException, RepositoryException, UpdateGuyException
 	{
 		// /active-release/{activeVersId}?releaseFamily=derp&newVersion=dapp
-		
-		Path repoPath = RepoInfoHelpers.get_valid_repos_path();
-		RepositoryInfo repoInfo = load_repos_from_file(repoPath).stream()
-											.filter(repo-> repo.repoType == RepositoryType.local)
-											.findFirst().get();
-		// calc the repoId
+		String testName = "getActiveRel-vid-nf";
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
 		String repoId = repoInfo.getShaHash();
-				
-		// set attribute so servlet picks it up
-		System.setProperty(Globals.SETTING_LOCAL_PATH, repoPath.getParent().toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, repoPath.getFileName().toString());
+
 		List<Manifest> manifestList = load_manifest_list_from_path(get_manifests_path());
-		
 	
 		String activeVersionId = "not-found";
 		
@@ -266,17 +242,9 @@ public class ManifestServletTest extends JerseyTest
 	public void testGetactive_release_relfam_notFound() throws IOException, RepositoryException, UpdateGuyException
 	{
 		// /active-release/{activeVersId}?releaseFamily=derp&newVersion=dapp
-		
-		Path repoPath = RepoInfoHelpers.get_valid_repos_path();
-		RepositoryInfo repoInfo = load_repos_from_file(repoPath).stream()
-											.filter(repo-> repo.repoType == RepositoryType.local)
-											.findFirst().get();
-		// calc the repoId
+		String testName = "getActiveRel-rf-nf";
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
 		String repoId = repoInfo.getShaHash();
-				
-		// set attribute so servlet picks it up
-		System.setProperty(Globals.SETTING_LOCAL_PATH, repoPath.getParent().toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, repoPath.getFileName().toString());
 		
 		
 		String activeVersionId = "not-found";

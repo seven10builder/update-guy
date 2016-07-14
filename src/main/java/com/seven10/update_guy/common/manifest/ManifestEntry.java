@@ -1,6 +1,5 @@
 package com.seven10.update_guy.common.manifest;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -10,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,16 +25,15 @@ public class ManifestEntry
 	@Expose
 	protected Date publishDate;
 	@Expose
-	protected final Map<String, Path> fileMap;
+	protected final Map<String, UpdateGuyRole> roleMap;
 	@Expose
 	protected String releaseFamily;
-	
 	public ManifestEntry()
 	{
 		releaseFamily = "unknown";
 		version = "unknown";
 		publishDate = new Date();
-		fileMap = new HashMap<String, Path>();
+		roleMap = new HashMap<String, UpdateGuyRole>();
 	}
 	
 	public ManifestEntry(ManifestEntry versionEntry)
@@ -42,7 +41,7 @@ public class ManifestEntry
 		releaseFamily = versionEntry.releaseFamily;
 		version = versionEntry.version;
 		publishDate = versionEntry.publishDate;
-		fileMap = new HashMap<String, Path>(versionEntry.fileMap);
+		roleMap = new HashMap<String, UpdateGuyRole>(versionEntry.roleMap);
 	}
 	
 	@Override
@@ -60,7 +59,7 @@ public class ManifestEntry
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((fileMap == null) ? 0 : fileMap.hashCode());
+		result = prime * result + ((roleMap == null) ? 0 : roleMap.hashCode());
 		result = prime * result + ((publishDate == null) ? 0 : publishDate.hashCode());
 		result = prime * result + ((version == null) ? 0 : version.hashCode());
 		result = prime * result + ((releaseFamily == null) ? 0 : releaseFamily.hashCode());
@@ -92,13 +91,13 @@ public class ManifestEntry
 			return false;
 		}
 		ManifestEntry other = (ManifestEntry) obj;
-		if (fileMap.size() != other.fileMap.size())
+		if (roleMap.size() != other.roleMap.size())
 		{
-			logger.debug(".equals(): match = false. other size does not match (this = %d, other = %d)", fileMap.size(),
-					other.fileMap.size());
+			logger.debug(".equals(): match = false. other size does not match (this = %d, other = %d)", roleMap.size(),
+					other.roleMap.size());
 			return false;
 		}
-		else if (fileMap.entrySet().containsAll(other.fileMap.entrySet()) == false)
+		else if (roleMap.entrySet().containsAll(other.roleMap.entrySet()) == false)
 		{
 			logger.debug(".equals(): match = false. other has entries that are not found in ours");
 			return false;
@@ -135,7 +134,7 @@ public class ManifestEntry
 	 */
 	public void setVersion(String version)
 	{
-		if (version == null || version.isEmpty())
+		if (StringUtils.isBlank(version))
 		{
 			throw new IllegalArgumentException("version must not be null");
 		}
@@ -170,47 +169,47 @@ public class ManifestEntry
 	}
 	public void setReleaseFamily(String newReleaseFamily)
 	{
-		if(newReleaseFamily == null || newReleaseFamily.isEmpty())
+		if(StringUtils.isBlank(newReleaseFamily))
 		{
 			throw new IllegalArgumentException("newReleaseFamily must not be null");
 		}
 		releaseFamily = newReleaseFamily;
 	}
-	public Path getPath(String fileRole)
+	public UpdateGuyRole getRoleInfo(String fileRole)
 	{
-		if (fileRole == null || fileRole.isEmpty())
+		if (StringUtils.isBlank(fileRole))
 		{
 			throw new IllegalArgumentException("fileRole must not be null");
 		}
-		return fileMap.get(fileRole);
+		return roleMap.get(fileRole);
 	}
 	
-	public void addPath(String fileRole, Path filePath)
+	public void addRoleInfo(String fileRole, UpdateGuyRole roleInfo)
 	{
 		if (fileRole == null || fileRole.isEmpty())
 		{
 			throw new IllegalArgumentException("fileRole must not be null");
 		}
-		if (filePath == null)
+		if (roleInfo == null)
 		{
 			throw new IllegalArgumentException("filePath must not be null");
 		}
-		logger.debug(".addPath(): role=%s, filePath=%s, new map size=%d", fileRole, filePath.toString(), fileMap.size() + 1);
-		fileMap.put(fileRole, filePath);
+		logger.debug(".addPath(): role=%s, filePath=%s, new map size=%d", fileRole, roleInfo.toString(), roleMap.size() + 1);
+		roleMap.put(fileRole, roleInfo);
 	}
 	
 	public List<String> getRoles()
 	{
 		List<String> roleList = new ArrayList<String>();
-		roleList.addAll(fileMap.keySet());
+		roleList.addAll(roleMap.keySet());
 		return roleList;
 	}
 	
-	public List<Entry<String, Path>> getRolePaths(List<String> roles)
+	public List<Entry<String, UpdateGuyRole>> getRoleInfos(List<String> roles)
 	{
-		List<Entry<String, Path>> selectedValues = fileMap.entrySet().stream() // convert all entries into stream of pairs
+		List<Entry<String, UpdateGuyRole>> selectedValues = roleMap.entrySet().stream() // convert all entries into stream of pairs
 				.filter(pair -> filterPaths(roles, pair)) // select the pair if it is one we are interest in
-				.collect(Collectors.toList()); // convert selected values to set of paths
+				.collect(Collectors.toList()); // convert selected values to set of roleInfos
 		return selectedValues;
 	}
 	
@@ -219,7 +218,7 @@ public class ManifestEntry
 	 * @param pair
 	 * @return
 	 */
-	public boolean filterPaths(List<String> roles, Entry<String, Path> pair)
+	public boolean filterPaths(List<String> roles, Entry<String, UpdateGuyRole> pair)
 	{
 		boolean isMatch = roles.contains(pair.getKey());
 		logger.debug(".filterPaths(): roles=%s, pair(k,v)=(%s, %s), isMatch=%s", Arrays.toString(roles.toArray()),
@@ -227,10 +226,10 @@ public class ManifestEntry
 		return isMatch;
 	}
 	
-	public List<Entry<String, Path>> getAllRolePaths()
+	public List<Entry<String, UpdateGuyRole>> getAllRoleInfos()
 	{
 		List<String> roles = getRoles();
-		return getRolePaths(roles);
+		return getRoleInfos(roles);
 	}
 
 

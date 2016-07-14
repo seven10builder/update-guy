@@ -2,6 +2,7 @@ package com.seven10.update_guy.server.manifest;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 import javax.ws.rs.core.Response.Status;
 
@@ -19,6 +20,10 @@ import com.seven10.update_guy.server.repository.connection.RepoConnectionFactory
 
 public class ManifestRefresher
 {
+	public interface FileCreator
+	{
+		void run(Path path) throws IOException;
+	}
 	private static final Logger logger = LogManager.getFormatterLogger(ManifestRefresher.class);
 	private final String repoId;
 	private final Path destManifestPath;
@@ -77,5 +82,26 @@ public class ManifestRefresher
 		RepositoryInfo repoInfo = RepositoryInfoMgr.loadRepo(Globals.getRepoFile(), getRepoId());
 		RepoConnection repoConnection = RepoConnectionFactory.connect(repoInfo);
 		return repoConnection;
+	}
+
+	
+	public void updateManifestNameList(FileCreator fileCreator) throws RepositoryException
+	{
+		RepoConnection repoConnection = createRepoConnectionForId();
+		List<String> fileNames = repoConnection.getFileNames();	
+		for(String fileName: fileNames)
+		{
+			Path path = getDestinationPath().resolve(fileName);
+			try
+			{
+				fileCreator.run(path);
+			}
+			catch (IOException ex)
+			{
+				logger.error(".refreshLocalManifest(): could not create manifest stub at path file '%s' - %s",
+						destManifestPath, ex.getMessage());
+				throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "could not update local manifest");
+			}
+		}
 	}
 }

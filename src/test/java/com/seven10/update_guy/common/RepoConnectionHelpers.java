@@ -25,6 +25,7 @@ import com.google.gson.reflect.TypeToken;
 import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.TestConstants;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.manifest.UpdateGuyRole;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.RepositoryInfo.RepositoryType;
 
@@ -44,10 +45,10 @@ public class RepoConnectionHelpers
 
 	public static void copy_downloads_to_path(ManifestEntry versionEntry, Path cachePath) throws IOException
 	{
-		for(Entry<String, Path> entry: versionEntry.getAllRolePaths())
+		for(Entry<String, UpdateGuyRole> entry: versionEntry.getAllRoleInfos())
 		{
-			Path srcFile = entry.getValue();
-			Path destFile = cachePath.resolve(entry.getValue().getFileName());
+			Path srcFile = entry.getValue().getFilePath();
+			Path destFile = cachePath.resolve(entry.getValue().getFilePath().getFileName());
 			FileUtils.copyFile(srcFile.toFile(), destFile.toFile());
 		}
 	}

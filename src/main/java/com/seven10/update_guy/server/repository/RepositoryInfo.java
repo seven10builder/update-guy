@@ -59,21 +59,48 @@ public class RepositoryInfo
     	//cachePath = ".";
     	description = "unknown";
     }
+    /**
+     * The DNS-resolvable name or IP address for the repo. This should be 'localhost' for
+     *  local repos
+     */
 	@Expose
 	public String repoAddress;
+	/**
+	 * The port to use for this repo
+	 */
 	@Expose
 	public int port;
+	/**
+	 * The user account for this repo. This value is ignored for local repos
+	 */
 	@Expose
 	public String user;
+	/**
+	 * The password for this repo. This value is ignored for local repos
+	 * Note: This value should be filtered out or masked when serialized to a string
+	 */
 	@Expose
     public String password;
+	/**
+	 * The path on the repo where any manifests are stored
+	 */
 	@Expose
     public String manifestPath;
+	/**
+	 * a human readable description
+	 */
 	@Expose
     public String description;
+	/**
+	 * Repository type
+	 */
 	@Expose
     public RepositoryType repoType;
-
+	/**
+	 * order in which to look for information when autodetecting the correct repo
+	 */
+	@Expose
+	public int priority;
     
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
