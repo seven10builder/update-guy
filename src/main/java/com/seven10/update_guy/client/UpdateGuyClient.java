@@ -56,11 +56,11 @@ public class UpdateGuyClient
 	public void executeClientLoop(RequesterUtils requestUtils, LocalCacheUtils localCacheUtils, JavaLauncher launcher) throws FatalClientException
 	{
 		// get current active releaseId from server
-		ManifestEntry release = requestUtils.requestActiveRelease();
+		ManifestEntry release = requestUtils.requestActiveRelease(RequesterUtils::getDefaultRequester);
 		Path jarFilePath = localCacheUtils.buildTargetPath(release);
 		
 		// request checksum for activeRelease->role->file
-		String remoteChecksum = requestUtils.requestRemoteChecksum(release);
+		String remoteChecksum = requestUtils.requestRemoteChecksum(release, RequesterUtils::getDefaultRequester);
 		logger.debug(".executeClientLoop(): remoteChecksum = '%s'", remoteChecksum);
 		
 		// get checksum for role->localFile
@@ -71,7 +71,7 @@ public class UpdateGuyClient
 		if(localChecksum.equals(remoteChecksum) == false)
 		{
 			logger.info(".executeClientLoop(): checksums did not match. Will download", localChecksum);
-			requestUtils.requestDownloadRoleFile(release, jarFilePath);
+			requestUtils.requestDownloadRoleFile(release, jarFilePath, RequesterUtils::getDefaultRequester);
 		}
 		else
 		{
