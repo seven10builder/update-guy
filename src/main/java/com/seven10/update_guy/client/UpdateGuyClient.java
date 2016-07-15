@@ -3,6 +3,7 @@ package com.seven10.update_guy.client;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,9 +21,9 @@ public class UpdateGuyClient
 	public static void main(String[] args)
 	{
 		// get cli options
-		CliMgr mgr = new CliMgr(args);
+		CliMgr mgr = new CliMgr(args, CliMgr::showHelp, CliMgr::processCfgFile);
 		
-		if(mgr.parse())
+		if(mgr.parse(CliMgr.getParser()))
 		{
 			ClientSettings settings = mgr.getClientSettings();
 			

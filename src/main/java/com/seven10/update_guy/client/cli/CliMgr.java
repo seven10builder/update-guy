@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,6 +23,14 @@ import org.apache.logging.log4j.LogManager;
 
 public class CliMgr
 {
+	public interface OnShowHelp
+	{
+		void showHelp(Options options);
+	}
+	public interface OnConfigFileCmd
+	{
+		ClientSettings doCommand(String path) throws ClientParameterException;
+	}
 	static final Logger logger = LogManager.getFormatterLogger(CliMgr.class.getName());
 	
 	private static Options buildOptions()
@@ -46,42 +55,85 @@ public class CliMgr
 
 	
 	private ClientSettings clientSettings;
-	private List<String> cmdLine;
+	public final List<String> cmdLine;
+	public final List<String> remainingOptions;
+	private final OnShowHelp onShowHelp;
+	private final OnConfigFileCmd onConfigFile;
 
-	private void help(Options options)
+	public static CommandLineParser getParser()
+	{
+		return new DefaultParser();
+	}
+	
+	public static void showHelp(Options options)
 	{
 		// This prints out some help
 		HelpFormatter formater = new HelpFormatter();
 		formater.printHelp(executableName, options);
 	}
-	private ClientSettings processCfgFile(CommandLine cmd) throws ClientParameterException
+	
+	public static ClientSettings processCfgFile(String path) throws ClientParameterException
 	{
-		if (cmd.hasOption(configFileCmd))
-		{
-			String path = cmd.getOptionValue(configFileCmd);
+	
 			if(StringUtils.isBlank(path))
 			{
 				throw new ClientParameterException("roleName must not be blank");
 			}
 			
 			Path filePath = Paths.get(path);
-			return ClientSettings.loadConfig(filePath);
+			ClientSettings clientSettings = ClientSettings.loadConfig(filePath);
+			logger.info(".processCfgFile(): read client settings - %s", clientSettings);
+			return clientSettings;
+	}
+	
+	/**
+	 * @param cmd
+	 * @throws ClientParameterException
+	 */
+	private void checkConfigFileCmd(CommandLine cmd) throws ClientParameterException
+	{
+		if (cmd.hasOption(configFileCmd))
+		{
+			String path = cmd.getOptionValue(configFileCmd);
+			logger.info(".checkConfigFileCmd(): config file option found. Path = %s", path);
+			onConfigFile.doCommand(path);
 		}
 		else
 		{
-			throw new ClientParameterException(".parse(): No default available for config file. It must be specified");
+			String message = ".parse(): No default available for config file. It must be specified";
+			logger.error(message);
+			throw new ClientParameterException(message);
 		}
 	}
 	
-	public CliMgr(String[] args)
+	public CliMgr(String[] args, OnShowHelp onShowHelp, OnConfigFileCmd onConfigFile)
 	{
+		if(args == null)
+		{
+			throw new IllegalArgumentException("argument list must not be null");
+		}
+		if(onShowHelp == null)
+		{
+			throw new IllegalArgumentException("onShowHelp must not be null");
+		}
+		if(onConfigFile == null)
+		{
+			throw new IllegalArgumentException("onConfigFile must not be null");
+		}
 		this.cmdLine = Arrays.asList(args);
+		this.remainingOptions = new ArrayList<String>();
+		clientSettings = new ClientSettings();
+		this.onShowHelp = onShowHelp;
+		this.onConfigFile = onConfigFile;
 	}
 	
-	public boolean parse()
+	public boolean parse(CommandLineParser parser)
 	{
-		boolean rval;
-		CommandLineParser parser = new DefaultParser();
+		if(parser == null)
+		{
+			throw new IllegalArgumentException("parser must not be null");
+		}
+		boolean rval = false;
 		CommandLine cmd = null;
 		Options options = buildOptions();
 		try
@@ -92,24 +144,31 @@ public class CliMgr
 
 			if (cmd.getOptions().length == 0)
 			{
+				logger.error(".parse(): No valid arguments found in command line");
 				throw new ParseException("Invalid argument list supplied");
 			}
 			
 			if (cmd.hasOption(helpCmd))
 			{
-				help(options);
+				onShowHelp.showHelp(options);
 			}
-			else
+			else // do all the other non-help commands
 			{
-				processCfgFile(cmd);
+				checkConfigFileCmd(cmd);
+				rval = true;
+			}
+			remainingOptions.addAll(cmd.getArgList());
+			if(remainingOptions.size() != 0)
+			{
+				logger.info(".parse(): The following remaining parameters will be passed to the application - %s",
+					String.join(", ", remainingOptions));
 			}
 			logger.trace(".parse(): All update-guy parameters parsed.");
-			rval = true;
 		}
 		catch (ParseException e)
 		{
 			logger.error(".parse(): Failed to parse comand line properties", e);
-			help(options);
+			onShowHelp.showHelp(options);
 			rval = false;
 		}
 		catch(ClientParameterException e)
@@ -132,7 +191,9 @@ public class CliMgr
 
 	public String[] getRemainingParams()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return remainingOptions.toArray(new String[0]);
+		
 	}
+
+	
 }
