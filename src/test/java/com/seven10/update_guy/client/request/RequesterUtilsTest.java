@@ -10,12 +10,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.seven10.update_guy.client.ClientSettings;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
@@ -27,6 +26,7 @@ import com.seven10.update_guy.common.manifest.ManifestEntry;
  * @author kmm
  *
  */
+@RunWith(MockitoJUnitRunner.class)
 public class RequesterUtilsTest
 {
 	private final static int serverPort = 31337;
@@ -111,7 +111,7 @@ public class RequesterUtilsTest
 		Requester requester = mock(Requester.class);
 		
 		ManifestEntry expectedManifest = ManifestEntryHelpers.create_valid_manifest_entry(testName, 1, rootFolder);
-		doReturn(expectedManifest).when(requester).get(ManifestEntry.class);
+		doReturn(expectedManifest).when(requester).get(any(), any());
 		
 		ManifestEntry actualManifest = requesterUtils.requestActiveRelease((url, methodName)->requester);
 		assertEquals(expectedManifest, actualManifest);
@@ -179,7 +179,7 @@ public class RequesterUtilsTest
 		Path jarFilePath = Paths.get("some", "valid", "path");
 		requesterUtils.requestDownloadRoleFile(release, jarFilePath, (url, methodName)->requester);
 		verify(requester, times(1)).addQueryParam("version", release.getVersion());	// make sure we're adding in the version
-		verify(requester, times(1)).getFile(jarFilePath);
+		verify(requester, times(1)).getFile(any(), any(), any());
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestDownloadRoleFile(com.seven10.update_guy.manifest.ManifestEntry, java.nio.file.Path)}.
@@ -253,15 +253,17 @@ public class RequesterUtilsTest
 		
 		Path rootFolder = folder.newFolder(testName).toPath();
 		RequesterUtils requesterUtils = new RequesterUtils(settings);
+	
+
 		Requester requester = mock(Requester.class);
-		doReturn(expectedChecksum).when(requester).get(String.class);
-				
+		doReturn(expectedChecksum).when(requester).get(any(), any());		
+		
 		ManifestEntry release = ManifestEntryHelpers.create_valid_manifest_entry(testName, 1, rootFolder);
 		
 		String actualChecksum = requesterUtils.requestRemoteChecksum(release, (url, methodName)->requester);
 		assertEquals(expectedChecksum, actualChecksum);
 		verify(requester, times(1)).addQueryParam("version", release.getVersion());	// make sure we're adding in the version
-		verify(requester,times(1)).get(String.class);
+		verify(requester,times(1)).get(any(), any());
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestRemoteChecksum(com.seven10.update_guy.manifest.ManifestEntry)}.
@@ -291,85 +293,5 @@ public class RequesterUtilsTest
 		RequesterFactory requesterFactory = null;
 		requesterUtils.requestRemoteChecksum(release, requesterFactory);
 	}
-	/**
-	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#evaluateResponse(javax.ws.rs.core.Response, javax.ws.rs.core.Response.Status, java.lang.Class)}.
-	 * @throws FatalClientException 
-	 */
-	@Test
-	public void testEvaluateResponse_ok() throws FatalClientException
-	{
-		String expected = "response-string";
-		Status statusCode = Status.OK;
-		Class<String> entityType = String.class;
-		Response response = mock(Response.class);
-		doReturn(expected).when(response).readEntity(entityType);
-		
-		String actual = RequesterUtils.evaluateResponse(response, statusCode, entityType);
-		assertEquals(expected, actual);
-	}
-	/**
-	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#evaluateResponse(javax.ws.rs.core.Response, javax.ws.rs.core.Response.Status, java.lang.Class)}.
-	 * @throws FatalClientException 
-	 */
-	@Test(expected=FatalClientException.class)
-	public void testEvaluateResponse_INT_SERV_ERR() throws FatalClientException
-	{
-		Status statusCode = Status.INTERNAL_SERVER_ERROR;
-		Class<String> entityType = String.class;
-		Response response = mock(Response.class);
-		
-		RequesterUtils.evaluateResponse(response, statusCode, entityType);
-	}
-	/**
-	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#evaluateResponse(javax.ws.rs.core.Response, javax.ws.rs.core.Response.Status, java.lang.Class)}.
-	 * @throws FatalClientException 
-	 */
-	@Test(expected=FatalClientException.class)
-	public void testEvaluateResponse_NOT_FOUND() throws FatalClientException
-	{
-		Status statusCode = Status.NOT_FOUND;
-		Class<String> entityType = String.class;
-		Response response = mock(Response.class);
-		
-		RequesterUtils.evaluateResponse(response, statusCode, entityType);
-	}
-	/**
-	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#evaluateResponse(javax.ws.rs.core.Response, javax.ws.rs.core.Response.Status, java.lang.Class)}.
-	 * @throws FatalClientException 
-	 */
-	@Test(expected=IllegalArgumentException.class)
-	public void testEvaluateResponse_null_response() throws FatalClientException
-	{
-		Status statusCode = Status.OK;
-		Class<String> entityType = String.class;
-		Response response = null;
-		
-		RequesterUtils.evaluateResponse(response, statusCode, entityType);
-	}
-	/**
-	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#evaluateResponse(javax.ws.rs.core.Response, javax.ws.rs.core.Response.Status, java.lang.Class)}.
-	 * @throws FatalClientException 
-	 */
-	@Test(expected=IllegalArgumentException.class)
-	public void testEvaluateResponse_null_statusCode() throws FatalClientException
-	{
-		Status statusCode = null;
-		Class<String> entityType = String.class;
-		Response response = mock(Response.class);
-		
-		RequesterUtils.evaluateResponse(response, statusCode, entityType);
-	}
-	/**
-	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#evaluateResponse(javax.ws.rs.core.Response, javax.ws.rs.core.Response.Status, java.lang.Class)}.
-	 * @throws FatalClientException 
-	 */
-	@Test(expected=IllegalArgumentException.class)
-	public void testEvaluateResponse_null_entityType() throws FatalClientException
-	{
-		Status statusCode = Status.OK;
-		Class<String> entityType = null;
-		Response response = mock(Response.class);
-		
-		RequesterUtils.evaluateResponse(response, statusCode, entityType);
-	}
+	
 }

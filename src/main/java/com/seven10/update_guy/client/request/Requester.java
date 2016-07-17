@@ -29,6 +29,12 @@ public class Requester
 	
 	private WebTarget webTarget;
 	
+	public interface WebReqFactory
+	{
+		public Invocation.Builder buildRequest();
+	}
+	
+	
 	public Requester(String url, String methodName)
 	{
 		if(StringUtils.isBlank(url))
@@ -57,26 +63,27 @@ public class Requester
 		webTarget = webTarget.queryParam(name, value);
 		logger.debug(".addQueryParam(): Adding query parameter (%s, %s)", name, value);
 	}
-
-	public <T> T get(Class<T> entityType) throws FatalClientException
+	
+	public <T> T get(WebReqFactory webReqFactory, ResponseEvaluator<T> evaluator) throws FatalClientException
 	{
-		logger.info(".get<%s>(): invoking request to webTarget '%s'", entityType.getName(), webTarget.toString());
-		Invocation.Builder invocationBuilder =  webTarget.request(MediaType.APPLICATION_XML);
+		String typeName = evaluator.getEntityType().getName();
+		logger.info(".get<%s>(): invoking request to webTarget '%s'", typeName, webTarget.toString());
+		Invocation.Builder invocationBuilder =  webReqFactory.buildRequest();
 		Response response = invocationBuilder.get();
-		logger.info(".get<%s>(): request invoked", entityType.getName());
+		logger.info(".get<%s>(): request invoked", typeName);
 		Status statusCode = Status.fromStatusCode(response.getStatus());
-		T result = RequesterUtils.evaluateResponse(response, statusCode, entityType);
+		T result = evaluator.evaluateResponse(response, statusCode);
 		return result;
 	}
 	
-	public void getFile(Path targetPath) throws FatalClientException
+	public void getFile(Path targetPath,  WebReqFactory webReqFactory, ResponseEvaluator<String> evaluator) throws FatalClientException
 	{
 		logger.info(".getFile(): invoking request to webTarget '%s'", webTarget.toString());
-		Invocation.Builder invocationBuilder =  webTarget.request(MediaType.APPLICATION_XML);
+		Invocation.Builder invocationBuilder =  webReqFactory.buildRequest();
 		Response response = invocationBuilder.get();
 		logger.info(".getFile(): request invoked");
 		Status statusCode = Status.fromStatusCode(response.getStatus());
-		RequesterUtils.evaluateResponse(response, statusCode, String.class);
+		evaluator.evaluateResponse(response, statusCode);
 		InputStream is = response.readEntity(InputStream.class);
 	    try
 		{
@@ -92,5 +99,9 @@ public class Requester
 	    {
 	    	IOUtils.closeQuietly(is);
 	    }
+	}
+	public Invocation.Builder buildRequest()
+	{
+		return webTarget.request(MediaType.APPLICATION_XML);
 	}
 }
