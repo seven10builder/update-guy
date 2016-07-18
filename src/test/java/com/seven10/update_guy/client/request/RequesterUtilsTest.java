@@ -13,9 +13,6 @@ import java.nio.file.Paths;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
-
 import com.seven10.update_guy.client.ClientSettings;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
 import com.seven10.update_guy.client.request.RequesterUtils.RequesterFactory;
@@ -26,7 +23,6 @@ import com.seven10.update_guy.common.manifest.ManifestEntry;
  * @author kmm
  *
  */
-@RunWith(MockitoJUnitRunner.class)
 public class RequesterUtilsTest
 {
 	private final static int serverPort = 31337;
@@ -179,7 +175,7 @@ public class RequesterUtilsTest
 		Path jarFilePath = Paths.get("some", "valid", "path");
 		requesterUtils.requestDownloadRoleFile(release, jarFilePath, (url, methodName)->requester);
 		verify(requester, times(1)).addQueryParam("version", release.getVersion());	// make sure we're adding in the version
-		verify(requester, times(1)).getFile(any(), any(), any());
+		verify(requester, times(1)).getFile(any(), any(), any(), any());
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestDownloadRoleFile(com.seven10.update_guy.manifest.ManifestEntry, java.nio.file.Path)}.

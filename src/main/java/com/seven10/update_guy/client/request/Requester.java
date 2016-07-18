@@ -33,7 +33,34 @@ public class Requester
 	{
 		public Invocation.Builder buildRequest();
 	}
-	
+	public interface ResponseToFileMgr
+	{
+		public void copy(Path targetPath, Response response, Status statusCode) throws FatalClientException;
+	}
+	/**
+	 * @param targetPath
+	 * @param response
+	 * @param statusCode
+	 * @throws FatalClientException
+	 */
+	public static void copyFileFromResponse(Path targetPath, Response response, Status statusCode) throws FatalClientException
+	{
+		InputStream is = response.readEntity(InputStream.class);
+	    try
+		{
+	    	logger.info(".getFile(): storing file at '%s'", targetPath);
+			Files.copy(is, targetPath, StandardCopyOption.REPLACE_EXISTING);
+			logger.info(".getFile(): file '%s' copied", targetPath);
+		}
+		catch (IOException e)
+		{
+			throw new FatalClientException("The update-guy responded with an unexpected response: %s", statusCode.toString());
+		}
+	    finally
+	    {
+	    	IOUtils.closeQuietly(is);
+	    }
+	}
 	
 	public Requester(String url, String methodName)
 	{
@@ -66,6 +93,14 @@ public class Requester
 	
 	public <T> T get(WebReqFactory webReqFactory, ResponseEvaluator<T> evaluator) throws FatalClientException
 	{
+		if(webReqFactory == null)
+		{
+			throw new IllegalArgumentException("webReqFactory must not be null");
+		}
+		if(evaluator == null)
+		{
+			throw new IllegalArgumentException("evaluator must not be null");
+		}
 		String typeName = evaluator.getEntityType().getName();
 		logger.info(".get<%s>(): invoking request to webTarget '%s'", typeName, webTarget.toString());
 		Invocation.Builder invocationBuilder =  webReqFactory.buildRequest();
@@ -76,30 +111,35 @@ public class Requester
 		return result;
 	}
 	
-	public void getFile(Path targetPath,  WebReqFactory webReqFactory, ResponseEvaluator<String> evaluator) throws FatalClientException
+	public void getFile(Path targetPath,  WebReqFactory webReqFactory, ResponseEvaluator<String> evaluator, ResponseToFileMgr respMgr) throws FatalClientException
 	{
+		if(targetPath == null)
+		{
+			throw new IllegalArgumentException("targetPath must not be null");
+		}
+		if(webReqFactory == null)
+		{
+			throw new IllegalArgumentException("webReqFactory must not be null");
+		}
+		if(evaluator == null)
+		{
+			throw new IllegalArgumentException("evaluator must not be null");
+		}
+		if(respMgr == null)
+		{
+			throw new IllegalArgumentException("respMgr must not be null");
+		}
 		logger.info(".getFile(): invoking request to webTarget '%s'", webTarget.toString());
 		Invocation.Builder invocationBuilder =  webReqFactory.buildRequest();
 		Response response = invocationBuilder.get();
 		logger.info(".getFile(): request invoked");
 		Status statusCode = Status.fromStatusCode(response.getStatus());
 		evaluator.evaluateResponse(response, statusCode);
-		InputStream is = response.readEntity(InputStream.class);
-	    try
-		{
-	    	logger.info(".getFile(): storing file at '%s'", targetPath);
-			Files.copy(is, targetPath, StandardCopyOption.REPLACE_EXISTING);
-			logger.info(".getFile(): file '%s' copied", targetPath);
-		}
-		catch (IOException e)
-		{
-			throw new FatalClientException("The update-guy responded with an unexpected response: %s", statusCode.toString());
-		}
-	    finally
-	    {
-	    	IOUtils.closeQuietly(is);
-	    }
+		respMgr.copy(targetPath, response, statusCode);
 	}
+
+	
+	
 	public Invocation.Builder buildRequest()
 	{
 		return webTarget.request(MediaType.APPLICATION_XML);

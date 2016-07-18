@@ -107,7 +107,7 @@ public class RequesterUtils
 		requester.getFile(
 				jarFilePath, 
 				requester::buildRequest, 
-				new ResponseEvaluator<String>(String.class));
+				new ResponseEvaluator<String>(String.class),  Requester::copyFileFromResponse);
 	}
 	
 	public String requestRemoteChecksum(ManifestEntry release, RequesterFactory requesterFactory) throws FatalClientException
