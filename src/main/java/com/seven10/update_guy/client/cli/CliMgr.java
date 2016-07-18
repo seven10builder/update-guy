@@ -17,20 +17,13 @@ import java.util.List;
 import org.apache.logging.log4j.Logger;
 
 import com.seven10.update_guy.client.ClientSettings;
+import com.seven10.update_guy.client.FunctionalInterfaces;
 import com.seven10.update_guy.client.exceptions.ClientParameterException;
 
 import org.apache.logging.log4j.LogManager;
 
 public class CliMgr
 {
-	public interface OnShowHelp
-	{
-		void showHelp(Options options);
-	}
-	public interface OnConfigFileCmd
-	{
-		ClientSettings doCommand(String path) throws ClientParameterException;
-	}
 	static final Logger logger = LogManager.getFormatterLogger(CliMgr.class.getName());
 	
 	private static Options buildOptions()
@@ -57,8 +50,8 @@ public class CliMgr
 	private ClientSettings clientSettings;
 	public final List<String> cmdLine;
 	public final List<String> remainingOptions;
-	private final OnShowHelp onShowHelp;
-	private final OnConfigFileCmd onConfigFile;
+	private final FunctionalInterfaces.OnShowHelp onShowHelp;
+	private final FunctionalInterfaces.OnConfigFileCmd onConfigFile;
 
 	public static CommandLineParser getParser()
 	{
@@ -106,7 +99,7 @@ public class CliMgr
 		}
 	}
 	
-	public CliMgr(String[] args, OnShowHelp onShowHelp, OnConfigFileCmd onConfigFile)
+	public CliMgr(String[] args, FunctionalInterfaces.OnShowHelp onShowHelp, FunctionalInterfaces.OnConfigFileCmd onConfigFile)
 	{
 		if(args == null)
 		{

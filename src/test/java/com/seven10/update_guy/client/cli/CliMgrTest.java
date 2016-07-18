@@ -13,8 +13,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.cli.CommandLineParser;
 import org.junit.Test;
-import com.seven10.update_guy.client.cli.CliMgr.OnConfigFileCmd;
-import com.seven10.update_guy.client.cli.CliMgr.OnShowHelp;
+
+import com.seven10.update_guy.client.FunctionalInterfaces;
+import com.seven10.update_guy.client.FunctionalInterfaces.OnConfigFileCmd;
+import com.seven10.update_guy.client.FunctionalInterfaces.OnShowHelp;
 import com.seven10.update_guy.client.exceptions.ClientParameterException;
 
 /**
@@ -43,8 +45,8 @@ public class CliMgrTest
 	public void testCliMgr_null_args()
 	{
 		String []args = null;
-		OnShowHelp onShowHelp = CliMgr::showHelp;
-		OnConfigFileCmd onConfigFile = CliMgr::processCfgFile;
+		FunctionalInterfaces.OnShowHelp onShowHelp = CliMgr::showHelp;
+		FunctionalInterfaces.OnConfigFileCmd onConfigFile = CliMgr::processCfgFile;
 		new CliMgr(args, onShowHelp, onConfigFile);
 	}
 	
@@ -55,8 +57,8 @@ public class CliMgrTest
 	public void testCliMgr_null_help()
 	{
 		String []args = new String[]{"arg1", "arg2", "arg3"};
-		OnShowHelp onShowHelp = null;
-		OnConfigFileCmd onConfigFile = CliMgr::processCfgFile;
+		FunctionalInterfaces.OnShowHelp onShowHelp = null;
+		FunctionalInterfaces.OnConfigFileCmd onConfigFile = CliMgr::processCfgFile;
 		new CliMgr(args, onShowHelp, onConfigFile);
 	}
 	
@@ -67,8 +69,8 @@ public class CliMgrTest
 	public void testCliMgr_null_processCfgFile()
 	{
 		String []args = new String[]{"arg1", "arg2", "arg3"};
-		OnShowHelp onShowHelp = CliMgr::showHelp;
-		OnConfigFileCmd onConfigFile = null;
+		FunctionalInterfaces.OnShowHelp onShowHelp = CliMgr::showHelp;
+		FunctionalInterfaces.OnConfigFileCmd onConfigFile = null;
 		new CliMgr(args, onShowHelp, onConfigFile);
 	}
 	
@@ -80,9 +82,9 @@ public class CliMgrTest
 	public void testParse_empty() throws ClientParameterException
 	{
 		String []args = new String[0];
-		OnShowHelp onShowHelp = mock(OnShowHelp.class);
+		FunctionalInterfaces.OnShowHelp onShowHelp = mock(FunctionalInterfaces.OnShowHelp.class);
 		
-		OnConfigFileCmd onConfigFile = mock(OnConfigFileCmd.class);
+		FunctionalInterfaces.OnConfigFileCmd onConfigFile = mock(FunctionalInterfaces.OnConfigFileCmd.class);
 		
 		CliMgr cliMgr = new CliMgr(args, onShowHelp, onConfigFile);
 		boolean actual = cliMgr.parse(CliMgr.getParser());
@@ -103,9 +105,9 @@ public class CliMgrTest
 	private void doHelpCmdTest(String cmd) throws ClientParameterException
 	{
 		String []args = new String[]{cmd};
-		OnShowHelp onShowHelp = mock(OnShowHelp.class);
+		FunctionalInterfaces.OnShowHelp onShowHelp = mock(FunctionalInterfaces.OnShowHelp.class);
 		
-		OnConfigFileCmd onConfigFile = mock(OnConfigFileCmd.class);
+		FunctionalInterfaces.OnConfigFileCmd onConfigFile = mock(FunctionalInterfaces.OnConfigFileCmd.class);
 		
 		CliMgr cliMgr = new CliMgr(args, onShowHelp, onConfigFile);
 		boolean actual = cliMgr.parse(CliMgr.getParser());
@@ -153,9 +155,9 @@ public class CliMgrTest
 	 */
 	private void checkConfigFileCmd(String cfgFilePath, String[] args) throws ClientParameterException
 	{
-		OnShowHelp onShowHelp = mock(OnShowHelp.class);
+		FunctionalInterfaces.OnShowHelp onShowHelp = mock(FunctionalInterfaces.OnShowHelp.class);
 		
-		OnConfigFileCmd onConfigFile = mock(OnConfigFileCmd.class);
+		FunctionalInterfaces.OnConfigFileCmd onConfigFile = mock(FunctionalInterfaces.OnConfigFileCmd.class);
 		List<String> expectedRemaining = Arrays.asList(args).stream().skip(2).collect(Collectors.toList());
 		CliMgr cliMgr = new CliMgr(args, onShowHelp, onConfigFile);
 		boolean actual = cliMgr.parse(CliMgr.getParser());
@@ -210,8 +212,8 @@ public class CliMgrTest
 	{
 		String []args = new String[]{"--" + CliMgr.configFileCmdLong};
 		
-		OnShowHelp onShowHelp = mock(OnShowHelp.class);
-		OnConfigFileCmd onConfigFile = mock(OnConfigFileCmd.class);
+		FunctionalInterfaces.OnShowHelp onShowHelp = mock(FunctionalInterfaces.OnShowHelp.class);
+		FunctionalInterfaces.OnConfigFileCmd onConfigFile = mock(FunctionalInterfaces.OnConfigFileCmd.class);
 		
 		CliMgr cliMgr = new CliMgr(args, onShowHelp, onConfigFile);
 		CommandLineParser parser = null;
@@ -226,8 +228,8 @@ public class CliMgrTest
 	{
 		String []args = new String[]{"--" + CliMgr.configFileCmdLong};
 		
-		OnShowHelp onShowHelp = mock(OnShowHelp.class);
-		OnConfigFileCmd onConfigFile = mock(OnConfigFileCmd.class);
+		FunctionalInterfaces.OnShowHelp onShowHelp = mock(FunctionalInterfaces.OnShowHelp.class);
+		FunctionalInterfaces.OnConfigFileCmd onConfigFile = mock(FunctionalInterfaces.OnConfigFileCmd.class);
 		
 		CliMgr cliMgr = new CliMgr(args, onShowHelp, onConfigFile);
 		boolean actual = cliMgr.parse(CliMgr.getParser());

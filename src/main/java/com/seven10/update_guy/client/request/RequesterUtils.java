@@ -6,6 +6,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.seven10.update_guy.client.ClientSettings;
+import com.seven10.update_guy.client.FunctionalInterfaces;
+import com.seven10.update_guy.client.FunctionalInterfaces.RequesterFactory;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
 
@@ -13,16 +15,10 @@ public class RequesterUtils
 {
 	private static final Logger logger = LogManager.getFormatterLogger(RequesterUtils.class.getName());
 	
-	public interface RequesterFactory
-	{
-		Requester getRequester(String url, String methodName);
-	}
 	public static Requester getDefaultRequester(String url, String methodName)
 	{
 		return new Requester(url, methodName);
 	}
-	
-	
 	
 	public static String buildMethodName(String roleName)
 	{
@@ -85,7 +81,7 @@ public class RequesterUtils
 		return url;
 	}
 	
-	public void requestDownloadRoleFile(ManifestEntry release, Path jarFilePath, RequesterFactory requesterFactory) throws FatalClientException
+	public void requestDownloadRoleFile(ManifestEntry release, Path jarFilePath, FunctionalInterfaces.RequesterFactory requesterFactory) throws FatalClientException
 	{
 		if(release == null)
 		{
@@ -110,7 +106,7 @@ public class RequesterUtils
 				new ResponseEvaluator<String>(String.class),  Requester::copyFileFromResponse);
 	}
 	
-	public String requestRemoteChecksum(ManifestEntry release, RequesterFactory requesterFactory) throws FatalClientException
+	public String requestRemoteChecksum(ManifestEntry release, FunctionalInterfaces.RequesterFactory requesterFactory) throws FatalClientException
 	{
 		if(release == null)
 		{

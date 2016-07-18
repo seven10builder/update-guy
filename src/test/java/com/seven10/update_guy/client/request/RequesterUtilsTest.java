@@ -14,8 +14,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import com.seven10.update_guy.client.ClientSettings;
+import com.seven10.update_guy.client.FunctionalInterfaces;
+import com.seven10.update_guy.client.FunctionalInterfaces.RequesterFactory;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
-import com.seven10.update_guy.client.request.RequesterUtils.RequesterFactory;
 import com.seven10.update_guy.common.ManifestEntryHelpers;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
 
@@ -123,7 +124,7 @@ public class RequesterUtilsTest
 		ClientSettings settings = new ClientSettings();
 		RequesterUtils requesterUtils = new RequesterUtils(settings);
 		
-		RequesterFactory requestorFactory = null;
+		FunctionalInterfaces.RequesterFactory requestorFactory = null;
 		requesterUtils.requestActiveRelease(requestorFactory);
 	}
 	
@@ -190,7 +191,7 @@ public class RequesterUtilsTest
 		Requester requester = mock(Requester.class);
 		ManifestEntry release = null;		
 		Path jarFilePath = Paths.get("some", "valid", "path");
-		RequesterFactory requestorFactory = (url, methodName)->requester;
+		FunctionalInterfaces.RequesterFactory requestorFactory = (url, methodName)->requester;
 		
 		RequesterUtils requesterUtils = new RequesterUtils(settings);
 		requesterUtils.requestDownloadRoleFile(release, jarFilePath, requestorFactory);
@@ -208,7 +209,7 @@ public class RequesterUtilsTest
 		Requester requester = mock(Requester.class);
 		ManifestEntry release = new ManifestEntry();		
 		Path jarFilePath = null;
-		RequesterFactory requestorFactory = (url, methodName)->requester;
+		FunctionalInterfaces.RequesterFactory requestorFactory = (url, methodName)->requester;
 		
 		RequesterUtils requesterUtils = new RequesterUtils(settings);
 		requesterUtils.requestDownloadRoleFile(release, jarFilePath, requestorFactory);
@@ -225,7 +226,7 @@ public class RequesterUtilsTest
 		
 		ManifestEntry release = new ManifestEntry();		
 		Path jarFilePath = Paths.get("some", "valid", "path");
-		RequesterFactory requestorFactory = null;
+		FunctionalInterfaces.RequesterFactory requestorFactory = null;
 		
 		RequesterUtils requesterUtils = new RequesterUtils(settings);
 		requesterUtils.requestDownloadRoleFile(release, jarFilePath, requestorFactory);
@@ -272,7 +273,7 @@ public class RequesterUtilsTest
 		ClientSettings settings = new ClientSettings();
 		RequesterUtils requesterUtils = new RequesterUtils(settings);
 		ManifestEntry release = null;
-		RequesterFactory requesterFactory = (url, methodName)->mock(Requester.class);
+		FunctionalInterfaces.RequesterFactory requesterFactory = (url, methodName)->mock(Requester.class);
 		requesterUtils.requestRemoteChecksum(release, requesterFactory);
 	}
 	/**
@@ -286,7 +287,7 @@ public class RequesterUtilsTest
 		ClientSettings settings = new ClientSettings();
 		RequesterUtils requesterUtils = new RequesterUtils(settings);
 		ManifestEntry release = new ManifestEntry();
-		RequesterFactory requesterFactory = null;
+		FunctionalInterfaces.RequesterFactory requesterFactory = null;
 		requesterUtils.requestRemoteChecksum(release, requesterFactory);
 	}
 	

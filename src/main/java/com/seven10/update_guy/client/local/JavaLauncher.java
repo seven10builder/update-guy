@@ -17,7 +17,7 @@ public class JavaLauncher
 		
 	}
 	
-	public void launchExecutable(ProcessBuilder processBuilder) throws FatalClientException
+	public boolean launchExecutable(ProcessBuilder processBuilder) throws FatalClientException
 	{
 		if(processBuilder == null)
 		{
@@ -26,7 +26,7 @@ public class JavaLauncher
 		try
 		{
 			Process p = processBuilder.start();
-			p.waitFor();
+			return p.waitFor() == 0;			// return true if the exit code is normal
 		}
 		catch (IOException ex)
 		{

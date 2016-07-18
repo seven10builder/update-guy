@@ -20,6 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.client.ClientConfig;
 
+import com.seven10.update_guy.client.FunctionalInterfaces;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
 
 public class Requester
@@ -29,14 +30,6 @@ public class Requester
 	
 	private WebTarget webTarget;
 	
-	public interface WebReqFactory
-	{
-		public Invocation.Builder buildRequest();
-	}
-	public interface ResponseToFileMgr
-	{
-		public void copy(Path targetPath, Response response, Status statusCode) throws FatalClientException;
-	}
 	/**
 	 * @param targetPath
 	 * @param response
@@ -91,7 +84,7 @@ public class Requester
 		logger.debug(".addQueryParam(): Adding query parameter (%s, %s)", name, value);
 	}
 	
-	public <T> T get(WebReqFactory webReqFactory, ResponseEvaluator<T> evaluator) throws FatalClientException
+	public <T> T get(FunctionalInterfaces.WebReqFactory webReqFactory, ResponseEvaluator<T> evaluator) throws FatalClientException
 	{
 		if(webReqFactory == null)
 		{
@@ -111,7 +104,7 @@ public class Requester
 		return result;
 	}
 	
-	public void getFile(Path targetPath,  WebReqFactory webReqFactory, ResponseEvaluator<String> evaluator, ResponseToFileMgr respMgr) throws FatalClientException
+	public void getFile(Path targetPath,  FunctionalInterfaces.WebReqFactory webReqFactory, ResponseEvaluator<String> evaluator, FunctionalInterfaces.ResponseToFileMgr respMgr) throws FatalClientException
 	{
 		if(targetPath == null)
 		{

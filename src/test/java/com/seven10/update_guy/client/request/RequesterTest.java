@@ -18,10 +18,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.seven10.update_guy.client.FunctionalInterfaces;
+import com.seven10.update_guy.client.FunctionalInterfaces.ResponseToFileMgr;
+import com.seven10.update_guy.client.FunctionalInterfaces.WebReqFactory;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
 import com.seven10.update_guy.client.request.Requester;
-import com.seven10.update_guy.client.request.Requester.ResponseToFileMgr;
-import com.seven10.update_guy.client.request.Requester.WebReqFactory;
 
 /**
  * @author kmm
@@ -168,7 +169,7 @@ public class RequesterTest
 		doReturn(String.class).when(mockedRespEvaluator).getEntityType();
 		doReturn(expectedString).when(mockedRespEvaluator).evaluateResponse(any(), any());
 		
-		WebReqFactory webReqFactory = mock(WebReqFactory.class);
+		FunctionalInterfaces.WebReqFactory webReqFactory = mock(FunctionalInterfaces.WebReqFactory.class);
 		doReturn(mockedInvocationBuilder).when(webReqFactory).buildRequest();
 		
 		String actualString = requester.get(webReqFactory, mockedRespEvaluator);
@@ -183,7 +184,7 @@ public class RequesterTest
 	{
 		
 		Requester requester = new Requester(TEST_URL, TEST_METHOD_NAME);
-		WebReqFactory webReqFactory =  null;
+		FunctionalInterfaces.WebReqFactory webReqFactory =  null;
 		
 		requester.get(webReqFactory, mockedRespEvaluator);
 	}
@@ -196,7 +197,7 @@ public class RequesterTest
 	{
 		Requester requester = new Requester(TEST_URL, TEST_METHOD_NAME);
 					
-		WebReqFactory webReqFactory =  mock(WebReqFactory.class);
+		FunctionalInterfaces.WebReqFactory webReqFactory =  mock(FunctionalInterfaces.WebReqFactory.class);
 		
 		ResponseEvaluator<String> respEvaluator = null;
 		requester.get(webReqFactory, respEvaluator);
@@ -223,10 +224,10 @@ public class RequesterTest
 		doReturn(String.class).when(mockedRespEvaluator).getEntityType();
 		doReturn(expectedString).when(mockedRespEvaluator).evaluateResponse(any(), any());
 		
-		WebReqFactory webReqFactory = mock(WebReqFactory.class);
+		FunctionalInterfaces.WebReqFactory webReqFactory = mock(FunctionalInterfaces.WebReqFactory.class);
 		doReturn(mockedInvocationBuilder).when(webReqFactory).buildRequest();
 		Path jarPath = Paths.get("this", "is", "a", "path") ;
-		ResponseToFileMgr respMgr = mock(ResponseToFileMgr.class);
+		FunctionalInterfaces.ResponseToFileMgr respMgr = mock(FunctionalInterfaces.ResponseToFileMgr.class);
 		requester.getFile(jarPath, webReqFactory, mockedRespEvaluator, respMgr);
 		verify(respMgr, times(1)).copy(jarPath, mockedResponse, Status.OK);
 	}
@@ -240,9 +241,9 @@ public class RequesterTest
 		Requester requester = new Requester(TEST_URL, TEST_METHOD_NAME);
 		
 		Path jarPath = null;
-		WebReqFactory webReqFactory =  mock(WebReqFactory.class);
+		FunctionalInterfaces.WebReqFactory webReqFactory =  mock(FunctionalInterfaces.WebReqFactory.class);
 		ResponseEvaluator<String> respEvaluator = mockedRespEvaluator;
-		ResponseToFileMgr respMgr = mock(ResponseToFileMgr.class);
+		FunctionalInterfaces.ResponseToFileMgr respMgr = mock(FunctionalInterfaces.ResponseToFileMgr.class);
 		requester.getFile(jarPath, webReqFactory, respEvaluator, respMgr);
 	}
 	/**
@@ -255,9 +256,9 @@ public class RequesterTest
 		Requester requester = new Requester(TEST_URL, TEST_METHOD_NAME);
 		
 		Path jarPath = Paths.get("your", "mom");
-		WebReqFactory webReqFactory =  null;
+		FunctionalInterfaces.WebReqFactory webReqFactory =  null;
 		ResponseEvaluator<String> respEvaluator = mockedRespEvaluator;
-		ResponseToFileMgr respMgr = mock(ResponseToFileMgr.class);
+		FunctionalInterfaces.ResponseToFileMgr respMgr = mock(FunctionalInterfaces.ResponseToFileMgr.class);
 		requester.getFile(jarPath, webReqFactory, respEvaluator, respMgr);
 	}
 	/**
@@ -270,9 +271,9 @@ public class RequesterTest
 		Requester requester = new Requester(TEST_URL, TEST_METHOD_NAME);
 		
 		Path jarPath = Paths.get("your", "mom");
-		WebReqFactory webReqFactory =  mock(WebReqFactory.class);
+		FunctionalInterfaces.WebReqFactory webReqFactory =  mock(FunctionalInterfaces.WebReqFactory.class);
 		ResponseEvaluator<String> respEvaluator = mockedRespEvaluator;
-		ResponseToFileMgr respMgr = null;
+		FunctionalInterfaces.ResponseToFileMgr respMgr = null;
 		requester.getFile(jarPath, webReqFactory, respEvaluator, respMgr);
 	}
 	/**
@@ -285,9 +286,9 @@ public class RequesterTest
 		Requester requester = new Requester(TEST_URL, TEST_METHOD_NAME);
 		
 		Path jarPath = Paths.get("your", "mom");
-		WebReqFactory webReqFactory =  mock(WebReqFactory.class);
+		FunctionalInterfaces.WebReqFactory webReqFactory =  mock(FunctionalInterfaces.WebReqFactory.class);
 		ResponseEvaluator<String> respEvaluator = mockedRespEvaluator;
-		ResponseToFileMgr respMgr = null;
+		FunctionalInterfaces.ResponseToFileMgr respMgr = null;
 		requester.getFile(jarPath, webReqFactory, respEvaluator, respMgr);
 	}
 }

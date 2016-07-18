@@ -43,7 +43,8 @@ public class JavaLauncherTest
 				.inheritIO();
 		
 		JavaLauncher javaLauncher = new JavaLauncher();
-		javaLauncher.launchExecutable(pb);
+		boolean expected = javaLauncher.launchExecutable(pb);
+		assertTrue(expected);
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.client.local.JavaLauncher#launchExecutable(java.lang.ProcessBuilder)}.
