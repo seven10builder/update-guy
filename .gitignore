@@ -1,6 +1,6 @@
 # jenkins Ignores
 jenkins-envVars.properties
-local/
+/local/
 
 # Maven Ignores #
 target/

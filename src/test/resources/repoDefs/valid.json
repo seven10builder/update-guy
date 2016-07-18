@@ -6,17 +6,15 @@
     "password": "password_1",
     "manifestPath": "src/test/resources/manifests",
     "description": "This is a regular FTP repo",
-    "repoType": "ftp",
-    "cachePath": "target/test/resources/cachePath"
+    "repoType": "ftp"
   },
   {
     "repoAddress": "localhost",
     "port": 0,
     "user": "",
     "password": "",
-    "manifestPath": "src/test/resources/manifests",
+    "manifestPath":  "src/test/resources/remote_repo/2f4be34b3680b5a2556b1830f3c24232/manifests/",
     "description": "This is a regular local repo",
-    "repoType": "local",
-    "cachePath": "target/test/resources/cachePath"
+    "repoType": "local"
   }
 ]

@@ -4,9 +4,8 @@
     "port": 0,
     "user": "",
     "password": "",
-    "manifestPath": "src/test/resources/manifests",
+    "manifestPath": "src/test/resources/remote_repo/repoId/manifests/",
     "description": "This is a regular local repo",
-    "repoType": "local",
-    "cachePath": "target/test/resources/cachePath"
+    "repoType": "local"
   }
 ]

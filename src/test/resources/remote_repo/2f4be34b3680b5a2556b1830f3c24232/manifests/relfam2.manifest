@@ -1,0 +1,289 @@
+{
+	"releaseFamily": "relfam2",
+	"created": "2014-06-06 2:07:18.200",
+	"retrieved": "2016-06-06 12:24:19.200",
+	"versions": {
+		"1.0": {
+			"version": "1.0",
+			"releaseFamily": "relfam2",
+			"publishDate": "2014-06-06 2:08:33.200",
+			"roleMap": {
+				"Role1": {
+					"filePath": "src/test/resources/remote_repo/files/1.0/file1",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine"
+					]
+				},
+				"Role2": {
+					"filePath": "src/test/resources/remote_repo/files/1.0/file2",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine2"
+					]
+				},
+				"Role3": {
+					"filePath": "src/test/resources/remote_repo/files/1.0/file3",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine3"
+					]
+				},
+				"Role4": {
+					"filePath": "src/test/resources/remote_repo/files/1.0/file4",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine3"
+					]
+				},
+				"Role5": {
+					"filePath": "src/test/resources/remote_repo/files/1.0/file5",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine5"
+					]
+				}
+			}
+		},
+		"1.1": {
+			"version": "1.1",
+			"publishDate": "2014-11-26 0:08:33.200",
+			"releaseFamily": "relfam2",
+			"roleMap": {
+				"Role1": {
+					"filePath": "src/test/resources/remote_repo/files/1.1/file1",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine"
+					]
+				},
+				"Role2": {
+					"filePath": "src/test/resources/remote_repo/files/1.1/file2",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine2"
+					]
+				},
+				"Role3": {
+					"filePath": "src/test/resources/remote_repo/files/1.1/file3",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine3"
+					]
+				},
+				"Role4": {
+					"filePath": "src/test/resources/remote_repo/files/1.1/file4",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine3"
+					]
+				},
+				"Role5": {
+					"filePath": "src/test/resources/remote_repo/files/1.1/file5",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine5"
+					]
+				}
+			}
+		},
+		"1.9": {
+			"version": "1.9",
+			"publishDate": "2015-05-02 1:19:06.200",
+			"releaseFamily": "relfam2",
+			"roleMap": {
+				"Role1": {
+					"filePath": "src/test/resources/remote_repo/files/1.9/file1",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine"
+					]
+				},
+				"Role2": {
+					"filePath": "src/test/resources/remote_repo/files/1.9/file2",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine2"
+					]
+				},
+				"Role3": {
+					"filePath": "src/test/resources/remote_repo/files/1.9/file3",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine3"
+					]
+				},
+				"Role4": {
+					"filePath": "src/test/resources/remote_repo/files/1.9/file4",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine3"
+					]
+				},
+				"Role5": {
+					"filePath": "src/test/resources/remote_repo/files/1.9/file5",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine5"
+					]
+				}
+			}
+		},
+		"2.0": {
+			"version": "2.0",
+			"publishDate": "2015-11-26 0:08:33.200",
+			"releaseFamily": "relfam2",
+			"roleMap": {
+				"Role1": {
+					"filePath": "src/test/resources/remote_repo/files/2.0/file1",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine"
+					]
+				},
+				"Role2": {
+					"filePath": "src/test/resources/remote_repo/files/2.0/file2",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine2"
+					]
+				},
+				"Role3": {
+					"filePath": "src/test/resources/remote_repo/files/2.0/file3",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine3"
+					]
+				},
+				"Role4": {
+					"filePath": "src/test/resources/remote_repo/files/2.0/file4",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine3"
+					]
+				},
+				"Role5": {
+					"filePath": "src/test/resources/remote_repo/files/2.0/file5",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine5"
+					]
+				}
+			}
+		},
+		"2.0.5": {
+			"version": "2.0.5",
+			"publishDate": "2016-06-06 2:08:33.200",
+			"releaseFamily": "relfam2",
+			"roleMap": {
+				"Role1": {
+					"filePath": "src/test/resources/remote_repo/files/2.0.5/file1",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine"
+					]
+				},
+				"Role2": {
+					"filePath": "src/test/resources/remote_repo/files/2.0.5/file2",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine2"
+					]
+				},
+				"Role3": {
+					"filePath": "src/test/resources/remote_repo/files/2.0.5/file3",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine3"
+					]
+				},
+				"Role4": {
+					"filePath": "src/test/resources/remote_repo/files/2.0.5/file4",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine3"
+					]
+				},
+				"Role5": {
+					"filePath": "src/test/resources/remote_repo/files/2.0.5/file5",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine5"
+					]
+				}
+			}
+		},
+		"qa_latest": {
+			"version": "qa_latest",
+			"publishDate": "2016-06-06 2:08:33.200",
+			"releaseFamily": "relfam2",
+			"roleMap": {
+				"Role1": {
+					"filePath": "src/test/resources/remote_repo/files/qa_latest/file1",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine"
+					]
+				},
+				"Role2": {
+					"filePath": "src/test/resources/remote_repo/files/qa_latest/file2",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine2"
+					]
+				},
+				"Role3": {
+					"filePath": "src/test/resources/remote_repo/files/qa_latest/file3",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine3"
+					]
+				},
+				"Role4": {
+					"filePath": "src/test/resources/remote_repo/files/qa_latest/file4",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine3"
+					]
+				},
+				"Role5": {
+					"filePath": "src/test/resources/remote_repo/files/qa_latest/file5",
+					"commandLine": [
+						"java",
+						"jar",
+						"cmldine5"
+					]
+				}
+			}
+		}
+	}
+}
