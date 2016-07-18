@@ -15,8 +15,6 @@ import org.apache.commons.cli.CommandLineParser;
 import org.junit.Test;
 
 import com.seven10.update_guy.client.FunctionalInterfaces;
-import com.seven10.update_guy.client.FunctionalInterfaces.OnConfigFileCmd;
-import com.seven10.update_guy.client.FunctionalInterfaces.OnShowHelp;
 import com.seven10.update_guy.client.exceptions.ClientParameterException;
 
 /**
@@ -150,7 +148,7 @@ public class CliMgrTest
 	/**
 	 * @param cfgFilePath
 	 * @param args
-	 * @param expectedRemaining TODO
+	 * @param expectedRemaining
 	 * @throws ClientParameterException
 	 */
 	private void checkConfigFileCmd(String cfgFilePath, String[] args) throws ClientParameterException

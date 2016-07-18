@@ -19,8 +19,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.seven10.update_guy.client.FunctionalInterfaces;
-import com.seven10.update_guy.client.FunctionalInterfaces.ResponseToFileMgr;
-import com.seven10.update_guy.client.FunctionalInterfaces.WebReqFactory;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
 import com.seven10.update_guy.client.request.Requester;
 

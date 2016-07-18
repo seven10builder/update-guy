@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.seven10.update_guy.client.request;
 
 import static org.junit.Assert.*;
@@ -15,7 +12,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import com.seven10.update_guy.client.ClientSettings;
 import com.seven10.update_guy.client.FunctionalInterfaces;
-import com.seven10.update_guy.client.FunctionalInterfaces.RequesterFactory;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
 import com.seven10.update_guy.common.ManifestEntryHelpers;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
