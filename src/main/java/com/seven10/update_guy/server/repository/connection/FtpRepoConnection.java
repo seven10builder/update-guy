@@ -293,7 +293,17 @@ public class FtpRepoConnection implements RepoConnection
 		{
 			throw new IllegalArgumentException("versionEntry cannot be null");
 		}
-		for (Entry<String, UpdateGuyRole> entry : versionEntry.getRoleInfos(versionEntry.getRoles())) // get all the  paths
+		if(onFileComplete == null)
+		{
+			throw new IllegalArgumentException("onFileComplete cannot be null");
+		}
+		List<Entry<String, UpdateGuyRole>> roleInfos = versionEntry.getRoleInfos(versionEntry.getRoles());
+		if(roleInfos.size() == 0)
+		{
+			logger.error(".downloadRelease(): could not find any role infos for version '%s'", versionEntry.getVersion());
+			throw new RepositoryException(Status.NOT_FOUND, "No manifests found");
+		}
+		for (Entry<String, UpdateGuyRole> entry : roleInfos) // get all the  paths
 		{
 			UpdateGuyRole srcPath = entry.getValue();
 			Path destPath;

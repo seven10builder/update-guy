@@ -125,7 +125,7 @@ public class ReleaseMgrTest
 	public void testGetRoleInfoForRole_valid() throws RepositoryException, IOException, UpdateGuyException
 	{
 		String testName = "getfilefr-v";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
 		for(Manifest releaseFamily: load_manifest_list_from_path(get_manifests_path()))
 		{

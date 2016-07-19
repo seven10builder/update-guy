@@ -23,6 +23,7 @@ import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.server.manifest.ManifestRefresher.FileCreator;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
+import com.seven10.update_guy.server.repository.RepositoryInfo.RepositoryType;
 import com.seven10.update_guy.server.repository.connection.RepoConnection;
 import com.seven10.update_guy.server.repository.connection.RepoConnectionFactory;
 
@@ -100,7 +101,7 @@ public class ManifestRefresherTest
 	public void testRefreshLocalManifest() throws RepositoryException, FileNotFoundException, IOException
 	{
 		String testName = "refresh_local_man";
-		RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
 		String releaseFamily = "relfam";
 		
@@ -159,7 +160,7 @@ public class ManifestRefresherTest
 	public void testCreateRepoConnectionForId() throws RepositoryException, FileNotFoundException, IOException
 	{
 		String testName = "refresh_local_man";
-		RepositoryInfo repo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		RepoConnection expected = RepoConnectionFactory.connect(repo);
 		
 		ManifestRefresher mr = new ManifestRefresher(repo.getShaHash(), Paths.get("this", "shouldnt", "matter") );		
@@ -177,7 +178,7 @@ public class ManifestRefresherTest
 	public void testUpdateManifestNameList() throws RepositoryException, FileNotFoundException, IOException
 	{
 		String testName = "refresh_local_man";
-		RepositoryInfo repo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
 		ManifestRefresher mr = new ManifestRefresher(repo.getShaHash(), Paths.get("this", "shouldnt", "matter") );	
 		FileCreator fileCreator = mock(ManifestRefresher.FileCreator.class);

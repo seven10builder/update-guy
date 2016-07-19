@@ -8,7 +8,9 @@ import static com.seven10.update_guy.common.RepoInfoHelpers.*;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +60,9 @@ public class RepositoryServletTest extends JerseyTest
 	@Test
 	public void testRepositoryServlet_valid() throws RepositoryException, IOException
 	{
+		Path rootPath = folder.newFolder("repoServlet-v").toPath();
+		System.setProperty(ServerGlobals.SETTING_LOCAL_PATH, rootPath.toString());
+		System.setProperty(ServerGlobals.SETTING_REPO_FILENAME, "test-repo.json");
 		RepositoryServlet servlet = new RepositoryServlet();
 		assertNotNull(servlet);
 	}
@@ -77,6 +82,10 @@ public class RepositoryServletTest extends JerseyTest
 		
 		RepositoryServlet servlet = new RepositoryServlet();
 		assertNotNull(servlet);
+		Path filePath = Paths.get(ServerGlobals.DEFAULT_LOCAL_PATH, ServerGlobals.DEFAULT_REPO_FILENAME);
+		assertTrue(Files.exists(filePath));
+		Files.delete(filePath);
+		Files.delete(Paths.get(ServerGlobals.DEFAULT_LOCAL_PATH));
 
 	}
 	

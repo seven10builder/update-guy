@@ -40,6 +40,7 @@ import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
 import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
+import com.seven10.update_guy.server.repository.RepositoryInfo.RepositoryType;
 import com.seven10.update_guy.server.release.ReleaseServlet;
 
 import junitx.framework.FileAssert;
@@ -100,7 +101,7 @@ public class ReleaseServletTest extends JerseyTest
 	public void testReleaseServlet_valid() throws RepositoryException, IOException, UpdateGuyException
 	{
 		String testName = "ctor-v";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
 		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
 		for(Manifest manifest: manifestList)
@@ -120,7 +121,7 @@ public class ReleaseServletTest extends JerseyTest
 	public void testReleaseServlet_repoId_notFound() throws RepositoryException, IOException, UpdateGuyException
 	{
 		String testName = "repoId-nf";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
 		// calc an invalid repoId
 		String repoId = repoInfo.getShaHash() + "breakrepoid";
@@ -138,7 +139,7 @@ public class ReleaseServletTest extends JerseyTest
 	public void testReleaseServlet_rf_notFound() throws RepositoryException, IOException
 	{
 		String testName = "ctor-rfnf";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
 		String releaseFamily = "someunknownRelease";
 		new ReleaseServlet(repoInfo.getShaHash(), releaseFamily);
@@ -155,7 +156,7 @@ public class ReleaseServletTest extends JerseyTest
 	public void testGetRoles() throws IOException, RepositoryException, UpdateGuyException
 	{
 		String testName = "getRoles-v";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
 		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
 		String repoId = repoInfo.getShaHash();
@@ -199,7 +200,7 @@ public class ReleaseServletTest extends JerseyTest
 	public void testGetFingerprint_valid() throws IOException, RepositoryException, UpdateGuyException
 	{
 		String testName = "getFingerprint-v";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
 		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
 		String repoId = repoInfo.getShaHash();
@@ -238,7 +239,7 @@ public class ReleaseServletTest extends JerseyTest
 	public void testGetFile_valid() throws IOException, RepositoryException, UpdateGuyException
 	{
 		String testName = "getFiles_v";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
 		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
 		String repoId = repoInfo.getShaHash();
@@ -275,7 +276,7 @@ public class ReleaseServletTest extends JerseyTest
 	public void testDoUpdateCache() throws IOException, RepositoryException, UpdateGuyException
 	{
 		String testName = "doUpdate-cache";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
 		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
 		String repoId = repoInfo.getShaHash();

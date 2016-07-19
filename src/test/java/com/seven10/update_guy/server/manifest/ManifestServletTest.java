@@ -115,7 +115,7 @@ public class ManifestServletTest extends JerseyTest
 	public void testGetManifest_specific_family_not_found() throws IOException, RepositoryException
 	{
 		String testName = "getManifest-sfnf";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
 		Response resp = target("/manifest/"+ repoId + "/show" + "/this-doesnt-exist").request().get();
 		assertEquals(Status.NOT_FOUND.getStatusCode(), resp.getStatus());
@@ -132,7 +132,7 @@ public class ManifestServletTest extends JerseyTest
 	public void testGetManifests_show_all_valid() throws IOException, RepositoryException, UpdateGuyException
 	{
 		String testName = "showAll-v";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
 		
 		List<Manifest> expectedManifestList = load_manifest_list_from_path(get_manifests_path());
@@ -218,7 +218,7 @@ public class ManifestServletTest extends JerseyTest
 	{
 		// /active-release/{activeVersId}?releaseFamily=derp&newVersion=dapp
 		String testName = "getActiveRel-vid-nf";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
 
 		List<Manifest> manifestList = load_manifest_list_from_path(get_manifests_path());
@@ -243,7 +243,7 @@ public class ManifestServletTest extends JerseyTest
 	{
 		// /active-release/{activeVersId}?releaseFamily=derp&newVersion=dapp
 		String testName = "getActiveRel-rf-nf";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
 		
 		

@@ -18,6 +18,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.util.Strings;
 
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.exceptions.UpdateGuyNotFoundException;
@@ -112,6 +113,10 @@ public class ManifestMgr
 		if( manifestPath == null)
 		{
 			throw new IllegalArgumentException("manifestPath must not be null");
+		}
+		if(Strings.isBlank(repoId))
+		{
+			throw new IllegalArgumentException("repoId must not be null");
 		}
 		if(Files.exists(manifestPath) == false)
 		{

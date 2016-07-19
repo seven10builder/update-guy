@@ -75,12 +75,13 @@ public class RepoInfoHelpers
 	/**
 	 * @param testName
 	 * @param temporaryFolder TODO
+	 * @param repositoryType TODO
 	 * @return
 	 * @throws IOException
 	 */
-	public static RepositoryInfo setup_test_repo(String testName, TemporaryFolder temporaryFolder) throws IOException
+	public static RepositoryInfo setup_test_repo(String testName, TemporaryFolder temporaryFolder, RepositoryType repositoryType) throws IOException
 	{
-		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.local);
+		RepositoryInfo repoInfo = load_valid_repo_info(repositoryType);
 		// calc the repoId
 		
 		// create local root path
