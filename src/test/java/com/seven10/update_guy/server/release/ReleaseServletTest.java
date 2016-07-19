@@ -29,7 +29,6 @@ import org.junit.rules.TemporaryFolder;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.seven10.update_guy.common.FileFingerPrint;
-import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.ManifestHelpers;
 import com.seven10.update_guy.common.RepoInfoHelpers;
@@ -37,6 +36,7 @@ import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
 import com.seven10.update_guy.common.manifest.UpdateGuyRole;
+import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.release.ReleaseServlet;
@@ -213,13 +213,15 @@ public class ReleaseServletTest extends JerseyTest
 				// do request
 				for(String roleName: expectedRoles)
 				{
-					String expectedFingerPrint = FileFingerPrint.create(entry.getRoleInfo(roleName).getFilePath().toFile());
-					String path = "/release/"+ repoId + "/" + releaseFamily + "/fingerprint/" + roleName;
+					String expectedFingerPrint = FileFingerPrint.create(entry.getRoleInfo(roleName).getFilePath());
+					String path = "/release/"+ repoId + "/" + releaseFamily + "/roleInfo/" + roleName;
 					Response resp = target(path).queryParam("version", version).request().get();
 					assertEquals(Status.OK.getStatusCode(), resp.getStatus());
-					String actualFingerPrint = resp.readEntity(String.class);
+					String roleInfoString = resp.readEntity(String.class);
+					UpdateGuyRole roleInfo = GsonFactory.getGson().fromJson(roleInfoString, UpdateGuyRole.class);
 					
-					assertEquals(expectedFingerPrint, actualFingerPrint);
+					assertEquals("(" + releaseFamily + "," + version + ", " + roleName + ")", 
+							expectedFingerPrint, roleInfo.getFingerPrint());
 				}
 			}
 		}
@@ -294,7 +296,7 @@ public class ReleaseServletTest extends JerseyTest
 				for(Entry<String, UpdateGuyRole> roleEntry: expectedRoles)
 				{
 					Path expectedFile = manifestEntry.getRoleInfo(roleEntry.getKey()).getFilePath(); 
-					Path actualFile = Globals.buildDownloadTargetPath(repoId, manifestEntry, roleEntry);
+					Path actualFile = ServerGlobals.buildDownloadTargetPath(repoId, manifestEntry, roleEntry);
 					FileAssert.assertBinaryEquals(expectedFile.toFile(), actualFile.toFile());
 				}
 			}

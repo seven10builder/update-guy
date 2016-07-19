@@ -19,6 +19,7 @@ public class ManifestEntryHelpers
 	{
 		Map<String, UpdateGuyRole> rvalue = new HashMap<String, UpdateGuyRole>();
 		rootFolder.toFile().mkdirs();
+		
 		for(int i = 1; i <= roleCount; i++)
 		{
 			String key = "role_" + i;
@@ -26,6 +27,15 @@ public class ManifestEntryHelpers
 			Files.createFile(target);
 			UpdateGuyRole role = new UpdateGuyRole();
 			role.setFilePath(target);
+			role.setFingerPrint(FileFingerPrint.create(target));
+			
+			List<String> cmdList = new ArrayList<String>();
+			for(int j = 1; j <= roleCount; j++)
+			{
+				cmdList.add("cmd"+i+j);
+			}
+				
+			role.setCommandLine(cmdList);
 			rvalue.put(key,  role);
 		}
 		return rvalue;

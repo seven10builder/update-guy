@@ -25,7 +25,6 @@ import org.junit.rules.TemporaryFolder;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.RepoInfoHelpers;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
@@ -34,6 +33,7 @@ import com.seven10.update_guy.common.manifest.ManifestEntry;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.RepositoryInfo.RepositoryType;
 import com.seven10.update_guy.server.manifest.ManifestServlet;
+import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 
 /**
@@ -86,8 +86,8 @@ public class ManifestServletTest extends JerseyTest
 		FileUtils.copyFile(repoPath.toFile(), rootPath.resolve(fileName).toFile());
 		
 		// set attribute so servlet picks it up
-		System.setProperty(Globals.SETTING_LOCAL_PATH, rootPath.toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, fileName);
+		System.setProperty(ServerGlobals.SETTING_LOCAL_PATH, rootPath.toString());
+		System.setProperty(ServerGlobals.SETTING_REPO_FILENAME, fileName);
 		List<Manifest> manifestList = load_manifest_list_from_path(get_manifests_path());
 		Path destManifestPath = rootPath.resolve(repoId).resolve("manifests");
 		destManifestPath.toFile().mkdirs();
@@ -174,8 +174,8 @@ public class ManifestServletTest extends JerseyTest
 		FileUtils.copyFile(repoPath.toFile(), rootPath.resolve(fileName).toFile());
 		
 		// set attribute so servlet picks it up
-		System.setProperty(Globals.SETTING_LOCAL_PATH, rootPath.toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, fileName);
+		System.setProperty(ServerGlobals.SETTING_LOCAL_PATH, rootPath.toString());
+		System.setProperty(ServerGlobals.SETTING_REPO_FILENAME, fileName);
 		List<Manifest> manifestList = load_manifest_list_from_path(get_manifests_path());
 		Path destManifestPath = rootPath.resolve(repoId).resolve("manifests");
 		destManifestPath.toFile().mkdirs();

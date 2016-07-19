@@ -1,73 +1,33 @@
 package com.seven10.update_guy.common;
 
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.util.Map.Entry;
-
-import com.seven10.update_guy.common.exceptions.UpdateGuyException;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole;
-
 public class Globals
 {
-	public static final int DEFAULT_PORT_SETTING = 7519;
-	public static final String ACTIVE_VERSIONS_FOLDER_NAME = "activeVersions";
-	public static final String MANIFEST_FOLDER_NAME = "manifests";
-	/**
-	 * The path of the local root folder for update-guy. This is the root of the 
-	 * tree where manifests and local caches are stored. 
+	/* 
+	 * Defaults
 	 */
-	public static final String SETTING_LOCAL_PATH = "update-guy.localPath";
 	/**
-	 * The default folder to use as the root of local storage
+	 * The default port setting to use if a port isn't specified
 	 */
-	public static final String DEFAULT_LOCAL_PATH = "local";
-	/**
-	 * The name of the repo file to look for. 
-	 */
-	public static final String SETTING_REPO_FILENAME = "update-guy.repoFileName";
-	/**
-	 * The default repo information file name
-	 */
-	public static final String DEFAULT_REPO_FILENAME = "repos.json";
+	public static final String DEFAULT_PORT_SETTING = "7519";
 	
-	public static Path getRootPath()
-	{
-		 return FileSystems.getDefault().getPath(System.getProperty(SETTING_LOCAL_PATH, DEFAULT_LOCAL_PATH));
-	}
-	public static Path getRepoFile()
-	{
-		String repoFileName = System.getProperty(SETTING_REPO_FILENAME, DEFAULT_REPO_FILENAME);
-		return getRootPath().resolve(repoFileName);
-	}
-	public static Path getManifestStorePath(String repoId)
-	{
-		return getRootPath().resolve(repoId).resolve(MANIFEST_FOLDER_NAME);
-	}
-	public static Path getActiveVersionStorePath()
-	{
-		return getRootPath().resolve(ACTIVE_VERSIONS_FOLDER_NAME);
-	}
-	public static Path getFileStorePathForRole(String repoId, String releaseFamily, String version, String roleId)
-	{
-		return getRootPath().resolve(repoId).resolve(releaseFamily).resolve(version).resolve(roleId);
-	}
-	/**
-	 * @param versionEntry
-	 * @param entry
-	 * @param srcPath
-	 * @return
-	 * @throws RepositoryException
+	/*
+	 * Settings
 	 */
-	public static Path buildDownloadTargetPath(String repoId, ManifestEntry versionEntry, Entry<String, UpdateGuyRole> roleEntry)
-			throws UpdateGuyException
+	/**
+	 * The port for the server to use to listen for the client
+	 */
+	public static final String SETTING_LISTEN_PORT = "update-guy.port";
+
+	/**
+	 * retrieves the configured listening port for the server
+	 * @return the port to use
+	 */
+	public static int getServerPort()
 	{
-		Path destPath = getFileStorePathForRole(repoId,
-														versionEntry.getReleaseFamily(),
-														versionEntry.getVersion(),
-														roleEntry.getKey());
-		Path filePath = destPath.resolve(roleEntry.getValue().getFilePath().getFileName().toString());
-		return filePath;
+		String portString = System.getProperty(Globals.SETTING_LISTEN_PORT, Globals.DEFAULT_PORT_SETTING);
+		return Integer.valueOf(portString);
 	}
+
+
 
 }

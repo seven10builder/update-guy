@@ -1,6 +1,8 @@
 package com.seven10.update_guy.client.request;
 
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -125,6 +127,28 @@ public class RequesterUtils
 				requester::buildRequest,
 				new ResponseEvaluator<String>(String.class));
 		return fingerPrint;
+	}
+
+	public List<String> requestCmdLine(ManifestEntry release, FunctionalInterfaces.RequesterFactory requesterFactory) throws FatalClientException
+	{
+		if(release == null)
+		{
+			throw new IllegalArgumentException("release must not be null");
+		}
+		if(requesterFactory == null)
+		{
+			throw new IllegalArgumentException("requesterFactory must not be null");
+		}
+		String methodName = String.format("/fingerprint/%s", settings.roleName);
+		String url = buildReleaseReq();
+				
+		Requester requester = requesterFactory.getRequester(url, methodName);
+		requester.addQueryParam("version", release.getVersion());
+		ResponseEvaluator<String[]> evaluator = new ResponseEvaluator<String[]>(String[].class);
+		String[] cmdLine = requester.get(
+				requester::buildRequest,
+				evaluator);
+		return Arrays.asList(cmdLine);
 	}
 	
 	

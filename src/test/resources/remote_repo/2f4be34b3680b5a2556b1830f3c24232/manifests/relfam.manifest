@@ -13,7 +13,8 @@
             "java",
             "jar",
             "cmldine"
-          ]
+          ],
+          "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role2": {
           "filePath": "src/test/resources/remote_repo/files/1.0/file2",
@@ -21,7 +22,8 @@
             "java",
             "jar",
             "cmldine2"
-          ]
+          ],
+          "fingerPrint": "023c61bacb8ca8388480f2b9910d09f2"
         },
         "Role3": {
           "filePath": "src/test/resources/remote_repo/files/1.0/file3",
@@ -29,7 +31,8 @@
             "java",
             "jar",
             "cmldine3"
-          ]
+          ],
+          "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role4": {
           "filePath": "src/test/resources/remote_repo/files/1.0/file4",
@@ -37,7 +40,8 @@
             "java",
             "jar",
             "cmldine3"
-          ]
+          ],
+          "fingerPrint": "6e1cd91320809f733cd0f354804ed8a3"
         },
         "Role5": {
           "filePath": "src/test/resources/remote_repo/files/1.0/file5",
@@ -45,7 +49,8 @@
             "java",
             "jar",
             "cmldine5"
-          ]
+          ],
+          "fingerPrint": "1dd06c8cb6bfbd075a1581b39b5d89fc"
         }
       },
       "releaseFamily": "relfam"
@@ -60,7 +65,8 @@
             "java",
             "jar",
             "cmldine"
-          ]
+          ],
+          "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role2": {
           "filePath": "src/test/resources/remote_repo/files/1.1/file2",
@@ -68,7 +74,8 @@
             "java",
             "jar",
             "cmldine2"
-          ]
+          ],
+          "fingerPrint": "023c61bacb8ca8388480f2b9910d09f2"
         },
         "Role3": {
           "filePath": "src/test/resources/remote_repo/files/1.1/file3",
@@ -76,7 +83,8 @@
             "java",
             "jar",
             "cmldine3"
-          ]
+          ],
+          "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role4": {
           "filePath": "src/test/resources/remote_repo/files/1.1/file4",
@@ -84,7 +92,8 @@
             "java",
             "jar",
             "cmldine3"
-          ]
+          ],
+          "fingerPrint": "6e1cd91320809f733cd0f354804ed8a3"
         },
         "Role5": {
           "filePath": "src/test/resources/remote_repo/files/1.1/file5",
@@ -92,7 +101,8 @@
             "java",
             "jar",
             "cmldine5"
-          ]
+          ],
+          "fingerPrint": "1dd06c8cb6bfbd075a1581b39b5d89fc"
         }
       },
       "releaseFamily": "relfam"
@@ -107,7 +117,8 @@
             "java",
             "jar",
             "cmldine"
-          ]
+          ],
+          "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role2": {
           "filePath": "src/test/resources/remote_repo/files/1.9/file2",
@@ -115,7 +126,8 @@
             "java",
             "jar",
             "cmldine2"
-          ]
+          ],
+          "fingerPrint": "023c61bacb8ca8388480f2b9910d09f2"
         },
         "Role3": {
           "filePath": "src/test/resources/remote_repo/files/1.9/file3",
@@ -123,7 +135,8 @@
             "java",
             "jar",
             "cmldine3"
-          ]
+          ],
+          "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role4": {
           "filePath": "src/test/resources/remote_repo/files/1.9/file4",
@@ -131,7 +144,8 @@
             "java",
             "jar",
             "cmldine3"
-          ]
+          ],
+          "fingerPrint": "6e1cd91320809f733cd0f354804ed8a3"
         },
         "Role5": {
           "filePath": "src/test/resources/remote_repo/files/1.9/file5",
@@ -139,7 +153,8 @@
             "java",
             "jar",
             "cmldine5"
-          ]
+          ],
+          "fingerPrint": "1dd06c8cb6bfbd075a1581b39b5d89fc"
         }
       },
       "releaseFamily": "relfam"
@@ -154,7 +169,8 @@
             "java",
             "jar",
             "cmldine"
-          ]
+          ],
+          "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role2": {
           "filePath": "src/test/resources/remote_repo/files/2.0/file2",
@@ -162,7 +178,8 @@
             "java",
             "jar",
             "cmldine2"
-          ]
+          ],
+          "fingerPrint": "023c61bacb8ca8388480f2b9910d09f2"
         },
         "Role3": {
           "filePath": "src/test/resources/remote_repo/files/2.0/file3",
@@ -170,7 +187,8 @@
             "java",
             "jar",
             "cmldine3"
-          ]
+          ],
+          "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role4": {
           "filePath": "src/test/resources/remote_repo/files/2.0/file4",
@@ -178,7 +196,8 @@
             "java",
             "jar",
             "cmldine3"
-          ]
+          ],
+          "fingerPrint": "6e1cd91320809f733cd0f354804ed8a3"
         },
         "Role5": {
           "filePath": "src/test/resources/remote_repo/files/2.0/file5",
@@ -186,7 +205,8 @@
             "java",
             "jar",
             "cmldine5"
-          ]
+          ],
+          "fingerPrint": "1dd06c8cb6bfbd075a1581b39b5d89fc"
         }
       },
       "releaseFamily": "relfam"
@@ -201,7 +221,8 @@
             "java",
             "jar",
             "cmldine"
-          ]
+          ],
+          "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role2": {
           "filePath": "src/test/resources/remote_repo/files/2.0.5/file2",
@@ -209,7 +230,8 @@
             "java",
             "jar",
             "cmldine2"
-          ]
+          ],
+          "fingerPrint": "023c61bacb8ca8388480f2b9910d09f2"
         },
         "Role3": {
           "filePath": "src/test/resources/remote_repo/files/2.0.5/file3",
@@ -217,7 +239,8 @@
             "java",
             "jar",
             "cmldine3"
-          ]
+          ],
+          "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role4": {
           "filePath": "src/test/resources/remote_repo/files/2.0.5/file4",
@@ -225,7 +248,8 @@
             "java",
             "jar",
             "cmldine3"
-          ]
+          ],
+          "fingerPrint": "6e1cd91320809f733cd0f354804ed8a3"
         },
         "Role5": {
           "filePath": "src/test/resources/remote_repo/files/2.0.5/file5",
@@ -233,7 +257,8 @@
             "java",
             "jar",
             "cmldine5"
-          ]
+          ],
+          "fingerPrint": "1dd06c8cb6bfbd075a1581b39b5d89fc"
         }
       },
       "releaseFamily": "relfam"
@@ -248,7 +273,8 @@
             "java",
             "jar",
             "cmldine"
-          ]
+          ],
+          "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role2": {
           "filePath": "src/test/resources/remote_repo/files/qa_latest/file2",
@@ -256,7 +282,8 @@
             "java",
             "jar",
             "cmldine2"
-          ]
+          ],
+          "fingerPrint": "023c61bacb8ca8388480f2b9910d09f2"
         },
         "Role3": {
           "filePath": "src/test/resources/remote_repo/files/qa_latest/file3",
@@ -264,7 +291,8 @@
             "java",
             "jar",
             "cmldine3"
-          ]
+          ],
+          "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role4": {
           "filePath": "src/test/resources/remote_repo/files/qa_latest/file4",
@@ -272,7 +300,8 @@
             "java",
             "jar",
             "cmldine3"
-          ]
+          ],
+          "fingerPrint": "6e1cd91320809f733cd0f354804ed8a3"
         },
         "Role5": {
           "filePath": "src/test/resources/remote_repo/files/qa_latest/file5",
@@ -280,7 +309,8 @@
             "java",
             "jar",
             "cmldine5"
-          ]
+          ],
+          "fingerPrint": "1dd06c8cb6bfbd075a1581b39b5d89fc"
         }
       },
       "releaseFamily": "relfam"

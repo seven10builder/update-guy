@@ -23,8 +23,8 @@ import org.junit.rules.TemporaryFolder;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.GsonFactory;
+import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.RepositoryServlet;
@@ -72,8 +72,8 @@ public class RepositoryServletTest extends JerseyTest
 	public void testRepositoryServlet_defaults() throws RepositoryException, IOException
 	{
 		
-		System.clearProperty(Globals.SETTING_LOCAL_PATH);
-		System.clearProperty(Globals.SETTING_REPO_FILENAME);
+		System.clearProperty(ServerGlobals.SETTING_LOCAL_PATH);
+		System.clearProperty(ServerGlobals.SETTING_REPO_FILENAME);
 		
 		RepositoryServlet servlet = new RepositoryServlet();
 		assertNotNull(servlet);
@@ -115,8 +115,8 @@ public class RepositoryServletTest extends JerseyTest
 		Path repoInfoFile = folder.newFolder(testName).toPath().resolve(testName + ".json");
 		FileUtils.copyFile(get_valid_repos_path().toFile(), repoInfoFile.toFile());
 		Path rootPath = repoInfoFile.getParent();
-		System.setProperty(Globals.SETTING_LOCAL_PATH, rootPath.toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, repoInfoFile.getFileName().toString());
+		System.setProperty(ServerGlobals.SETTING_LOCAL_PATH, rootPath.toString());
+		System.setProperty(ServerGlobals.SETTING_REPO_FILENAME, repoInfoFile.getFileName().toString());
 		return repoInfoFile;
 	}
 	

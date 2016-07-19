@@ -10,8 +10,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import static org.mockito.Mockito.*;
-
-import java.io.File;
+import static com.seven10.update_guy.common.ManifestHelpers.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,11 +18,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import com.seven10.update_guy.common.FileFingerPrint;
 import com.seven10.update_guy.common.ManifestEntryHelpers;
+
 import com.seven10.update_guy.common.RepoInfoHelpers;
+import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.manifest.UpdateGuyRole;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.SpyablePathConsumer;
 import com.seven10.update_guy.server.repository.SpyableRunnable;
@@ -113,30 +116,41 @@ public class ReleaseMgrTest
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.release.ReleaseMgr#getFileForRole(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.release.ReleaseMgr#GetRoleInfoForRole(java.lang.String)}.
 	 * @throws RepositoryException 
 	 * @throws IOException 
+	 * @throws UpdateGuyException 
 	 */
 	@Test
-	public void testGetFileForRole_valid() throws RepositoryException, IOException
+	public void testGetRoleInfoForRole_valid() throws RepositoryException, IOException, UpdateGuyException
 	{
 		String testName = "getfilefr-v";
-		Path rootFolder = folder.newFolder(testName).toPath();
-		ManifestEntry activeVersion = ManifestEntryHelpers.create_valid_manifest_entry(testName, 1, rootFolder);
-		Manifest releaseFamily = new Manifest();
-		releaseFamily.addVersionEntry(activeVersion);
-		RepositoryInfo repoInfo = new RepositoryInfo();
-		ReleaseMgr mgr = new ReleaseMgr(releaseFamily, repoInfo);
-		String roleName = activeVersion.getRoles().get(0);
-		File roleFile = mgr.getFileForRole(activeVersion.getVersion(), roleName);
-		assertTrue(Files.exists(roleFile.toPath()));
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		
+		for(Manifest releaseFamily: load_manifest_list_from_path(get_manifests_path()))
+		{
+			ReleaseMgr mgr = new ReleaseMgr(releaseFamily, repoInfo);
+		
+			for(ManifestEntry activeVersion: releaseFamily.getVersionEntries())
+			{
+				for(String roleName: activeVersion.getRoles())
+				{
+					UpdateGuyRole roleFile = mgr.getRoleInfoForRole(activeVersion.getVersion(), roleName);
+					Path rolePath = roleFile.getFilePath();
+					String expectedFingerPrint = FileFingerPrint.create(rolePath);
+					assertTrue(Files.exists(rolePath));
+					assertEquals("(" + releaseFamily.getReleaseFamily() + "," + activeVersion.getVersion()+ ", " + roleName + ")" ,
+							expectedFingerPrint, roleFile.getFingerPrint());
+				}
+			}
+		}
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.release.ReleaseMgr#getFileForRole(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.release.ReleaseMgr#GetRoleInfoForRole(java.lang.String)}.
 	 * @throws RepositoryException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
-	public void testGetFileForRole_null_roleName() throws RepositoryException
+	public void testGetRoleInfoForRole_null_roleName() throws RepositoryException
 	{
 		
 		Manifest activeVersion = new Manifest();
@@ -144,28 +158,28 @@ public class ReleaseMgrTest
 		ReleaseMgr mgr = new ReleaseMgr(activeVersion, repoInfo);
 		String version = "version";
 		String roleName = null;
-		mgr.getFileForRole(version, roleName);
+		mgr.getRoleInfoForRole(version, roleName);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.release.ReleaseMgr#getFileForRole(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.release.ReleaseMgr#GetRoleInfoForRole(java.lang.String)}.
 	 * @throws RepositoryException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
-	public void testGetFileForRole_empty_roleName() throws RepositoryException
+	public void testGetRoleInfoForRole_empty_roleName() throws RepositoryException
 	{
 		Manifest releaseFamily = new Manifest();
 		RepositoryInfo repoInfo = new RepositoryInfo();
 		ReleaseMgr mgr = new ReleaseMgr(releaseFamily, repoInfo);
 		String version = "version";
 		String roleName = "";
-		mgr.getFileForRole(version, roleName);
+		mgr.getRoleInfoForRole(version, roleName);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.release.ReleaseMgr#getFileForRole(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.release.ReleaseMgr#GetRoleInfoForRole(java.lang.String)}.
 	 * @throws RepositoryException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
-	public void testGetFileForRole_null_version() throws RepositoryException
+	public void testGetRoleInfoForRole_null_version() throws RepositoryException
 	{
 		
 		Manifest activeVersion = new Manifest();
@@ -173,14 +187,14 @@ public class ReleaseMgrTest
 		ReleaseMgr mgr = new ReleaseMgr(activeVersion, repoInfo);
 		String version = null;
 		String roleName = "roleName";
-		mgr.getFileForRole(version, roleName);
+		mgr.getRoleInfoForRole(version, roleName);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.release.ReleaseMgr#getFileForRole(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.release.ReleaseMgr#GetRoleInfoForRole(java.lang.String)}.
 	 * @throws RepositoryException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
-	public void testGetFileForRole_empty_version() throws RepositoryException
+	public void testGetRoleInfoForRole_empty_version() throws RepositoryException
 	{
 		
 		Manifest activeVersion = new Manifest();
@@ -188,7 +202,7 @@ public class ReleaseMgrTest
 		ReleaseMgr mgr = new ReleaseMgr(activeVersion, repoInfo);
 		String version = "";
 		String roleName = "roleName";
-		mgr.getFileForRole(version, roleName);
+		mgr.getRoleInfoForRole(version, roleName);
 	}
 	
 	/**

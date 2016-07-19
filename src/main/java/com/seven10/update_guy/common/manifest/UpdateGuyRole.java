@@ -16,16 +16,21 @@ public class UpdateGuyRole
 	@Expose
 	protected final List<String> commandLine;
 	
+	@Expose
+	protected String fingerPrint;
+	
 	public UpdateGuyRole()
 	{
 		filePath = "";
+		fingerPrint = "";
 		commandLine = new ArrayList<String>();
 	}
 
-	public UpdateGuyRole(Path filePath, List<String> commandLine)
+	public UpdateGuyRole(Path filePath, List<String> commandLine, String fingerPrint)
 	{
 		this.filePath = filePath.toString();
 		this.commandLine = commandLine;
+		this.fingerPrint = fingerPrint;
 	}
 
 	/**
@@ -60,7 +65,16 @@ public class UpdateGuyRole
 		commandLine.clear();
 		commandLine.addAll(commandLine);
 	}
-
+	
+	public String getFingerPrint()
+	{
+		return fingerPrint;
+	}
+	public void setFingerPrint(String newValue)
+	{
+		fingerPrint = newValue;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -71,6 +85,7 @@ public class UpdateGuyRole
 		int result = 1;
 		result = prime * result + ((commandLine == null) ? 0 : commandLine.hashCode());
 		result = prime * result + ((filePath == null) ? 0 : filePath.hashCode());
+		result = prime * result + ((fingerPrint == null) ? 0 :fingerPrint.hashCode());
 		return result;
 	}
 
@@ -112,6 +127,17 @@ public class UpdateGuyRole
 			}
 		}
 		else if (!filePath.equals(other.filePath))
+		{
+			return false;
+		}
+		if (fingerPrint == null)
+		{
+			if(other.fingerPrint != null)
+			{
+				return false;
+			}
+		}
+		else if( (!fingerPrint.equals(other.fingerPrint)))
 		{
 			return false;
 		}

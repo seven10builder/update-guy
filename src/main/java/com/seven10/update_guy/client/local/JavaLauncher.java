@@ -45,12 +45,13 @@ public class JavaLauncher
 				.inheritIO();
 	}
 
-	public List<String> buildParamList(List<String> remainingParams, Path jarFilePath)
+	public List<String> buildParamList(List<String> remainingParams, Path jarFilePath, List<String> cmdLine)
 	{
 		List<String> paramList = new ArrayList<String>();
 		paramList.add(LocalCacheUtils.getJavaBinPath());
 		paramList.add(JAVA_JAR_OPTION);
 		paramList.add(jarFilePath.toString());
+		paramList.addAll(cmdLine);
 		paramList.addAll(remainingParams);
 		return paramList;
 	}

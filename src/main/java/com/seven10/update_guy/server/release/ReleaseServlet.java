@@ -1,7 +1,5 @@
 package com.seven10.update_guy.server.release;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -18,10 +16,10 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.seven10.update_guy.common.FileFingerPrint;
-import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.manifest.Manifest;
+import com.seven10.update_guy.common.manifest.UpdateGuyRole;
+import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.RepositoryServlet;
@@ -73,7 +71,7 @@ public class ReleaseServlet
 	public ReleaseServlet(@PathParam("repoId") String repoId, @PathParam("releaseFamily") String releaseFamily) throws RepositoryException
 	{
 		RepositoryInfo repoInfo = RepositoryServlet.getRepoInfoById(repoId);
-		Manifest manifest = ManifestServlet.getManifestById(releaseFamily, repoId, new ManifestRefresher(repoId, Globals.getManifestStorePath(repoId)));
+		Manifest manifest = ManifestServlet.getManifestById(releaseFamily, repoId, new ManifestRefresher(repoId, ServerGlobals.getManifestStorePath(repoId)));
 		this.releaseMgr = new ReleaseMgr(manifest, repoInfo);
 	}
 
@@ -97,27 +95,22 @@ public class ReleaseServlet
 	}
 	
 	@GET
-	@Path("/fingerprint/{roleName}")
+	@Path("/roleInfo/{roleName}")
 	public Response getFingerprint(@PathParam("roleName") String roleName, @QueryParam("version") String version)
 	{
 		ResponseBuilder resp = null;
 		try
 		{
-			File file = releaseMgr.getFileForRole(version, roleName);
-			String fingerPrint = FileFingerPrint.create(file);
-			resp = Response.ok().entity(fingerPrint);
+			UpdateGuyRole roleInfo = releaseMgr.getRoleInfoForRole(version, roleName);
+			resp = Response.ok().entity(roleInfo.toString());
 		}
 		catch (RepositoryException ex)
 		{
 			resp = Response.status(ex.getStatusCode()).entity(ex);
 		}
-		catch (IOException ex)
-		{
-			resp = Response.status(Status.INTERNAL_SERVER_ERROR).entity(ex);
-		}
-		
 		return resp.build();
 	}
+	
 	
 	@GET
 	@Path("/download/{roleName}")
@@ -127,10 +120,10 @@ public class ReleaseServlet
 		ResponseBuilder resp = null;
 		try
 		{
-			File file = releaseMgr.getFileForRole(version, roleName);
+			UpdateGuyRole roleInfo = releaseMgr.getRoleInfoForRole(version, roleName);
 			
-			resp = Response.ok(file, MediaType.APPLICATION_OCTET_STREAM)
-		      .header("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"" );
+			resp = Response.ok(roleInfo.getFilePath().toFile(), MediaType.APPLICATION_OCTET_STREAM)
+		      .header("Content-Disposition", "attachment; filename=\"" + roleInfo.getFilePath().getFileName() + "\"" );
 		}
 		catch (RepositoryException ex)
 		{

@@ -5,7 +5,6 @@ package com.seven10.update_guy.client.local;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -100,7 +99,7 @@ public class LocalCacheUtilsTest
 	{
 		PowerMockito.mockStatic(FileFingerPrint.class);
 		String expected = "this-represents-a-fingerprint";
-		Mockito.when(FileFingerPrint.create(Mockito.any(File.class))).thenReturn(expected);
+		Mockito.when(FileFingerPrint.create(Mockito.any(Path.class))).thenReturn(expected);
 		
 		ClientSettings settings = load_valid_settings();
 		LocalCacheUtils localCacheUtils = new LocalCacheUtils(settings);
@@ -154,7 +153,7 @@ public class LocalCacheUtilsTest
 	{
 		
 		PowerMockito.mockStatic(FileFingerPrint.class);
-		Mockito.when(FileFingerPrint.create(Mockito.any(File.class))).thenThrow(new IOException());
+		Mockito.when(FileFingerPrint.create(Mockito.any(Path.class))).thenThrow(new IOException());
 		
 		ClientSettings settings = load_valid_settings();
 		LocalCacheUtils localCacheUtils = new LocalCacheUtils(settings);

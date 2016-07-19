@@ -138,9 +138,10 @@ public class UpdateGuyClient
 			logger.info(".executeClientLoop(): checksums matched, no need to download", localChecksum);
 		}
 		
+		List<String> cmdLine = requestUtils.requestCmdLine(release, RequesterUtils::getDefaultRequester);
 		//	launch role file with remaining cli options
 		ProcessBuilder processBuilder = launcher.createProcessBuilder(
-											launcher.buildParamList(remainingParams, jarFilePath),
+											launcher.buildParamList(remainingParams, jarFilePath, cmdLine),
 											jarFilePath.getParent());
 		return launcher.launchExecutable(processBuilder);
 	}

@@ -16,11 +16,11 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 
 @Path("/manifest/{repoId}")
@@ -32,7 +32,7 @@ public class ManifestServlet
 
 	public static Manifest getManifestById(String releaseFamily, String repoId, ManifestRefresher manifestRefresher) throws RepositoryException
 	{
-		java.nio.file.Path manifestPath = Globals.getManifestStorePath(repoId)
+		java.nio.file.Path manifestPath = ServerGlobals.getManifestStorePath(repoId)
 				.resolve(String.format("%s.manifest", releaseFamily));
 		try
 		{
@@ -49,7 +49,7 @@ public class ManifestServlet
 	public ManifestServlet(@PathParam("repoId") String repoId)
 	{
 		this.repoId = repoId;
-		java.nio.file.Path manifestPath = Globals.getManifestStorePath(repoId);
+		java.nio.file.Path manifestPath = ServerGlobals.getManifestStorePath(repoId);
 		manifestMgr = new ManifestMgr(manifestPath, repoId);
 	}
 	
