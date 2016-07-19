@@ -61,28 +61,38 @@ public class ServerGlobals
 		return filePath;
 	}
 
-
+	public static Path getRootPath()
+	{
+		 return FileSystems.getDefault().getPath(System.getProperty(SETTING_LOCAL_PATH, DEFAULT_LOCAL_PATH));
+	}
+	public static Path getCacheRoot()
+	{
+		return getRootPath().resolve("local");
+	}
+	public static Path getSubRepoRoot(String repoId)
+	{
+		return getCacheRoot().resolve(repoId);
+	}
 	public static Path getFileStorePathForRole(String repoId, String releaseFamily, String version, String roleId)
 	{
-		return getRootPath().resolve(repoId).resolve(releaseFamily).resolve(version).resolve(roleId);
-	}
-	public static Path getActiveVersionStorePath()
-	{
-		return getRootPath().resolve(ACTIVE_VERSIONS_FOLDER_NAME);
+		return getSubRepoRoot(repoId).resolve(releaseFamily).resolve(version).resolve(roleId);
 	}
 	public static Path getManifestStorePath(String repoId)
 	{
-		return getRootPath().resolve(repoId).resolve(MANIFEST_FOLDER_NAME);
+		return getSubRepoRoot(repoId).resolve(MANIFEST_FOLDER_NAME);
 	}
+	
+	public static Path getActiveVersionStorePath()
+	{
+		return getCacheRoot().resolve(ACTIVE_VERSIONS_FOLDER_NAME);
+	}
+	
 	public static Path getRepoFile()
 	{
 		String repoFileName = System.getProperty(SETTING_REPO_FILENAME, DEFAULT_REPO_FILENAME);
 		return getRootPath().resolve(repoFileName);
 	}
-	public static Path getRootPath()
-	{
-		 return FileSystems.getDefault().getPath(System.getProperty(SETTING_LOCAL_PATH, DEFAULT_LOCAL_PATH));
-	}
+	
 
 
 }

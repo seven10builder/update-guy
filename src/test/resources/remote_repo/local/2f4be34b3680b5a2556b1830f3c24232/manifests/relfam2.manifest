@@ -8,7 +8,7 @@
       "publishDate": "2014-06-06 02:08:33.200",
       "roleMap": {
         "Role1": {
-          "filePath": "src/test/resources/remote_repo/files/1.0/file1",
+          "filePath": "src/test/resources/remote_repo/local/files/1.0/file1",
           "commandLine": [
             "java",
             "jar",
@@ -17,7 +17,7 @@
           "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role2": {
-          "filePath": "src/test/resources/remote_repo/files/1.0/file2",
+          "filePath": "src/test/resources/remote_repo/local/files/1.0/file2",
           "commandLine": [
             "java",
             "jar",
@@ -26,7 +26,7 @@
           "fingerPrint": "023c61bacb8ca8388480f2b9910d09f2"
         },
         "Role3": {
-          "filePath": "src/test/resources/remote_repo/files/1.0/file3",
+          "filePath": "src/test/resources/remote_repo/local/files/1.0/file3",
           "commandLine": [
             "java",
             "jar",
@@ -35,7 +35,7 @@
           "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role4": {
-          "filePath": "src/test/resources/remote_repo/files/1.0/file4",
+          "filePath": "src/test/resources/remote_repo/local/files/1.0/file4",
           "commandLine": [
             "java",
             "jar",
@@ -44,7 +44,7 @@
           "fingerPrint": "6e1cd91320809f733cd0f354804ed8a3"
         },
         "Role5": {
-          "filePath": "src/test/resources/remote_repo/files/1.0/file5",
+          "filePath": "src/test/resources/remote_repo/local/files/1.0/file5",
           "commandLine": [
             "java",
             "jar",
@@ -60,7 +60,7 @@
       "publishDate": "2014-09-10 02:08:33.200",
       "roleMap": {
         "Role1": {
-          "filePath": "src/test/resources/remote_repo/files/1.1/file1",
+          "filePath": "src/test/resources/remote_repo/local/files/1.1/file1",
           "commandLine": [
             "java",
             "jar",
@@ -69,7 +69,7 @@
           "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role2": {
-          "filePath": "src/test/resources/remote_repo/files/1.1/file2",
+          "filePath": "src/test/resources/remote_repo/local/files/1.1/file2",
           "commandLine": [
             "java",
             "jar",
@@ -78,7 +78,7 @@
           "fingerPrint": "023c61bacb8ca8388480f2b9910d09f2"
         },
         "Role3": {
-          "filePath": "src/test/resources/remote_repo/files/1.1/file3",
+          "filePath": "src/test/resources/remote_repo/local/files/1.1/file3",
           "commandLine": [
             "java",
             "jar",
@@ -87,7 +87,7 @@
           "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role4": {
-          "filePath": "src/test/resources/remote_repo/files/1.1/file4",
+          "filePath": "src/test/resources/remote_repo/local/files/1.1/file4",
           "commandLine": [
             "java",
             "jar",
@@ -96,7 +96,7 @@
           "fingerPrint": "6e1cd91320809f733cd0f354804ed8a3"
         },
         "Role5": {
-          "filePath": "src/test/resources/remote_repo/files/1.1/file5",
+          "filePath": "src/test/resources/remote_repo/local/files/1.1/file5",
           "commandLine": [
             "java",
             "jar",
@@ -112,7 +112,7 @@
       "publishDate": "2015-05-02 01:19:06.200",
       "roleMap": {
         "Role1": {
-          "filePath": "src/test/resources/remote_repo/files/1.9/file1",
+          "filePath": "src/test/resources/remote_repo/local/files/1.9/file1",
           "commandLine": [
             "java",
             "jar",
@@ -121,7 +121,7 @@
           "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role2": {
-          "filePath": "src/test/resources/remote_repo/files/1.9/file2",
+          "filePath": "src/test/resources/remote_repo/local/files/1.9/file2",
           "commandLine": [
             "java",
             "jar",
@@ -130,7 +130,7 @@
           "fingerPrint": "023c61bacb8ca8388480f2b9910d09f2"
         },
         "Role3": {
-          "filePath": "src/test/resources/remote_repo/files/1.9/file3",
+          "filePath": "src/test/resources/remote_repo/local/files/1.9/file3",
           "commandLine": [
             "java",
             "jar",
@@ -139,7 +139,7 @@
           "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role4": {
-          "filePath": "src/test/resources/remote_repo/files/1.9/file4",
+          "filePath": "src/test/resources/remote_repo/local/files/1.9/file4",
           "commandLine": [
             "java",
             "jar",
@@ -148,7 +148,7 @@
           "fingerPrint": "6e1cd91320809f733cd0f354804ed8a3"
         },
         "Role5": {
-          "filePath": "src/test/resources/remote_repo/files/1.9/file5",
+          "filePath": "src/test/resources/remote_repo/local/files/1.9/file5",
           "commandLine": [
             "java",
             "jar",
@@ -164,7 +164,7 @@
       "publishDate": "2015-11-26 00:08:33.200",
       "roleMap": {
         "Role1": {
-          "filePath": "src/test/resources/remote_repo/files/2.0/file1",
+          "filePath": "src/test/resources/remote_repo/local/files/2.0/file1",
           "commandLine": [
             "java",
             "jar",
@@ -173,7 +173,7 @@
           "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role2": {
-          "filePath": "src/test/resources/remote_repo/files/2.0/file2",
+          "filePath": "src/test/resources/remote_repo/local/files/2.0/file2",
           "commandLine": [
             "java",
             "jar",
@@ -182,7 +182,7 @@
           "fingerPrint": "023c61bacb8ca8388480f2b9910d09f2"
         },
         "Role3": {
-          "filePath": "src/test/resources/remote_repo/files/2.0/file3",
+          "filePath": "src/test/resources/remote_repo/local/files/2.0/file3",
           "commandLine": [
             "java",
             "jar",
@@ -191,7 +191,7 @@
           "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role4": {
-          "filePath": "src/test/resources/remote_repo/files/2.0/file4",
+          "filePath": "src/test/resources/remote_repo/local/files/2.0/file4",
           "commandLine": [
             "java",
             "jar",
@@ -200,7 +200,7 @@
           "fingerPrint": "6e1cd91320809f733cd0f354804ed8a3"
         },
         "Role5": {
-          "filePath": "src/test/resources/remote_repo/files/2.0/file5",
+          "filePath": "src/test/resources/remote_repo/local/files/2.0/file5",
           "commandLine": [
             "java",
             "jar",
@@ -216,7 +216,7 @@
       "publishDate": "2016-06-06 02:08:33.200",
       "roleMap": {
         "Role1": {
-          "filePath": "src/test/resources/remote_repo/files/2.0.5/file1",
+          "filePath": "src/test/resources/remote_repo/local/files/2.0.5/file1",
           "commandLine": [
             "java",
             "jar",
@@ -225,7 +225,7 @@
           "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role2": {
-          "filePath": "src/test/resources/remote_repo/files/2.0.5/file2",
+          "filePath": "src/test/resources/remote_repo/local/files/2.0.5/file2",
           "commandLine": [
             "java",
             "jar",
@@ -234,7 +234,7 @@
           "fingerPrint": "023c61bacb8ca8388480f2b9910d09f2"
         },
         "Role3": {
-          "filePath": "src/test/resources/remote_repo/files/2.0.5/file3",
+          "filePath": "src/test/resources/remote_repo/local/files/2.0.5/file3",
           "commandLine": [
             "java",
             "jar",
@@ -243,7 +243,7 @@
           "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role4": {
-          "filePath": "src/test/resources/remote_repo/files/2.0.5/file4",
+          "filePath": "src/test/resources/remote_repo/local/files/2.0.5/file4",
           "commandLine": [
             "java",
             "jar",
@@ -252,7 +252,7 @@
           "fingerPrint": "6e1cd91320809f733cd0f354804ed8a3"
         },
         "Role5": {
-          "filePath": "src/test/resources/remote_repo/files/2.0.5/file5",
+          "filePath": "src/test/resources/remote_repo/local/files/2.0.5/file5",
           "commandLine": [
             "java",
             "jar",
@@ -268,7 +268,7 @@
       "publishDate": "2016-06-06 02:08:33.200",
       "roleMap": {
         "Role1": {
-          "filePath": "src/test/resources/remote_repo/files/qa_latest/file1",
+          "filePath": "src/test/resources/remote_repo/local/files/qa_latest/file1",
           "commandLine": [
             "java",
             "jar",
@@ -277,7 +277,7 @@
           "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role2": {
-          "filePath": "src/test/resources/remote_repo/files/qa_latest/file2",
+          "filePath": "src/test/resources/remote_repo/local/files/qa_latest/file2",
           "commandLine": [
             "java",
             "jar",
@@ -286,7 +286,7 @@
           "fingerPrint": "023c61bacb8ca8388480f2b9910d09f2"
         },
         "Role3": {
-          "filePath": "src/test/resources/remote_repo/files/qa_latest/file3",
+          "filePath": "src/test/resources/remote_repo/local/files/qa_latest/file3",
           "commandLine": [
             "java",
             "jar",
@@ -295,7 +295,7 @@
           "fingerPrint": "a923e2165a954ab5b909259116696d39"
         },
         "Role4": {
-          "filePath": "src/test/resources/remote_repo/files/qa_latest/file4",
+          "filePath": "src/test/resources/remote_repo/local/files/qa_latest/file4",
           "commandLine": [
             "java",
             "jar",
@@ -304,7 +304,7 @@
           "fingerPrint": "6e1cd91320809f733cd0f354804ed8a3"
         },
         "Role5": {
-          "filePath": "src/test/resources/remote_repo/files/qa_latest/file5",
+          "filePath": "src/test/resources/remote_repo/local/files/qa_latest/file5",
           "commandLine": [
             "java",
             "jar",

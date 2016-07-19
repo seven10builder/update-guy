@@ -99,7 +99,12 @@ public class ActiveVersionEncoderTest
 		String expectedRepoId = "repoId";
 		String expectedReleaseFamily = "releaseFamily";
 		String expectedVersionId = "versionId";
-		Path expectedPath = rootFolder.resolve(ServerGlobals.ACTIVE_VERSIONS_FOLDER_NAME).resolve(expectedRepoId).resolve(expectedReleaseFamily).resolve(expectedVersionId + ".json");
+		Path expectedPath = rootFolder
+				.resolve("local")
+				.resolve(ServerGlobals.ACTIVE_VERSIONS_FOLDER_NAME)
+				.resolve(expectedRepoId)
+				.resolve(expectedReleaseFamily)
+				.resolve(expectedVersionId + ".json");
 		
 		ActiveVersionEncoder encoder = new ActiveVersionEncoder(expectedRepoId, expectedReleaseFamily);
 		Path actualPath = encoder.encodeFileName(expectedVersionId);
