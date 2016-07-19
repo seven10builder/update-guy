@@ -1,0 +1,11 @@
+[
+  {
+    "repoAddress": "localhost",
+    "port": 0,
+    "user": "",
+    "password": "",
+    "manifestPath": "/seven10/update-guy/repos/manifests",
+    "description": "This is the default local repo",
+    "repoType": "local"
+  }
+]

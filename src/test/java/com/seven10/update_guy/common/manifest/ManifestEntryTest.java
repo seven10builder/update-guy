@@ -167,7 +167,7 @@ public class ManifestEntryTest
 		UpdateGuyRole actual = versionEntry.getRoleInfo(expected);
 		assertNull(actual);
 		// add something
-		versionEntry.addRoleInfo("notExpected", new UpdateGuyRole(Paths.get("notExpected"), new ArrayList<String>()));
+		versionEntry.addRoleInfo("notExpected", new UpdateGuyRole(Paths.get("notExpected"), new ArrayList<String>(), "fingerprint"));
 		actual = versionEntry.getRoleInfo(expected);
 		// still not in there
 		assertNull(actual);
@@ -202,7 +202,7 @@ public class ManifestEntryTest
 		ManifestEntry versionEntry = new ManifestEntry();
 		String expected = null;
 		Path expectedPath = folder.newFolder().toPath();
-		versionEntry.addRoleInfo(expected, new UpdateGuyRole(expectedPath, new ArrayList<String>()));
+		versionEntry.addRoleInfo(expected, new UpdateGuyRole(expectedPath, new ArrayList<String>(), "fingerprint"));
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#addRoleInfo(java.lang.String, java.nio.file.Path)}.
@@ -214,7 +214,7 @@ public class ManifestEntryTest
 		ManifestEntry versionEntry = new ManifestEntry();
 		String expected = "";
 		Path expectedPath = folder.newFolder().toPath();
-		versionEntry.addRoleInfo(expected, new UpdateGuyRole(expectedPath, new ArrayList<String>()));
+		versionEntry.addRoleInfo(expected, new UpdateGuyRole(expectedPath, new ArrayList<String>(), "fingerprint"));
 	}
 	
 	
@@ -388,7 +388,7 @@ public class ManifestEntryTest
 		ManifestEntry cloneManifest = new ManifestEntry(versionEntry);
 		assertEquals(versionEntry, cloneManifest);
 		// different object should be different
-		cloneManifest.addRoleInfo("some-role", new UpdateGuyRole(folder.newFolder("jibberish").toPath(), new ArrayList<String>()));
+		cloneManifest.addRoleInfo("some-role", new UpdateGuyRole(folder.newFolder("jibberish").toPath(), new ArrayList<String>(), "fingerprint"));
 		
 		assertNotEquals(versionEntry, cloneManifest);
 	}

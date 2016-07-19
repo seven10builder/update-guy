@@ -15,9 +15,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.ManifestEntryHelpers;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.manifest.ActiveVersionEncoder;
 
 /**
@@ -94,12 +94,17 @@ public class ActiveVersionEncoderTest
 	{
 		
 		Path rootFolder = folder.newFolder().toPath();
-		System.setProperty(Globals.SETTING_LOCAL_PATH, rootFolder.toString());
+		System.setProperty(ServerGlobals.SETTING_LOCAL_PATH, rootFolder.toString());
 		
 		String expectedRepoId = "repoId";
 		String expectedReleaseFamily = "releaseFamily";
 		String expectedVersionId = "versionId";
-		Path expectedPath = rootFolder.resolve(Globals.ACTIVE_VERSIONS_FOLDER_NAME).resolve(expectedRepoId).resolve(expectedReleaseFamily).resolve(expectedVersionId + ".json");
+		Path expectedPath = rootFolder
+				.resolve("local")
+				.resolve(ServerGlobals.ACTIVE_VERSIONS_FOLDER_NAME)
+				.resolve(expectedRepoId)
+				.resolve(expectedReleaseFamily)
+				.resolve(expectedVersionId + ".json");
 		
 		ActiveVersionEncoder encoder = new ActiveVersionEncoder(expectedRepoId, expectedReleaseFamily);
 		Path actualPath = encoder.encodeFileName(expectedVersionId);

@@ -15,13 +15,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.exceptions.UpdateGuyNotFoundException;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
 import com.seven10.update_guy.common.manifest.UpdateGuyRole;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
+import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 
 class LocalRepoConnection implements RepoConnection
@@ -96,7 +96,7 @@ class LocalRepoConnection implements RepoConnection
 			Path destPath;
 			try
 			{
-				destPath = Globals.buildDownloadTargetPath(repoId, versionEntry, roleEntry);
+				destPath = ServerGlobals.buildDownloadTargetPath(repoId, versionEntry, roleEntry);
 			}
 			catch(UpdateGuyException ex)
 			{

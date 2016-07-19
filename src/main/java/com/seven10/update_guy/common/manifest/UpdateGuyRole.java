@@ -10,22 +10,46 @@ import com.seven10.update_guy.common.GsonFactory;
 
 public class UpdateGuyRole
 {
+	public static class ClientRoleInfo
+	{
+		@Expose
+		public String fingerPrint;
+		@Expose
+		public List<String> commandLine;
+
+		public ClientRoleInfo()
+		{
+			fingerPrint = "";
+			commandLine = new ArrayList<String>();
+		}
+		public ClientRoleInfo(String fingerPrint, List<String> commandLine)
+		{
+			this.fingerPrint = fingerPrint;
+			this.commandLine = commandLine;
+		}
+	}
+
 	@Expose
 	protected String filePath;
 	
 	@Expose
 	protected final List<String> commandLine;
 	
+	@Expose
+	protected String fingerPrint;
+	
 	public UpdateGuyRole()
 	{
 		filePath = "";
+		fingerPrint = "";
 		commandLine = new ArrayList<String>();
 	}
 
-	public UpdateGuyRole(Path filePath, List<String> commandLine)
+	public UpdateGuyRole(Path filePath, List<String> commandLine, String fingerPrint)
 	{
 		this.filePath = filePath.toString();
 		this.commandLine = commandLine;
+		this.fingerPrint = fingerPrint;
 	}
 
 	/**
@@ -55,12 +79,25 @@ public class UpdateGuyRole
 	/**
 	 * @param commandLine the commandLine to sets
 	 */
-	public void setCommandLine(List<String> commandLine)
+	public void setCommandLine(List<String> newCmdLine)
 	{
 		commandLine.clear();
 		commandLine.addAll(commandLine);
 	}
-
+	
+	public String getFingerPrint()
+	{
+		return fingerPrint;
+	}
+	public void setFingerPrint(String newValue)
+	{
+		fingerPrint = newValue;
+	}
+	
+	public ClientRoleInfo toClientRoleInfo()
+	{
+		return new ClientRoleInfo(fingerPrint, commandLine);
+	}
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -71,6 +108,7 @@ public class UpdateGuyRole
 		int result = 1;
 		result = prime * result + ((commandLine == null) ? 0 : commandLine.hashCode());
 		result = prime * result + ((filePath == null) ? 0 : filePath.hashCode());
+		result = prime * result + ((fingerPrint == null) ? 0 :fingerPrint.hashCode());
 		return result;
 	}
 
@@ -112,6 +150,17 @@ public class UpdateGuyRole
 			}
 		}
 		else if (!filePath.equals(other.filePath))
+		{
+			return false;
+		}
+		if (fingerPrint == null)
+		{
+			if(other.fingerPrint != null)
+			{
+				return false;
+			}
+		}
+		else if( (!fingerPrint.equals(other.fingerPrint)))
 		{
 			return false;
 		}

@@ -20,8 +20,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.gson.Gson;
-import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.GsonFactory;
+import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 
 
@@ -47,7 +47,7 @@ public class RepositoryServlet
 	
 	public static RepositoryInfo getRepoInfoById(String repoId) throws RepositoryException
 	{
-		java.nio.file.Path repoFile = Globals.getRepoFile();
+		java.nio.file.Path repoFile = ServerGlobals.getRepoFile();
 		List<RepositoryInfo> repoList = RepositoryInfoMgr.loadRepos(repoFile);
 		Supplier<? extends RepositoryException> exceptionSupplier = 
 				()->new RepositoryException(Status.NOT_FOUND, "Could not find repository with ID '%s'", repoId);
@@ -62,7 +62,7 @@ public class RepositoryServlet
 	{
 	
 		// blech conflicting type names
-		java.nio.file.Path repoFilePath = Globals.getRepoFile();
+		java.nio.file.Path repoFilePath = ServerGlobals.getRepoFile();
 		this.repoInfoMgr = new RepositoryInfoMgr(repoFilePath);
 	}
 	

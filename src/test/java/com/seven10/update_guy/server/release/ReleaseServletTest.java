@@ -29,7 +29,6 @@ import org.junit.rules.TemporaryFolder;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.seven10.update_guy.common.FileFingerPrint;
-import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.ManifestHelpers;
 import com.seven10.update_guy.common.RepoInfoHelpers;
@@ -37,8 +36,11 @@ import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
 import com.seven10.update_guy.common.manifest.UpdateGuyRole;
+import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
+import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
+import com.seven10.update_guy.server.repository.RepositoryInfo.RepositoryType;
 import com.seven10.update_guy.server.release.ReleaseServlet;
 
 import junitx.framework.FileAssert;
@@ -99,7 +101,7 @@ public class ReleaseServletTest extends JerseyTest
 	public void testReleaseServlet_valid() throws RepositoryException, IOException, UpdateGuyException
 	{
 		String testName = "ctor-v";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
 		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
 		for(Manifest manifest: manifestList)
@@ -119,7 +121,7 @@ public class ReleaseServletTest extends JerseyTest
 	public void testReleaseServlet_repoId_notFound() throws RepositoryException, IOException, UpdateGuyException
 	{
 		String testName = "repoId-nf";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
 		// calc an invalid repoId
 		String repoId = repoInfo.getShaHash() + "breakrepoid";
@@ -137,7 +139,7 @@ public class ReleaseServletTest extends JerseyTest
 	public void testReleaseServlet_rf_notFound() throws RepositoryException, IOException
 	{
 		String testName = "ctor-rfnf";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
 		String releaseFamily = "someunknownRelease";
 		new ReleaseServlet(repoInfo.getShaHash(), releaseFamily);
@@ -154,7 +156,7 @@ public class ReleaseServletTest extends JerseyTest
 	public void testGetRoles() throws IOException, RepositoryException, UpdateGuyException
 	{
 		String testName = "getRoles-v";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
 		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
 		String repoId = repoInfo.getShaHash();
@@ -198,7 +200,7 @@ public class ReleaseServletTest extends JerseyTest
 	public void testGetFingerprint_valid() throws IOException, RepositoryException, UpdateGuyException
 	{
 		String testName = "getFingerprint-v";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
 		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
 		String repoId = repoInfo.getShaHash();
@@ -213,13 +215,15 @@ public class ReleaseServletTest extends JerseyTest
 				// do request
 				for(String roleName: expectedRoles)
 				{
-					String expectedFingerPrint = FileFingerPrint.create(entry.getRoleInfo(roleName).getFilePath().toFile());
-					String path = "/release/"+ repoId + "/" + releaseFamily + "/fingerprint/" + roleName;
+					String expectedFingerPrint = FileFingerPrint.create(entry.getRoleInfo(roleName).getFilePath());
+					String path = "/release/"+ repoId + "/" + releaseFamily + "/roleInfo/" + roleName;
 					Response resp = target(path).queryParam("version", version).request().get();
 					assertEquals(Status.OK.getStatusCode(), resp.getStatus());
-					String actualFingerPrint = resp.readEntity(String.class);
+					String roleInfoString = resp.readEntity(String.class);
+					ClientRoleInfo roleInfo = GsonFactory.getGson().fromJson(roleInfoString, ClientRoleInfo.class);
 					
-					assertEquals(expectedFingerPrint, actualFingerPrint);
+					assertEquals("(" + releaseFamily + "," + version + ", " + roleName + ")", 
+							expectedFingerPrint, roleInfo.fingerPrint);
 				}
 			}
 		}
@@ -235,7 +239,7 @@ public class ReleaseServletTest extends JerseyTest
 	public void testGetFile_valid() throws IOException, RepositoryException, UpdateGuyException
 	{
 		String testName = "getFiles_v";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
 		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
 		String repoId = repoInfo.getShaHash();
@@ -272,7 +276,7 @@ public class ReleaseServletTest extends JerseyTest
 	public void testDoUpdateCache() throws IOException, RepositoryException, UpdateGuyException
 	{
 		String testName = "doUpdate-cache";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
 		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
 		String repoId = repoInfo.getShaHash();
@@ -294,7 +298,7 @@ public class ReleaseServletTest extends JerseyTest
 				for(Entry<String, UpdateGuyRole> roleEntry: expectedRoles)
 				{
 					Path expectedFile = manifestEntry.getRoleInfo(roleEntry.getKey()).getFilePath(); 
-					Path actualFile = Globals.buildDownloadTargetPath(repoId, manifestEntry, roleEntry);
+					Path actualFile = ServerGlobals.buildDownloadTargetPath(repoId, manifestEntry, roleEntry);
 					FileAssert.assertBinaryEquals(expectedFile.toFile(), actualFile.toFile());
 				}
 			}

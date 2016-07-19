@@ -46,7 +46,7 @@ public class LocalCacheUtils
 		try
 		{
 			logger.debug(".getLocalChecksum(): target jarFilePath = '%s'", jarFilePath);
-			rval = FileFingerPrint.create(jarFilePath.toFile());
+			rval = FileFingerPrint.create(jarFilePath);
 			logger.info(".getLocalChecksum(): checksum for jarFilePath '%s' = %s", jarFilePath, rval);
 		}
 		catch (FileNotFoundException ex)

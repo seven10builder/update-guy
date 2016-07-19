@@ -212,7 +212,7 @@
 
   * **Content:** 
  
-     {
+      {
       "releaseFamily": "my-product",
       "created": "2014-06-06 2:07:18.200",
       "retrieved": "2016-06-06 12:24:19.200",
@@ -221,25 +221,89 @@
           "releaseFamily": "my-product",
           "version": "1.0",
           "publishDate": "2014-06-06 2:08:33.200",
-          "fileMap": {
-            "web-service": "/users/aturing/1.0/server.war",
-            "db": "/users/aturing/1.0/mongo.jar",
-            "monitor": "/users/aturing/1.0/monitor.jar",
-            "admin": "/users/aturing/1.0/admin.jar"
+          "roleMap": {
+            "web-service": {
+              "filePath": "/users/aturing/1.0/server.war",
+              "commandLine": [
+                "java",
+                "jar",
+                "start"
+              ],
+              "fingerPrint": "a923e2165a954ab5b909259116696d39"
+              },
+            "db": {
+              "filePath": "/users/aturing/1.0/mongo.jar",
+              "commandLine": [
+                "/sbin/startDatabases",
+                "bdname"
+              ],
+              "fingerPrint": "5b909259116696da923e2165a954ab39"
+              },
+            "monitor": {
+              "filePath": "/users/aturing/1.0/monitor.jar",
+              "commandLine": [
+                "java",
+                "jar",
+                "start"
+              ],
+              "fingerPrint": "54ab5b909a923e2165a9259116696d39"
+              },
+            "admin": {
+              "filePath": "/users/aturing/1.0/admin.jar"
+              "commandLine": [
+                "java",
+                "jar",
+                "start"
+              ],
+              "fingerPrint": "165a96696259113e2d394ab5b909"
+              }
           }
         },
         "1.1": {
           "releaseFamily": "my-product",
           "version": "1.1",
           "publishDate": "2014-07-16 14:10:20.200",
-          "fileMap": {
-            "web-service": "/users/aturing/1.1/server.war",
-            "db": "/users/aturing/1.1/redis.jar",
-            "monitor": "/users/aturing/1.1/monitor.jar",
-            "admin": "/users/aturing/1.1/admin.jar"
+          "roleMap": {
+
+            "web-service": {
+              "filePath": "/users/aturing/1.1/server.war",
+              "commandLine": [
+                "java",
+                "jar",
+                "start"
+              ],
+              "fingerPrint": "a923e2165a954ab5b909259116696d39"
+              },
+            "db": {
+              "filePath": "/users/aturing/1.1/redis.jar",
+              "commandLine": [
+                "/sbin/startDatabases",
+                "bdname"
+              ],
+              "fingerPrint": "5b909259116696da923e2165a954ab39"
+              },
+            "monitor": {
+              "filePath": "/users/aturing/1.0/monitor.jar",
+              "commandLine": [
+                "java",
+                "jar",
+                "start"
+              ],
+              "fingerPrint": "54ab5b909a923e2165a9259116696d39"
+              },
+            "admin": {
+              "filePath": "/users/aturing/1.0/admin.jar"
+              "commandLine": [
+                "java",
+                "jar",
+                "start"
+              ],
+              "fingerPrint": "165a96696259113e2d394ab5b909"
+              }
           }
         }        
     }
+  }
 
  
 * **Error Response:**
@@ -285,17 +349,43 @@
 
   * **Content:** 
  
-    {
-        "releaseFamily": "my-product",
-        "version": "1.0",
-        "publishDate": "2014-06-06 2:08:33.200",
-        "fileMap": {
-        "web-service": "/users/aturing/1.0/server.war",
-        "db": "/users/aturing/1.0/mongo.jar",
-        "monitor": "/users/aturing/1.0/monitor.jar",
-        "admin": "/users/aturing/1.0/admin.jar"
-        }
-    }
+        {
+            "web-service": {
+              "filePath": "/users/aturing/1.0/server.war",
+              "commandLine": [
+                "java",
+                "jar",
+                "start"
+              ],
+              "fingerPrint": "a923e2165a954ab5b909259116696d39"
+              },
+            "db": {
+              "filePath": "/users/aturing/1.0/mongo.jar",
+              "commandLine": [
+                "/sbin/startDatabases",
+                "bdname"
+              ],
+              "fingerPrint": "5b909259116696da923e2165a954ab39"
+              },
+            "monitor": {
+              "filePath": "/users/aturing/1.0/monitor.jar",
+              "commandLine": [
+                "java",
+                "jar",
+                "start"
+              ],
+              "fingerPrint": "54ab5b909a923e2165a9259116696d39"
+              },
+            "admin": {
+              "filePath": "/users/aturing/1.0/admin.jar"
+              "commandLine": [
+                "java",
+                "jar",
+                "start"
+              ],
+              "fingerPrint": "165a96696259113e2d394ab5b909"
+              }
+          }
  
 * **Error Response:**
 
@@ -353,13 +443,13 @@
    * **Code:** `500 INTERNAL_SERVER_ERROR` <br />
      **Content:** `{ error : "could not get version entry"}`
 
-**Get file fingerprint for role**
+**Get role information for role**
 ----
-  Returns a unique fingerprint for the file assigned to the given role. This fingerprint is used to determine if the version of the file the client has needs to be updated.
+  Returns the information for the role file, including a unique fingerprint, for the file assigned to the given role. This fingerprint is used to determine if the version of the file the client has needs to be updated.
   
 * **URL**
 
- `/release/:repoId/:releaseFamily/fingerprint/:roleName?version=:version`
+ `/release/:repoId/:releaseFamily/roleInfo/:roleName?version=:version`
 
 * **Method:**
 
@@ -370,7 +460,7 @@
    **Required:**
  
     `version=[String]` - identifies the version to get the fingerprint for
-   `roleName=[String]` - identifies the role to get the fingerprint for
+    `roleName=[String]` - identifies the role to get the fingerprint for
 
    **Optional:**
    `None`
@@ -383,7 +473,15 @@
 
   * **Code:** `200 OK`<br />
 
-  * **Content:** A string representing the fingerprint of the file
+  * **Content:** 
+     {
+        "commandLine": [
+            "java",
+            "jar",
+            "start"
+          ],
+          "fingerPrint": "54ab5b909a923e2165a9259116696d39"
+      }
  
 * **Error Response:**
 

@@ -6,9 +6,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.JsonSyntaxException;
-import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.server.ServerGlobals;
 
 public class ActiveVersionEncoder
 {
@@ -37,7 +37,7 @@ public class ActiveVersionEncoder
 		{
 			throw new IllegalArgumentException("activeVersId must not be null or empty");
 		}
-		Path path = Globals.getActiveVersionStorePath();
+		Path path = ServerGlobals.getActiveVersionStorePath();
 		String fileName = String.format("%s.json", activeVersId);
 		return path.resolve(repoId).resolve(releaseFamily).resolve(fileName);
 	}

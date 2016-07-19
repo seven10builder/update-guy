@@ -10,8 +10,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
 
-import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.manifest.Manifest;
+import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.RepositoryInfoMgr;
@@ -79,7 +79,7 @@ public class ManifestRefresher
 	}
 	public RepoConnection createRepoConnectionForId() throws RepositoryException
 	{
-		RepositoryInfo repoInfo = RepositoryInfoMgr.loadRepo(Globals.getRepoFile(), getRepoId());
+		RepositoryInfo repoInfo = RepositoryInfoMgr.loadRepo(ServerGlobals.getRepoFile(), getRepoId());
 		RepoConnection repoConnection = RepoConnectionFactory.connect(repoInfo);
 		return repoConnection;
 	}

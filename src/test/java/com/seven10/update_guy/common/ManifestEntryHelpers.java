@@ -19,6 +19,7 @@ public class ManifestEntryHelpers
 	{
 		Map<String, UpdateGuyRole> rvalue = new HashMap<String, UpdateGuyRole>();
 		rootFolder.toFile().mkdirs();
+		
 		for(int i = 1; i <= roleCount; i++)
 		{
 			String key = "role_" + i;
@@ -26,6 +27,15 @@ public class ManifestEntryHelpers
 			Files.createFile(target);
 			UpdateGuyRole role = new UpdateGuyRole();
 			role.setFilePath(target);
+			role.setFingerPrint(FileFingerPrint.create(target));
+			
+			List<String> cmdList = new ArrayList<String>();
+			for(int j = 1; j <= roleCount; j++)
+			{
+				cmdList.add("cmd"+i+j);
+			}
+				
+			role.setCommandLine(cmdList);
 			rvalue.put(key,  role);
 		}
 		return rvalue;
@@ -59,7 +69,7 @@ public class ManifestEntryHelpers
 	}
 	public static Path get_valid_download_file_path()
 	{
-		return Paths.get("src","test","resources","remote_repo","files","1.0","file1");
+		return Paths.get("src","test","resources","remote_repo","local","files","1.0","file1");
 	}
 
 

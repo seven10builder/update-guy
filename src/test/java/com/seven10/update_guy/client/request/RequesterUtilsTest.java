@@ -6,6 +6,8 @@ import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -15,6 +17,7 @@ import com.seven10.update_guy.client.FunctionalInterfaces;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
 import com.seven10.update_guy.common.ManifestEntryHelpers;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
 
 /**
  * @author kmm
@@ -229,12 +232,12 @@ public class RequesterUtilsTest
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestRemoteChecksum(com.seven10.update_guy.manifest.ManifestEntry)}.
+	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestRemoteRoleInfo(com.seven10.update_guy.manifest.ManifestEntry)}.
 	 * @throws IOException 
 	 * @throws FatalClientException 
 	 */
 	@Test
-	public void testRequestRemoteChecksum_valid() throws IOException, FatalClientException
+	public void testRequestRemoteRoleInfo_valid() throws IOException, FatalClientException
 	{
 		String testName = "reqRemCheck-v";
 		ClientSettings settings = new ClientSettings();
@@ -242,49 +245,51 @@ public class RequesterUtilsTest
 		settings.setServerPort(serverPort);
 		settings.setRepoId(repoId);
 		
-		String expectedChecksum = "some-checksum";
+		String expectedFingerPrint = "some-RoleInfo";
+		List<String> expectedCmdList = Arrays.asList(new String[]{"cmd1", "cmd2"});
+		ClientRoleInfo expectedInfo = new ClientRoleInfo(expectedFingerPrint, expectedCmdList);
 		
 		Path rootFolder = folder.newFolder(testName).toPath();
 		RequesterUtils requesterUtils = new RequesterUtils(settings);
 	
 
 		Requester requester = mock(Requester.class);
-		doReturn(expectedChecksum).when(requester).get(any(), any());		
+		doReturn(expectedInfo).when(requester).get(any(), any());		
 		
 		ManifestEntry release = ManifestEntryHelpers.create_valid_manifest_entry(testName, 1, rootFolder);
 		
-		String actualChecksum = requesterUtils.requestRemoteChecksum(release, (url, methodName)->requester);
-		assertEquals(expectedChecksum, actualChecksum);
+		ClientRoleInfo actualRoleInfo = requesterUtils.requestRemoteClientRoleInfo(release, (url, methodName)->requester);
+		assertEquals(expectedFingerPrint, actualRoleInfo.fingerPrint);
 		verify(requester, times(1)).addQueryParam("version", release.getVersion());	// make sure we're adding in the version
 		verify(requester,times(1)).get(any(), any());
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestRemoteChecksum(com.seven10.update_guy.manifest.ManifestEntry)}.
+	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestRemoteRoleInfo(com.seven10.update_guy.manifest.ManifestEntry)}.
 	 * @throws IOException 
 	 * @throws FatalClientException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
-	public void testRequestRemoteChecksum_null_release() throws IOException, FatalClientException
+	public void testRequestRemoteRoleInfo_null_release() throws IOException, FatalClientException
 	{
 		ClientSettings settings = new ClientSettings();
 		RequesterUtils requesterUtils = new RequesterUtils(settings);
 		ManifestEntry release = null;
 		FunctionalInterfaces.RequesterFactory requesterFactory = (url, methodName)->mock(Requester.class);
-		requesterUtils.requestRemoteChecksum(release, requesterFactory);
+		requesterUtils.requestRemoteClientRoleInfo(release, requesterFactory);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestRemoteChecksum(com.seven10.update_guy.manifest.ManifestEntry)}.
+	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestRemoteRoleInfo(com.seven10.update_guy.manifest.ManifestEntry)}.
 	 * @throws IOException 
 	 * @throws FatalClientException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
-	public void testRequestRemoteChecksum_null_reqFactory() throws IOException, FatalClientException
+	public void testRequestRemoteRoleInfo_null_reqFactory() throws IOException, FatalClientException
 	{
 		ClientSettings settings = new ClientSettings();
 		RequesterUtils requesterUtils = new RequesterUtils(settings);
 		ManifestEntry release = new ManifestEntry();
 		FunctionalInterfaces.RequesterFactory requesterFactory = null;
-		requesterUtils.requestRemoteChecksum(release, requesterFactory);
+		requesterUtils.requestRemoteClientRoleInfo(release, requesterFactory);
 	}
 	
 }

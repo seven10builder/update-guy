@@ -31,7 +31,7 @@ public class ManifestHelpers
 	}
 	public static Path get_manifests_path()
 	{
-		Path srcFile = Paths.get("src","test","resources","remote_repo","2f4be34b3680b5a2556b1830f3c24232", "manifests");
+		Path srcFile = Paths.get("src","test","resources","remote_repo","local", "2f4be34b3680b5a2556b1830f3c24232", "manifests");
 		return srcFile;
 	}
 	public static Manifest load_manifest_from_path(Path manifestPath) throws IOException

@@ -70,25 +70,89 @@ Below is an example of a manifest file named my-product.manifest.
           "releaseFamily": "my-product",
           "version": "1.0",
           "publishDate": "2014-06-06 2:08:33.200",
-          "fileMap": {
-            "web-service": "/users/aturing/1.0/server.war",
-            "db": "/users/aturing/1.0/mongo.jar",
-            "monitor": "/users/aturing/1.0/monitor.jar",
-            "admin": "/users/aturing/1.0/admin.jar"
+          "roleMap": {
+            "web-service": {
+              "filePath": "/users/aturing/1.0/server.war",
+              "commandLine": [
+                "java",
+                "jar",
+                "start"
+              ],
+              "fingerPrint": "a923e2165a954ab5b909259116696d39"
+              },
+            "db": {
+              "filePath": "/users/aturing/1.0/mongo.jar",
+              "commandLine": [
+                "/sbin/startDatabases",
+                "bdname"
+              ],
+              "fingerPrint": "5b909259116696da923e2165a954ab39"
+              },
+            "monitor": {
+              "filePath": "/users/aturing/1.0/monitor.jar",
+              "commandLine": [
+                "java",
+                "jar",
+                "start"
+              ],
+              "fingerPrint": "54ab5b909a923e2165a9259116696d39"
+              },
+            "admin": {
+              "filePath": "/users/aturing/1.0/admin.jar"
+              "commandLine": [
+                "java",
+                "jar",
+                "start"
+              ],
+              "fingerPrint": "165a96696259113e2d394ab5b909"
+              }
           }
         },
         "1.1": {
           "releaseFamily": "my-product",
           "version": "1.1",
           "publishDate": "2014-07-16 14:10:20.200",
-          "fileMap": {
-            "web-service": "/users/aturing/1.1/server.war",
-            "db": "/users/aturing/1.1/redis.jar",
-            "monitor": "/users/aturing/1.1/monitor.jar",
-            "admin": "/users/aturing/1.1/admin.jar"
+          "roleMap": {
+
+            "web-service": {
+              "filePath": "/users/aturing/1.1/server.war",
+              "commandLine": [
+                "java",
+                "jar",
+                "start"
+              ],
+              "fingerPrint": "a923e2165a954ab5b909259116696d39"
+              },
+            "db": {
+              "filePath": "/users/aturing/1.1/redis.jar",
+              "commandLine": [
+                "/sbin/startDatabases",
+                "bdname"
+              ],
+              "fingerPrint": "5b909259116696da923e2165a954ab39"
+              },
+            "monitor": {
+              "filePath": "/users/aturing/1.0/monitor.jar",
+              "commandLine": [
+                "java",
+                "jar",
+                "start"
+              ],
+              "fingerPrint": "54ab5b909a923e2165a9259116696d39"
+              },
+            "admin": {
+              "filePath": "/users/aturing/1.0/admin.jar"
+              "commandLine": [
+                "java",
+                "jar",
+                "start"
+              ],
+              "fingerPrint": "165a96696259113e2d394ab5b909"
+              }
           }
         }        
     }
+  }
     
 - releaseFamily - This is the name of the release family, and should be the same as the first part of the filename.
 - created - This is the date that the initial release family was created

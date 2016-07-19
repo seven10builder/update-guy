@@ -68,7 +68,7 @@ public class ClientSettings
 	public ClientSettings()
 	{
 		serverAddress = DEFAULT_SERVER_ADDRESS;
-		serverPort = Globals.DEFAULT_PORT_SETTING;
+		serverPort = Globals.getServerPort();
 		cachePath = DEFAULT_CACHE_PATH;
 		repoId = "";
 		roleName = "";

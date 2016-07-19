@@ -24,12 +24,12 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
 import com.seven10.update_guy.common.manifest.UpdateGuyRole;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
+import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 
 /**
@@ -268,7 +268,7 @@ public class FtpRepoConnection implements RepoConnection
 		String manifestFileName = String.format("%s.manifest", releaseFamily);
 		Path srcPath = activeRepo.getRemoteManifestPath().resolve(manifestFileName);
 		String repoId = activeRepo.getShaHash();
-		Path destPath = Globals.getManifestStorePath(repoId).resolve(manifestFileName);
+		Path destPath = ServerGlobals.getManifestStorePath(repoId).resolve(manifestFileName);
 		// ensure the path exists
 
 		downloadFile(srcPath, destPath);
@@ -293,13 +293,23 @@ public class FtpRepoConnection implements RepoConnection
 		{
 			throw new IllegalArgumentException("versionEntry cannot be null");
 		}
-		for (Entry<String, UpdateGuyRole> entry : versionEntry.getRoleInfos(versionEntry.getRoles())) // get all the  paths
+		if(onFileComplete == null)
+		{
+			throw new IllegalArgumentException("onFileComplete cannot be null");
+		}
+		List<Entry<String, UpdateGuyRole>> roleInfos = versionEntry.getRoleInfos(versionEntry.getRoles());
+		if(roleInfos.size() == 0)
+		{
+			logger.error(".downloadRelease(): could not find any role infos for version '%s'", versionEntry.getVersion());
+			throw new RepositoryException(Status.NOT_FOUND, "No manifests found");
+		}
+		for (Entry<String, UpdateGuyRole> entry : roleInfos) // get all the  paths
 		{
 			UpdateGuyRole srcPath = entry.getValue();
 			Path destPath;
 			try
 			{
-				destPath = Globals.buildDownloadTargetPath(activeRepo.getShaHash(), versionEntry, entry);
+				destPath = ServerGlobals.buildDownloadTargetPath(activeRepo.getShaHash(), versionEntry, entry);
 			}
 			catch (UpdateGuyException ex)
 			{

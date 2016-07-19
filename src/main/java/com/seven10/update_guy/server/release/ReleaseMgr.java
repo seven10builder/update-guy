@@ -1,6 +1,5 @@
 package com.seven10.update_guy.server.release;
 
-import java.io.File;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -13,6 +12,7 @@ import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.manifest.UpdateGuyRole;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.connection.RepoConnection;
 import com.seven10.update_guy.server.repository.connection.RepoConnectionFactory;
@@ -44,12 +44,12 @@ public class ReleaseMgr
 
 
 	/**
-	 * Retrieves a File object that references the file that provides the role desired
+	 * Retrieves the role info object that references the file that provides the role desired
 	 * @param roleName The name of the role the desired file provides
 	 * @return a File object pointing to the file
 	 * @throws RepositoryException Thrown if the role cannot be found
 	 */
-	public File getFileForRole(String version, String roleName) throws RepositoryException
+	public UpdateGuyRole getRoleInfoForRole(String version, String roleName) throws RepositoryException
 	{
 		if(roleName == null || roleName.isEmpty())
 		{
@@ -67,7 +67,7 @@ public class ReleaseMgr
 		}
 		if( activeVersion.getRoles().contains(roleName))
 		{
-			return activeVersion.getRoleInfo(roleName).getFilePath().toFile();
+			return activeVersion.getRoleInfo(roleName);
 		}
 		else
 		{

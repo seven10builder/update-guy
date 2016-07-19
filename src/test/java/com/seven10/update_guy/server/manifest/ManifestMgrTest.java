@@ -19,9 +19,9 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.google.gson.JsonSyntaxException;
-import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.ManifestEntryHelpers;
 import com.seven10.update_guy.common.RepoInfoHelpers;
+import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.manifest.Manifest;
@@ -63,10 +63,12 @@ public class ManifestMgrTest
 	@Test
 	public void testManifestMgr_valid_path_not_exists() throws IOException, RepositoryException
 	{
-		
+		String testName = "valid-pne";
 		Path path = folder.getRoot().toPath().resolve("path-not-exist-yet"); 
 		assertFalse(Files.exists(path));
-		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
+		
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
+		String repoId = repoInfo.getShaHash();
 		ManifestMgr manifestMgr = new ManifestMgr(path, repoId);
 		assertNotNull(manifestMgr);
 		assertTrue(Files.exists(path));
@@ -99,21 +101,23 @@ public class ManifestMgrTest
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#ManifestMgr(com.seven10.update_guy.Globals)}.
+	 * @throws IOException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
-	public void testManifestMgr_null_repoId()
+	public void testManifestMgr_null_repoId() throws IOException
 	{
-		Path path = Paths.get("tmp");
+		Path path = folder.newFolder("manmgr").toPath();
 		String repoId = null;
 		new ManifestMgr(path, repoId);
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#ManifestMgr(com.seven10.update_guy.Globals)}.
+	 * @throws IOException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
-	public void testManifestMgr_empty_repoId()
+	public void testManifestMgr_empty_repoId() throws IOException
 	{
-		Path path = Paths.get("tmp");
+		Path path = folder.newFolder("manmgr").toPath();
 		String repoId = "";
 		new ManifestMgr(path, repoId);
 	}
@@ -127,9 +131,9 @@ public class ManifestMgrTest
 	public void testGetManifest_valid() throws IOException, RepositoryException
 	{
 		String testName = "getManifest";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
-		Path manifestPath = Paths.get(System.getProperty(Globals.SETTING_LOCAL_PATH))
+		Path manifestPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH))
 				.resolve(repoId)
 				.resolve("manifests");
 		Manifest expected = load_manifest_from_path(get_valid_manifest_file_path());
@@ -148,9 +152,9 @@ public class ManifestMgrTest
 	public void testGetManifest_not_found() throws IOException, RepositoryException
 	{
 		String testName = "manifest-nf";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
-		Path manifestPath = Paths.get(System.getProperty(Globals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
+		Path manifestPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
 		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);
 		manifestMgr.getManifest(testName);
 		
@@ -164,9 +168,9 @@ public class ManifestMgrTest
 	public void testGetManifest_null() throws RepositoryException, IOException
 	{
 		String testName = "getmanifest-n";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
-		Path manifestPath = Paths.get(System.getProperty(Globals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
+		Path manifestPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
 		
 		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);
 		String releaseFamily = null;
@@ -182,9 +186,9 @@ public class ManifestMgrTest
 	{
 		String testName = "getmanifest-emp";
 		
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
-		Path manifestPath = Paths.get(System.getProperty(Globals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
+		Path manifestPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
 		
 		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);
 		String releaseFamily = "";
@@ -202,9 +206,9 @@ public class ManifestMgrTest
 	{
 		String testName = "getManifests";
 		
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
-		Path manifestPath = Paths.get(System.getProperty(Globals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
+		Path manifestPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
 		// create list of valid manifests
 		List<Manifest> expected = load_manifest_list_from_path(get_manifests_path());
 		
@@ -225,9 +229,9 @@ public class ManifestMgrTest
 	public void testGetManifests_many_files() throws RepositoryException, IOException, UpdateGuyException
 	{
 		String testName = "getManifests";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
-		Path manifestPath = Paths.get(System.getProperty(Globals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
+		Path manifestPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
 		
 		// create list of valid manifests
 		List<Manifest> expected = load_manifest_list_from_path(get_manifests_path());
@@ -251,9 +255,9 @@ public class ManifestMgrTest
 		// create list of valid manifests
 		List<Manifest> expected = load_manifest_list_from_path(get_manifests_path());
 		
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
-		Path manifestPath = Paths.get(System.getProperty(Globals.SETTING_LOCAL_PATH))
+		Path manifestPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH))
 				.resolve(repoId)
 				.resolve("manifests");
 		// create a defective manifest file
@@ -300,9 +304,9 @@ public class ManifestMgrTest
 		});
 		
 		String testName = "getActiveVers";
-		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder);
+		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
-		Path manifestPath = Paths.get(System.getProperty(Globals.SETTING_LOCAL_PATH))
+		Path manifestPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH))
 				.resolve(repoId)
 				.resolve("manifests");
 		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);

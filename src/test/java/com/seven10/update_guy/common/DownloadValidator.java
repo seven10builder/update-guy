@@ -11,7 +11,7 @@ import java.nio.file.Path;
 
 import org.apache.commons.io.FileUtils;
 
-import com.seven10.update_guy.common.Globals;
+import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
 
@@ -41,7 +41,7 @@ public class DownloadValidator
 			try
 			{
 				srcPath = roleEntry.getValue().getFilePath();
-				destPath = Globals.buildDownloadTargetPath(repoId, versionEntry, roleEntry);
+				destPath = ServerGlobals.buildDownloadTargetPath(repoId, versionEntry, roleEntry);
 				validate_download(srcPath, destPath);
 			}
 			catch (Exception e)

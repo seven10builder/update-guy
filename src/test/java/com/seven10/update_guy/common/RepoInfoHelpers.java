@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.seven10.update_guy.common.GsonFactory;
+import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.RepositoryInfo.RepositoryType;
 
@@ -74,12 +75,13 @@ public class RepoInfoHelpers
 	/**
 	 * @param testName
 	 * @param temporaryFolder TODO
+	 * @param repositoryType TODO
 	 * @return
 	 * @throws IOException
 	 */
-	public static RepositoryInfo setup_test_repo(String testName, TemporaryFolder temporaryFolder) throws IOException
+	public static RepositoryInfo setup_test_repo(String testName, TemporaryFolder temporaryFolder, RepositoryType repositoryType) throws IOException
 	{
-		RepositoryInfo repoInfo = load_valid_repo_info(RepositoryType.local);
+		RepositoryInfo repoInfo = load_valid_repo_info(repositoryType);
 		// calc the repoId
 		
 		// create local root path
@@ -91,8 +93,8 @@ public class RepoInfoHelpers
 		FileUtils.copyFile(get_valid_repos_path().toFile(), repoInfoFile.toFile());
 		
 		// set attribute so servlet picks it up
-		System.setProperty(Globals.SETTING_LOCAL_PATH, localDir.toString());
-		System.setProperty(Globals.SETTING_REPO_FILENAME, fileName);
+		System.setProperty(ServerGlobals.SETTING_LOCAL_PATH, localDir.toString());
+		System.setProperty(ServerGlobals.SETTING_REPO_FILENAME, fileName);
 	
 		return repoInfo;
 	}
