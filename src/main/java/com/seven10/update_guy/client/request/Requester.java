@@ -21,7 +21,10 @@ import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.client.ClientConfig;
 
 import com.seven10.update_guy.client.FunctionalInterfaces;
+import com.seven10.update_guy.client.FunctionalInterfaces.ResponseToFileMgr;
+import com.seven10.update_guy.client.FunctionalInterfaces.WebReqFactory;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
+import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
 
 public class Requester
 {
@@ -104,7 +107,7 @@ public class Requester
 		return result;
 	}
 	
-	public void getFile(Path targetPath,  FunctionalInterfaces.WebReqFactory webReqFactory, ResponseEvaluator<String> evaluator, FunctionalInterfaces.ResponseToFileMgr respMgr) throws FatalClientException
+	public void getFile(Path targetPath, WebReqFactory webReqFactory, ResponseEvaluator<ClientRoleInfo> evaluator, ResponseToFileMgr respMgr) throws FatalClientException
 	{
 		if(targetPath == null)
 		{
@@ -130,8 +133,6 @@ public class Requester
 		evaluator.evaluateResponse(response, statusCode);
 		respMgr.copy(targetPath, response, statusCode);
 	}
-
-	
 	
 	public Invocation.Builder buildRequest()
 	{

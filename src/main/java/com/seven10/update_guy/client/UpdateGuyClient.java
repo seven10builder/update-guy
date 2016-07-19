@@ -17,6 +17,7 @@ import com.seven10.update_guy.client.local.JavaLauncher;
 import com.seven10.update_guy.client.local.LocalCacheUtils;
 import com.seven10.update_guy.client.request.RequesterUtils;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
 
 public class UpdateGuyClient
 {
@@ -26,10 +27,13 @@ public class UpdateGuyClient
 	{
 		// get cli options
 		CliMgr mgr = new CliMgr(args, CliMgr::showHelp, CliMgr::processCfgFile);
-		RequesterUtilsFactory requesterUtilsFactory = (settings)->new RequesterUtils(settings);
-		LocalCacheUtilsFactory localCacheUtilsFactory = (settings)->new LocalCacheUtils(settings);
+		
+		// create the dependency inject factories
+		RequesterUtilsFactory requesterUtilsFactory = RequesterUtils::new;
+		LocalCacheUtilsFactory localCacheUtilsFactory = LocalCacheUtils::new;
 		JavaLauncherFactory launcherFactory = (settings)->new JavaLauncher();
-		UpdateGuyClientFactory clientFactory = (params)->new UpdateGuyClient(params);
+		UpdateGuyClientFactory clientFactory = UpdateGuyClient::new;
+		
 		doClient(mgr, requesterUtilsFactory, localCacheUtilsFactory, launcherFactory, clientFactory);
 	}
 
@@ -120,15 +124,16 @@ public class UpdateGuyClient
 		Path jarFilePath = localCacheUtils.buildTargetPath(release);
 		
 		// request checksum for activeRelease->role->file
-		String remoteChecksum = requestUtils.requestRemoteChecksum(release, RequesterUtils::getDefaultRequester);
-		logger.debug(".executeClientLoop(): remoteChecksum = '%s'", remoteChecksum);
+		ClientRoleInfo remoteRoleInfo = requestUtils.requestRemoteClientRoleInfo(release, RequesterUtils::getDefaultRequester);
+		logger.debug(".executeClientLoop(): remoteChecksum = '%s', role cli = '%s'", 
+				remoteRoleInfo.fingerPrint, String.join(", ", remoteRoleInfo.commandLine));
 		
 		// get checksum for role->localFile
 		String localChecksum = localCacheUtils.getLocalChecksum(jarFilePath);
 		logger.debug(".executeClientLoop(): localChecksum = '%s'", localChecksum);
 		
 		// if checksums don't match, download role file
-		if(localChecksum.equals(remoteChecksum) == false)
+		if(localChecksum.equals(remoteRoleInfo.fingerPrint) == false)
 		{
 			logger.info(".executeClientLoop(): checksums did not match. Will download", localChecksum);
 			requestUtils.requestDownloadRoleFile(release, jarFilePath, RequesterUtils::getDefaultRequester);
@@ -138,11 +143,9 @@ public class UpdateGuyClient
 			logger.info(".executeClientLoop(): checksums matched, no need to download", localChecksum);
 		}
 		
-		List<String> cmdLine = requestUtils.requestCmdLine(release, RequesterUtils::getDefaultRequester);
 		//	launch role file with remaining cli options
-		ProcessBuilder processBuilder = launcher.createProcessBuilder(
-											launcher.buildParamList(remainingParams, jarFilePath, cmdLine),
-											jarFilePath.getParent());
+		List<String> paramsList = launcher.buildParamList(remainingParams, jarFilePath, remoteRoleInfo.commandLine);
+		ProcessBuilder processBuilder = launcher.createProcessBuilder(paramsList, jarFilePath.getParent());
 		return launcher.launchExecutable(processBuilder);
 	}
 }

@@ -24,6 +24,7 @@ import com.seven10.update_guy.client.local.JavaLauncher;
 import com.seven10.update_guy.client.local.LocalCacheUtils;
 import com.seven10.update_guy.client.request.RequesterUtils;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
 
 /**
  * @author kmm
@@ -47,9 +48,10 @@ public class UpdateGuyClientTest
 	private RequesterUtils createMockedRequesterUtils(String expectedChecksum, ManifestEntry mockedManifestEntry)
 			throws FatalClientException
 	{
+		ClientRoleInfo clientRoleInfo = new ClientRoleInfo(expectedChecksum, Arrays.asList(expectedParams));
 		RequesterUtils mockedRequestUtils = mock(RequesterUtils.class);
 		doReturn(mockedManifestEntry).when(mockedRequestUtils).requestActiveRelease(any());
-		doReturn(expectedChecksum).when(mockedRequestUtils).requestRemoteChecksum(eq(mockedManifestEntry), any());
+		doReturn(clientRoleInfo).when(mockedRequestUtils).requestRemoteClientRoleInfo(eq(mockedManifestEntry), any());
 		return mockedRequestUtils;
 	}
 	/**

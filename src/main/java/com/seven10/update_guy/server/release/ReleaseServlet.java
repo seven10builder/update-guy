@@ -19,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.UpdateGuyRole;
+import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
 import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
@@ -96,13 +97,15 @@ public class ReleaseServlet
 	
 	@GET
 	@Path("/roleInfo/{roleName}")
-	public Response getFingerprint(@PathParam("roleName") String roleName, @QueryParam("version") String version)
+	public Response getRoleInfo(@PathParam("roleName") String roleName, @QueryParam("version") String version)
 	{
 		ResponseBuilder resp = null;
 		try
 		{
-			UpdateGuyRole roleInfo = releaseMgr.getRoleInfoForRole(version, roleName);
-			resp = Response.ok().entity(roleInfo.toString());
+			ClientRoleInfo roleInfo = releaseMgr.getRoleInfoForRole(version, roleName).toClientRoleInfo();
+			String json = GsonFactory.getGson().toJson(roleInfo);
+			logger.info(".getRoleInfo(): returning roleInfo as a json obect - %s", json);
+			resp = Response.ok().entity(json);
 		}
 		catch (RepositoryException ex)
 		{

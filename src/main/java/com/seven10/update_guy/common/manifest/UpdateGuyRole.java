@@ -10,6 +10,25 @@ import com.seven10.update_guy.common.GsonFactory;
 
 public class UpdateGuyRole
 {
+	public static class ClientRoleInfo
+	{
+		@Expose
+		public String fingerPrint;
+		@Expose
+		public List<String> commandLine;
+
+		public ClientRoleInfo()
+		{
+			fingerPrint = "";
+			commandLine = new ArrayList<String>();
+		}
+		public ClientRoleInfo(String fingerPrint, List<String> commandLine)
+		{
+			this.fingerPrint = fingerPrint;
+			this.commandLine = commandLine;
+		}
+	}
+
 	@Expose
 	protected String filePath;
 	
@@ -60,7 +79,7 @@ public class UpdateGuyRole
 	/**
 	 * @param commandLine the commandLine to sets
 	 */
-	public void setCommandLine(List<String> commandLine)
+	public void setCommandLine(List<String> newCmdLine)
 	{
 		commandLine.clear();
 		commandLine.addAll(commandLine);
@@ -75,6 +94,10 @@ public class UpdateGuyRole
 		fingerPrint = newValue;
 	}
 	
+	public ClientRoleInfo toClientRoleInfo()
+	{
+		return new ClientRoleInfo(fingerPrint, commandLine);
+	}
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */

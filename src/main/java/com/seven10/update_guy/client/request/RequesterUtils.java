@@ -1,17 +1,14 @@
 package com.seven10.update_guy.client.request;
 
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.seven10.update_guy.client.ClientSettings;
-import com.seven10.update_guy.client.FunctionalInterfaces;
 import com.seven10.update_guy.client.FunctionalInterfaces.RequesterFactory;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
 
 public class RequesterUtils
 {
@@ -83,7 +80,7 @@ public class RequesterUtils
 		return url;
 	}
 	
-	public void requestDownloadRoleFile(ManifestEntry release, Path jarFilePath, FunctionalInterfaces.RequesterFactory requesterFactory) throws FatalClientException
+	public void requestDownloadRoleFile(ManifestEntry release, Path jarFilePath, RequesterFactory requesterFactory) throws FatalClientException
 	{
 		if(release == null)
 		{
@@ -105,10 +102,10 @@ public class RequesterUtils
 		requester.getFile(
 				jarFilePath, 
 				requester::buildRequest, 
-				new ResponseEvaluator<String>(String.class),  Requester::copyFileFromResponse);
+				new ResponseEvaluator<ClientRoleInfo>(ClientRoleInfo.class),  Requester::copyFileFromResponse);
 	}
 	
-	public String requestRemoteChecksum(ManifestEntry release, FunctionalInterfaces.RequesterFactory requesterFactory) throws FatalClientException
+	public ClientRoleInfo requestRemoteClientRoleInfo(ManifestEntry release, RequesterFactory requesterFactory) throws FatalClientException
 	{
 		if(release == null)
 		{
@@ -118,38 +115,13 @@ public class RequesterUtils
 		{
 			throw new IllegalArgumentException("requesterFactory must not be null");
 		}
-		String methodName = String.format("/fingerprint/%s", settings.roleName);
+		String methodName = String.format("/roleInfo/%s", settings.roleName);
 		String url = buildReleaseReq();
 				
 		Requester requester = requesterFactory.getRequester(url, methodName);
 		requester.addQueryParam("version", release.getVersion());
-		String fingerPrint = requester.get(
-				requester::buildRequest,
-				new ResponseEvaluator<String>(String.class));
-		return fingerPrint;
+		ClientRoleInfo clientRoleInfo = requester.get(requester::buildRequest,
+					new ResponseEvaluator<ClientRoleInfo>(ClientRoleInfo.class));
+		return clientRoleInfo;
 	}
-
-	public List<String> requestCmdLine(ManifestEntry release, FunctionalInterfaces.RequesterFactory requesterFactory) throws FatalClientException
-	{
-		if(release == null)
-		{
-			throw new IllegalArgumentException("release must not be null");
-		}
-		if(requesterFactory == null)
-		{
-			throw new IllegalArgumentException("requesterFactory must not be null");
-		}
-		String methodName = String.format("/fingerprint/%s", settings.roleName);
-		String url = buildReleaseReq();
-				
-		Requester requester = requesterFactory.getRequester(url, methodName);
-		requester.addQueryParam("version", release.getVersion());
-		ResponseEvaluator<String[]> evaluator = new ResponseEvaluator<String[]>(String[].class);
-		String[] cmdLine = requester.get(
-				requester::buildRequest,
-				evaluator);
-		return Arrays.asList(cmdLine);
-	}
-	
-	
 }

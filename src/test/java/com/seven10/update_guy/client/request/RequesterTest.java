@@ -8,6 +8,8 @@ import static org.mockito.Mockito.*;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Response;
@@ -21,6 +23,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.seven10.update_guy.client.FunctionalInterfaces;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
 import com.seven10.update_guy.client.request.Requester;
+import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
 
 /**
  * @author kmm
@@ -35,7 +38,7 @@ public class RequesterTest
 	private static final String TEST_URL = "localhost://some-path/";
 
 	@Mock
-	public ResponseEvaluator<String> mockedRespEvaluator;
+	public ResponseEvaluator<ClientRoleInfo> mockedRespEvaluator;
 	
 	/**
 	 * Test method for {@link com.seven10.update_guy.client.request.Requester#Requester(java.lang.String, java.lang.String)}.
@@ -155,7 +158,9 @@ public class RequesterTest
 	{
 		Requester requester = new Requester(TEST_URL, TEST_METHOD_NAME);
 		
-		String expectedString = "this-got-through";
+		String expectedFingerprint = "this-got-through";
+		List<String> expectedCmdList = Arrays.asList(new String[]{"cmd1", "cmd2"});
+		ClientRoleInfo expectedInfo = new ClientRoleInfo(expectedFingerprint, expectedCmdList);
 		
 		Response mockedResponse = mock(Response.class);
 		int mockStatusInt = 200;
@@ -164,14 +169,15 @@ public class RequesterTest
 		Invocation.Builder mockedInvocationBuilder = mock(Invocation.Builder.class);
 		doReturn(mockedResponse).when(mockedInvocationBuilder).get();
 
-		doReturn(String.class).when(mockedRespEvaluator).getEntityType();
-		doReturn(expectedString).when(mockedRespEvaluator).evaluateResponse(any(), any());
+		doReturn(ClientRoleInfo.class).when(mockedRespEvaluator).getEntityType();
+		doReturn(expectedInfo).when(mockedRespEvaluator).evaluateResponse(any(), any());
 		
 		FunctionalInterfaces.WebReqFactory webReqFactory = mock(FunctionalInterfaces.WebReqFactory.class);
 		doReturn(mockedInvocationBuilder).when(webReqFactory).buildRequest();
 		
-		String actualString = requester.get(webReqFactory, mockedRespEvaluator);
-		assertEquals(expectedString, actualString);
+		ClientRoleInfo actualInfo = requester.get(webReqFactory, mockedRespEvaluator);
+		assertEquals(expectedFingerprint, actualInfo.fingerPrint);
+		assertEquals(expectedCmdList, actualInfo.commandLine);
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.client.request.Requester#get(java.lang.Class)}.
@@ -240,7 +246,7 @@ public class RequesterTest
 		
 		Path jarPath = null;
 		FunctionalInterfaces.WebReqFactory webReqFactory =  mock(FunctionalInterfaces.WebReqFactory.class);
-		ResponseEvaluator<String> respEvaluator = mockedRespEvaluator;
+		ResponseEvaluator<ClientRoleInfo> respEvaluator = mockedRespEvaluator;
 		FunctionalInterfaces.ResponseToFileMgr respMgr = mock(FunctionalInterfaces.ResponseToFileMgr.class);
 		requester.getFile(jarPath, webReqFactory, respEvaluator, respMgr);
 	}
@@ -255,7 +261,7 @@ public class RequesterTest
 		
 		Path jarPath = Paths.get("your", "mom");
 		FunctionalInterfaces.WebReqFactory webReqFactory =  null;
-		ResponseEvaluator<String> respEvaluator = mockedRespEvaluator;
+		ResponseEvaluator<ClientRoleInfo> respEvaluator = mockedRespEvaluator;
 		FunctionalInterfaces.ResponseToFileMgr respMgr = mock(FunctionalInterfaces.ResponseToFileMgr.class);
 		requester.getFile(jarPath, webReqFactory, respEvaluator, respMgr);
 	}
@@ -270,7 +276,7 @@ public class RequesterTest
 		
 		Path jarPath = Paths.get("your", "mom");
 		FunctionalInterfaces.WebReqFactory webReqFactory =  mock(FunctionalInterfaces.WebReqFactory.class);
-		ResponseEvaluator<String> respEvaluator = mockedRespEvaluator;
+		ResponseEvaluator<ClientRoleInfo> respEvaluator = mockedRespEvaluator;
 		FunctionalInterfaces.ResponseToFileMgr respMgr = null;
 		requester.getFile(jarPath, webReqFactory, respEvaluator, respMgr);
 	}
@@ -285,7 +291,7 @@ public class RequesterTest
 		
 		Path jarPath = Paths.get("your", "mom");
 		FunctionalInterfaces.WebReqFactory webReqFactory =  mock(FunctionalInterfaces.WebReqFactory.class);
-		ResponseEvaluator<String> respEvaluator = mockedRespEvaluator;
+		ResponseEvaluator<ClientRoleInfo> respEvaluator = mockedRespEvaluator;
 		FunctionalInterfaces.ResponseToFileMgr respMgr = null;
 		requester.getFile(jarPath, webReqFactory, respEvaluator, respMgr);
 	}
