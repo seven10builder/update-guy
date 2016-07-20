@@ -16,4 +16,4 @@ VOLUME ["/seven10/update-guy/local"]
 # this volume is for the local repo, if used
 VOLUME ["/seven10/update-guy/repos"]
 
-ENTRYPOINT ["java", "-Dfile.encoding=UTF-8", "-Dupdate-guy.repoFileName=repo.json", "-Dupdate-guy.localPath=/seven10/update-guy", "-jar", "update-guy-server.jar"]
+ENTRYPOINT ["java", "-Dfile.encoding=UTF-8", "-Dlog4j.configurationFile=/seven10/update-guy/log4j2.xml", "-Dupdate-guy.repoFileName=repo.json", "-Dupdate-guy.localPath=/seven10/update-guy", "-jar", "update-guy-server.jar"]
