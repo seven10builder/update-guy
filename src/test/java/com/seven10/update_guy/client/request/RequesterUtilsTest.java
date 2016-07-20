@@ -2,6 +2,7 @@ package com.seven10.update_guy.client.request;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
+import static com.seven10.update_guy.common.ManifestEntryHelpers.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -15,9 +16,8 @@ import org.junit.rules.TemporaryFolder;
 import com.seven10.update_guy.client.ClientSettings;
 import com.seven10.update_guy.client.FunctionalInterfaces;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
-import com.seven10.update_guy.common.ManifestEntryHelpers;
+import com.seven10.update_guy.common.manifest.ClientRoleInfo;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
 
 /**
  * @author kmm
@@ -106,7 +106,7 @@ public class RequesterUtilsTest
 		RequesterUtils requesterUtils = new RequesterUtils(settings);
 		Requester requester = mock(Requester.class);
 		
-		ManifestEntry expectedManifest = ManifestEntryHelpers.create_valid_manifest_entry(testName, 1, rootFolder);
+		ManifestEntry expectedManifest = create_valid_manifest_entry(testName, 1, rootFolder);
 		doReturn(expectedManifest).when(requester).get(any(), any());
 		
 		ManifestEntry actualManifest = requesterUtils.requestActiveRelease((url, methodName)->requester);
@@ -170,7 +170,7 @@ public class RequesterUtilsTest
 		Path rootFolder = folder.newFolder(testName).toPath();
 		RequesterUtils requesterUtils = new RequesterUtils(settings);
 		Requester requester = mock(Requester.class);
-		ManifestEntry release = ManifestEntryHelpers.create_valid_manifest_entry(testName, 1, rootFolder);
+		ManifestEntry release = create_valid_manifest_entry(testName, 1, rootFolder);
 		
 		Path jarFilePath = Paths.get("some", "valid", "path");
 		requesterUtils.requestDownloadRoleFile(release, jarFilePath, (url, methodName)->requester);
@@ -256,7 +256,7 @@ public class RequesterUtilsTest
 		Requester requester = mock(Requester.class);
 		doReturn(expectedInfo).when(requester).get(any(), any());		
 		
-		ManifestEntry release = ManifestEntryHelpers.create_valid_manifest_entry(testName, 1, rootFolder);
+		ManifestEntry release = create_valid_manifest_entry(testName, 1, rootFolder);
 		
 		ClientRoleInfo actualRoleInfo = requesterUtils.requestRemoteClientRoleInfo(release, (url, methodName)->requester);
 		assertEquals(expectedFingerPrint, actualRoleInfo.fingerPrint);

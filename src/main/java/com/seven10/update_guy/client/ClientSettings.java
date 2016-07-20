@@ -75,6 +75,16 @@ public class ClientSettings
 		releaseFamily = "unknown";
 		activeVersionId = "";
 	}
+	public ClientSettings(ClientSettings other)
+	{
+		serverAddress = other.serverAddress;
+		serverPort = other.serverPort;
+		cachePath = other.cachePath;
+		repoId = other.repoId;
+		roleName = other.roleName;
+		releaseFamily = other.releaseFamily;
+		activeVersionId = other.activeVersionId;
+	}
 	/**
 	 * @return the serverAddress
 	 */
@@ -138,7 +148,7 @@ public class ClientSettings
 	{
 		this.activeVersionId = newVersion;
 	}
-	public String getActiveVersion()
+	public String getActiveVersionId()
 	{
 		return this.activeVersionId;
 	}

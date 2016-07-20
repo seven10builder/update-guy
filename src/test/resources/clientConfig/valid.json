@@ -4,5 +4,6 @@
   "repoId": "c9b85ad3348a7d4350ad50d4f9f45ed1",
   "roleName": "test-role",
   "releaseFamily": "test-family",
+  "activeVersionId": "test-version-id",
   "cachePath": "cache/"
 }

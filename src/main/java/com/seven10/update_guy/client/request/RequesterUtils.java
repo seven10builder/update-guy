@@ -7,17 +7,12 @@ import org.apache.logging.log4j.Logger;
 import com.seven10.update_guy.client.ClientSettings;
 import com.seven10.update_guy.client.FunctionalInterfaces.RequesterFactory;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
+import com.seven10.update_guy.common.manifest.ClientRoleInfo;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
 
 public class RequesterUtils
 {
 	private static final Logger logger = LogManager.getFormatterLogger(RequesterUtils.class.getName());
-	
-	public static Requester getDefaultRequester(String url, String methodName)
-	{
-		return new Requester(url, methodName);
-	}
 	
 	public static String buildMethodName(String roleName)
 	{
@@ -60,13 +55,15 @@ public class RequesterUtils
 			throw new IllegalArgumentException("requesterFactory must not be null");
 		}
 		String methodName = String.format("active-release/%s/%s", settings.releaseFamily, settings.activeVersionId);
+		logger.debug(".requestActiveRelease(): methodName=%s", methodName);
 		String url = buildManifestReq();		
 		Requester requester = requesterFactory.getRequester(url, methodName);
-		
+
 		ManifestEntry activeVersion = requester.get(
 				requester::buildRequest,
 				new ResponseEvaluator<ManifestEntry>(ManifestEntry.class));
 		logger.debug(".requestActiveRelease(): activeVersion = '%s'", activeVersion.getVersion());
+		
 		return activeVersion;
 	}
 	

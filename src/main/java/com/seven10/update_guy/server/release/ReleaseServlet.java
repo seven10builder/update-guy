@@ -17,9 +17,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.seven10.update_guy.common.GsonFactory;
+import com.seven10.update_guy.common.manifest.ClientRoleInfo;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.UpdateGuyRole;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
 import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.server.repository.RepositoryInfo;

@@ -15,9 +15,11 @@ import com.seven10.update_guy.client.cli.CliMgr;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
 import com.seven10.update_guy.client.local.JavaLauncher;
 import com.seven10.update_guy.client.local.LocalCacheUtils;
+import com.seven10.update_guy.client.request.Requester;
 import com.seven10.update_guy.client.request.RequesterUtils;
+import com.seven10.update_guy.common.GsonFactory;
+import com.seven10.update_guy.common.manifest.ClientRoleInfo;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
 
 public class UpdateGuyClient
 {
@@ -69,6 +71,7 @@ public class UpdateGuyClient
 		if(cliMgr.parse(CliMgr.getParser()))
 		{
 			ClientSettings settings = cliMgr.getClientSettings();
+			logger.debug(".doClient(): clientSettings='%s'", GsonFactory.getGson().toJson(settings));
 			
 			UpdateGuyClient client =  clientFactory.build(cliMgr.getRemainingParams());
 			RequesterUtils requesterUtils = requesterUtilsFactory.build(settings);
@@ -120,11 +123,11 @@ public class UpdateGuyClient
 			throw new IllegalArgumentException("launcher must not be null");
 		}
 		// get current active releaseId from server
-		ManifestEntry release = requestUtils.requestActiveRelease(RequesterUtils::getDefaultRequester);
+		ManifestEntry release = requestUtils.requestActiveRelease(Requester::new);
 		Path jarFilePath = localCacheUtils.buildTargetPath(release);
 		
 		// request checksum for activeRelease->role->file
-		ClientRoleInfo remoteRoleInfo = requestUtils.requestRemoteClientRoleInfo(release, RequesterUtils::getDefaultRequester);
+		ClientRoleInfo remoteRoleInfo = requestUtils.requestRemoteClientRoleInfo(release, Requester::new);
 		logger.debug(".executeClientLoop(): remoteChecksum = '%s', role cli = '%s'", 
 				remoteRoleInfo.fingerPrint, String.join(", ", remoteRoleInfo.commandLine));
 		
@@ -136,7 +139,7 @@ public class UpdateGuyClient
 		if(localChecksum.equals(remoteRoleInfo.fingerPrint) == false)
 		{
 			logger.info(".executeClientLoop(): checksums did not match. Will download", localChecksum);
-			requestUtils.requestDownloadRoleFile(release, jarFilePath, RequesterUtils::getDefaultRequester);
+			requestUtils.requestDownloadRoleFile(release, jarFilePath, Requester::new);
 		}
 		else
 		{

@@ -24,7 +24,7 @@ import com.seven10.update_guy.client.FunctionalInterfaces;
 import com.seven10.update_guy.client.FunctionalInterfaces.ResponseToFileMgr;
 import com.seven10.update_guy.client.FunctionalInterfaces.WebReqFactory;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
+import com.seven10.update_guy.common.manifest.ClientRoleInfo;
 
 public class Requester
 {
@@ -136,6 +136,6 @@ public class Requester
 	
 	public Invocation.Builder buildRequest()
 	{
-		return webTarget.request(MediaType.APPLICATION_XML);
+		return webTarget.request(MediaType.APPLICATION_JSON);
 	}
 }

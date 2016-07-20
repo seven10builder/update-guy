@@ -89,7 +89,7 @@ public class CliMgr
 		{
 			String path = cmd.getOptionValue(configFileCmd);
 			logger.info(".checkConfigFileCmd(): config file option found. Path = %s", path);
-			onConfigFile.doCommand(path);
+			clientSettings = onConfigFile.doCommand(path);
 		}
 		else
 		{

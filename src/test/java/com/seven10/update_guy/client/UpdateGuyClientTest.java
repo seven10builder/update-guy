@@ -23,8 +23,8 @@ import com.seven10.update_guy.client.exceptions.FatalClientException;
 import com.seven10.update_guy.client.local.JavaLauncher;
 import com.seven10.update_guy.client.local.LocalCacheUtils;
 import com.seven10.update_guy.client.request.RequesterUtils;
+import com.seven10.update_guy.common.manifest.ClientRoleInfo;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
 
 /**
  * @author kmm
