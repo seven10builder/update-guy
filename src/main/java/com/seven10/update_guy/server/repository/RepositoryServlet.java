@@ -60,10 +60,12 @@ public class RepositoryServlet
 
 	public RepositoryServlet() throws RepositoryException
 	{
-	
+		logger.trace(".ctor(): creating repository servlet");
 		// blech conflicting type names
 		java.nio.file.Path repoFilePath = ServerGlobals.getRepoFile();
+		logger.info(".ctor(): repo config file path = %s", repoFilePath.toString());
 		this.repoInfoMgr = new RepositoryInfoMgr(repoFilePath);
+		logger.trace(".ctor(): created repository servlet");
 	}
 	
 
@@ -82,20 +84,22 @@ public class RepositoryServlet
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response showRepo(@PathParam("repoId") String repoId)
 	{
-		Map<String, RepositoryInfo> repoMap = repoInfoMgr.getRepoMap();
-		RepositoryInfo repoInfo = repoMap.get(repoId);
-		
+		logger.trace(".showRepo(): start showRepo, repoId = '%s'", repoId);
 		ResponseBuilder resp = null;
+		Map<String, RepositoryInfo> repoMap = repoInfoMgr.getRepoMap();
+		
+		RepositoryInfo repoInfo = repoMap.get(repoId);
 		if(repoInfo == null)
 		{
-			String msg = String.format("Could not find repo identified by '%s'", repoId.toString());
+			String msg = String.format("could not find repo identified by '%s'", repoId.toString());
+			logger.error(".showRepo(): %s", msg);			
 			resp = Response.status(Status.NOT_FOUND)
 					.entity( GsonFactory.createJsonFromString("error", msg));
 		}
 		else
 		{
-			Gson gson = GsonFactory.getGson();
-			String repoMapJson = gson.toJson(repoInfo);
+			logger.info(".showRepo(): found repo identified by '%s'", repoId);
+			String repoMapJson = GsonFactory.getGson().toJson(repoInfo);
 			resp = Response.ok().entity(repoMapJson);	
 		}
 		return resp.build();

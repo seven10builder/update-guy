@@ -75,13 +75,14 @@ public class RepositoryInfoMgr
 		logger.info(".init(): initializing RepositoryInfoMgr");
 		if(Files.exists(repositoryStorePath)==false)
 		{
+			logger.info(".init(): path '%s' does not exist, creating default", repositoryStorePath.toString());
 			createDefaultFile(repositoryStorePath);
 		}
 		List<RepositoryInfo> repos = loadRepos(repositoryStorePath);
 		for(RepositoryInfo repo: repos)
 		{
 			String repoHash = repo.getShaHash();
-			logger.debug("adding repo '%s' to repoMap", repoHash);	
+			logger.debug(".init(): adding repo '%s' to repoMap", repoHash);	
 			repoMap.put(repoHash, repo);
 		}
 	}

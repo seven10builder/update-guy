@@ -9,9 +9,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
@@ -44,12 +42,10 @@ public class GsonFactory
 		return builder.create();
 	}
 	
-	public static JsonObject createJsonFromString(String keyName, String value)
+	public static String createJsonFromString(String keyName, String value)
 	{
-		JsonParser parser = new JsonParser();
 		String json = String.format("{\"%s\": \"%s\"}", keyName, value);
-		JsonObject jsonObj = parser.parse(json).getAsJsonObject();
-		return jsonObj;
+		return json;
 	}
 
 }
