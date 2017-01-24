@@ -1,4 +1,4 @@
-package com.seven10.update_guy.common;
+package com.seven10.update_guy.server.helpers;
 
 import static com.seven10.update_guy.common.ManifestHelpers.*;
 import static com.seven10.update_guy.common.RepoInfoHelpers.*;
@@ -26,8 +26,8 @@ import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.TestConstants;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
 import com.seven10.update_guy.common.manifest.UpdateGuyRole;
-import com.seven10.update_guy.server.repository.RepositoryInfo;
-import com.seven10.update_guy.server.repository.RepositoryInfo.RepositoryType;
+import com.seven10.update_guy.server.helpers.repository.RepositoryInfo;
+import com.seven10.update_guy.server.helpers.repository.RepositoryInfo.RepositoryType;
 
 public class RepoConnectionHelpers
 {

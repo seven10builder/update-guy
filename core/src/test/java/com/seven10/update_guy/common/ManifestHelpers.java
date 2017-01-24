@@ -12,13 +12,14 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.NotImplementedException;
 import org.junit.rules.TemporaryFolder;
 
 import com.google.gson.Gson;
 import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.manifest.Manifest;
-import com.seven10.update_guy.server.repository.RepositoryInfo;
+
 
 import jersey.repackaged.com.google.common.util.concurrent.UncheckedExecutionException;
 
@@ -82,14 +83,15 @@ public class ManifestHelpers
 	}
 	public static Path create_invalid_manifest_file(Path rootFolder) throws IOException
 	{
-		Path destPath = rootFolder.resolve("manifests").resolve("invalid.manifest");
+		//Path destPath = rootFolder.resolve("manifests").resolve("invalid.manifest");
 		// NOT a manifest object
-		RepositoryInfo expected = new RepositoryInfo();
+		//RepositoryInfo expected = new RepositoryInfo();
 		// JSON from file to Object
-		Gson gson = GsonFactory.getGson();
-		String json = gson.toJson(expected);
-		FileUtils.writeStringToFile(destPath.toFile(), json, "UTF-8");
-		return destPath;
+		//Gson gson = GsonFactory.getGson();
+		//String json = gson.toJson(expected);
+		//FileUtils.writeStringToFile(destPath.toFile(), json, "UTF-8");
+		//return destPath;
+		throw new NotImplementedException("create_invalid_manifest_file not implemented");
 	}
 	public static void write_manifest_list_to_folder(Path rootPath, List<Manifest> manifestList) throws IOException
 	{

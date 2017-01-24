@@ -1,4 +1,4 @@
-package com.seven10.update_guy.common;
+package com.seven10.update_guy.server.helpers;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -19,9 +19,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.seven10.update_guy.common.GsonFactory;
-import com.seven10.update_guy.server.ServerGlobals;
-import com.seven10.update_guy.server.repository.RepositoryInfo;
-import com.seven10.update_guy.server.repository.RepositoryInfo.RepositoryType;
+import com.seven10.update_guy.server.helpers.ServerGlobals;
+import com.seven10.update_guy.server.helpers.repository.RepositoryInfo;
+import com.seven10.update_guy.server.helpers.repository.RepositoryInfo.RepositoryType;
 
 public class RepoInfoHelpers
 {

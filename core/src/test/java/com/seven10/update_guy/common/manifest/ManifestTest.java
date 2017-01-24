@@ -25,7 +25,6 @@ import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
-import com.seven10.update_guy.server.exceptions.RepositoryException;
 
 /**
  * @author kmm
@@ -433,7 +432,7 @@ public class ManifestTest
 	 * @throws UpdateGuyException 
 	 */
 	@Test(expected = UpdateGuyException.class)
-	public void testLoadFromFile_path_notFound() throws RepositoryException, UpdateGuyException
+	public void testLoadFromFile_path_notFound() throws UpdateGuyException, Exception
 	{
 		// create path that is known NOT to be good
 		Path filePath = Paths.get("/no_updateguy_here");

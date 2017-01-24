@@ -2,6 +2,14 @@
 jenkins-envVars.properties
 /local/
 
+core/target
+client/target
+server/target
+core/.settings
+core/.classpath
+core/.project
+core/release
+
 # Maven Ignores #
 target/
 pom.xml.tag

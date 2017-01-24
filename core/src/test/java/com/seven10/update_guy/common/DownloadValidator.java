@@ -10,9 +10,8 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.NotImplementedException;
 
-import com.seven10.update_guy.server.ServerGlobals;
-import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.common.manifest.ManifestEntry;
 
 public class DownloadValidator
@@ -24,7 +23,7 @@ public class DownloadValidator
 	 * @throws RepositoryException
 	 * @throws IOException
 	 */
-	public static void validate_download(Path srcPath, Path destFolder) throws RepositoryException, IOException
+	public static void validate_download(Path srcPath, Path destFolder) throws IOException, Exception
 	{
 		assertTrue(Files.exists(destFolder, LinkOption.NOFOLLOW_LINKS));
 		File srcFile = srcPath.toFile();
@@ -32,9 +31,10 @@ public class DownloadValidator
 		assertTrue(FileUtils.contentEquals(srcFile, destFile));
 	}
 
-	public static void validate_downloaded_release(ManifestEntry versionEntry, String repoId) throws RepositoryException
+	public static void validate_downloaded_release(ManifestEntry versionEntry, String repoId) throws Exception
 	{
-		versionEntry.getAllRoleInfos().forEach(roleEntry ->
+		/*
+		 versionEntry.getAllRoleInfos().forEach(roleEntry ->
 		{
 			Path srcPath = null;
 			Path destPath = null;
@@ -49,6 +49,8 @@ public class DownloadValidator
 				fail(String.format("Download '%s' to '%s' was not validated: %s", srcPath, destPath, e.getMessage()));
 			}
 		});
+		*/
+		throw new NotImplementedException("validate_downloaded_release not implemented");
 	}
-
+	
 }

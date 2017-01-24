@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>update-guy</artifactId>
+	<artifactId>update-guy-core</artifactId>
 	<groupId>com.seven10</groupId>
 	<version>0.1-SNAPSHOT</version>
 	<properties>
@@ -14,11 +14,7 @@
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>com.seven10</groupId>
-			<artifactId>update-guy-core</artifactId>
-			<version>0.1-SNAPSHOT</version>
-		</dependency>
+
 		<!-- JSON -->
 		<!-- http://mvnrepository.com/artifact/com.google.code.gson/gson -->
 		<dependency>
@@ -193,106 +189,5 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.5.0</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>java</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<mainClass>com.seven10.update_guy.client.UpdateGuyClient</mainClass>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.4.3</version>
-				<executions>
-					<execution>
-						<id>client</id>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>release/client/</outputDirectory>
-							<finalName>update-guy-client</finalName>
-							<createDependencyReducedPom>false</createDependencyReducedPom>
-							<transformers>
-								<transformer
-									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>com.seven10.update_guy.client.UpdateGuyClient</mainClass>
-								</transformer>
-							</transformers>
-							<filters>
-								<filter>
-									<artifact>com.seven10:update-guy</artifact>
-									<excludes>
-										<exclude>com/seven10/update_guy/server/**</exclude>
-									</excludes>
-									<includes>
-										<include>com/seven10/update_guy/client/**</include>
-										<include>com/seven10/update_guy/common/**</include>
-									</includes>
-								</filter>
-								<filter>
-									<artifact>*:*</artifact>
-									<excludes>
-										<exclude>META-INF/*.SF</exclude>
-										<exclude>META-INF/*.DSA</exclude>
-										<exclude>META-INF/*.RSA</exclude>
-									</excludes>
-								</filter>
-							</filters>
-						</configuration>
-					</execution>
-					<execution>
-						<id>server</id>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>release/server/</outputDirectory>
-							<finalName>update-guy-server</finalName>
-							<createDependencyReducedPom>false</createDependencyReducedPom>
-							<transformers>
-								<transformer
-									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>com.seven10.update_guy.server.UpdateGuyServer</mainClass>
-								</transformer>
-							</transformers>
-							<filters>
-								<filter>
-									<artifact>com.seven10:update-guy</artifact>
-									<excludes>
-										<exclude>com/seven10/update_guy/client/**</exclude>
-									</excludes>
-									<includes>
-										<include>com/seven10/update_guy/server/**</include>
-										<include>com/seven10/update_guy/common/**</include>
-									</includes>
-								</filter>
-								<filter>
-									<artifact>*:*</artifact>
-									<excludes>
-										<exclude>META-INF/*.SF</exclude>
-										<exclude>META-INF/*.DSA</exclude>
-										<exclude>META-INF/*.RSA</exclude>
-										<exclude>com/seven10/update_guy/client/**</exclude>
-									</excludes>
-								</filter>
-							</filters>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
 	</build>
 </project>
