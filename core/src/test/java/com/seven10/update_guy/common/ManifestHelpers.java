@@ -1,6 +1,7 @@
 package com.seven10.update_guy.common;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,8 +21,6 @@ import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.manifest.Manifest;
 
-
-import jersey.repackaged.com.google.common.util.concurrent.UncheckedExecutionException;
 
 public class ManifestHelpers
 {
@@ -57,9 +56,9 @@ public class ManifestHelpers
 							{
 								json = FileUtils.readFileToString(path.toFile(), GsonFactory.encodingType);
 							}
-							catch (Exception e)
+							catch (IOException e)
 							{
-								throw new UncheckedExecutionException(e);
+								throw new UncheckedIOException(e);
 							}
 							Gson gson = GsonFactory.getGson();
 							Manifest manifest = gson.fromJson(json, Manifest.class);
