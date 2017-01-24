@@ -4,7 +4,7 @@
 package com.seven10.update_guy.server.repository;
 
 import static org.junit.Assert.*;
-import static com.seven10.update_guy.common.RepoInfoHelpers.*;
+import static com.seven10.update_guy.server.helpers.RepoInfoHelpers.*;
 
 import java.io.IOException;
 import java.lang.reflect.Type;

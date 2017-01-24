@@ -18,7 +18,7 @@ import org.junit.rules.TemporaryFolder;
 
 
 import com.seven10.update_guy.common.ManifestHelpers;
-import com.seven10.update_guy.common.RepoInfoHelpers;
+import com.seven10.update_guy.server.helpers.RepoInfoHelpers;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.server.manifest.ManifestRefresher.FileCreator;

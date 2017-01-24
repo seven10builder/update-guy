@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 import com.seven10.update_guy.common.FileFingerPrint;
 import com.seven10.update_guy.common.ManifestEntryHelpers;
 
-import com.seven10.update_guy.common.RepoInfoHelpers;
+import com.seven10.update_guy.server.helpers.RepoInfoHelpers;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.common.manifest.Manifest;

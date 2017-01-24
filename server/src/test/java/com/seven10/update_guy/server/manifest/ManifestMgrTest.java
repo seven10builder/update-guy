@@ -20,7 +20,7 @@ import org.mockito.stubbing.Answer;
 
 import com.google.gson.JsonSyntaxException;
 import com.seven10.update_guy.common.ManifestEntryHelpers;
-import com.seven10.update_guy.common.RepoInfoHelpers;
+import com.seven10.update_guy.server.helpers.RepoInfoHelpers;
 import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;

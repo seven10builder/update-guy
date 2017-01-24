@@ -4,7 +4,7 @@
 package com.seven10.update_guy.server.manifest;
 
 import static com.seven10.update_guy.common.ManifestHelpers.*;
-import static com.seven10.update_guy.common.RepoInfoHelpers.*;
+import static com.seven10.update_guy.server.helpers.RepoInfoHelpers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -26,7 +26,7 @@ import org.junit.rules.TemporaryFolder;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.seven10.update_guy.common.GsonFactory;
-import com.seven10.update_guy.common.RepoInfoHelpers;
+import com.seven10.update_guy.server.helpers.RepoInfoHelpers;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.ManifestEntry;

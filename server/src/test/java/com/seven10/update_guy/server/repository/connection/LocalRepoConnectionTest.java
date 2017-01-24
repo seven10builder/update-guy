@@ -4,8 +4,8 @@
 package com.seven10.update_guy.server.repository.connection;
 
 import static com.seven10.update_guy.common.ManifestHelpers.*;
-import static com.seven10.update_guy.common.RepoConnectionHelpers.*;
-import static com.seven10.update_guy.common.RepoInfoHelpers.*;
+import static com.seven10.update_guy.server.helpers.RepoConnectionHelpers.*;
+import static com.seven10.update_guy.server.helpers.RepoInfoHelpers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
@@ -25,7 +25,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.seven10.update_guy.common.RepoInfoHelpers;
+import com.seven10.update_guy.server.helpers.RepoInfoHelpers;
 import com.seven10.update_guy.common.DownloadValidator;
 import com.seven10.update_guy.common.ManifestHelpers;
 import com.seven10.update_guy.common.manifest.Manifest;

@@ -31,7 +31,7 @@ import com.google.gson.reflect.TypeToken;
 import com.seven10.update_guy.common.FileFingerPrint;
 import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.ManifestHelpers;
-import com.seven10.update_guy.common.RepoInfoHelpers;
+import com.seven10.update_guy.server.helpers.RepoInfoHelpers;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.manifest.Manifest;
 import com.seven10.update_guy.common.manifest.ManifestEntry;

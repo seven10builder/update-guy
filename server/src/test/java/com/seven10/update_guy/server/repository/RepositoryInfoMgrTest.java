@@ -20,10 +20,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import static com.seven10.update_guy.common.RepoInfoHelpers.*;
+import static com.seven10.update_guy.server.helpers.RepoInfoHelpers.*;
 
-import com.seven10.update_guy.common.RepoInfoHelpers;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
+import com.seven10.update_guy.server.helpers.RepoInfoHelpers;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.RepositoryInfoMgr;
 import com.seven10.update_guy.server.repository.RepositoryInfo.RepositoryType;
