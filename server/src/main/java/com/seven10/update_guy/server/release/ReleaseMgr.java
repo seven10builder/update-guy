@@ -10,9 +10,9 @@ import org.apache.logging.log4j.Logger;
 
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
-import com.seven10.update_guy.common.manifest.Manifest;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole;
+import com.seven10.update_guy.common.release_family.ReleaseFamily;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
+import com.seven10.update_guy.common.release_family.UpdateGuyRole;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.connection.RepoConnection;
 import com.seven10.update_guy.server.repository.connection.RepoConnectionFactory;
@@ -20,7 +20,7 @@ import com.seven10.update_guy.server.repository.connection.RepoConnectionFactory
 public class ReleaseMgr
 {	
 	private static final Logger logger = LogManager.getFormatterLogger(ReleaseMgr.class);
-	private final Manifest releaseFamily;
+	private final ReleaseFamily releaseFamily;
 	private final RepositoryInfo repoInfo;
 
 	
@@ -28,7 +28,7 @@ public class ReleaseMgr
 	 * Constructor for the CacheManager, a class used to handle the serving of locally cached files to consumers
 	 * @param releaseId 
 	 */
-	public ReleaseMgr(Manifest releaseFamily, RepositoryInfo repoInfo)
+	public ReleaseMgr(ReleaseFamily releaseFamily, RepositoryInfo repoInfo)
 	{
 		if( releaseFamily == null)
 		{
@@ -55,7 +55,7 @@ public class ReleaseMgr
 		{
 			throw new IllegalArgumentException("roleName must not be null or empty");
 		}
-		ManifestEntry activeVersion;
+		ReleaseFamilyEntry activeVersion;
 		try
 		{
 			activeVersion = releaseFamily.getVersionEntry(version);
@@ -90,7 +90,7 @@ public class ReleaseMgr
 			throw new IllegalArgumentException("onDownloadComplete must not be null");
 		}
 		
-		ManifestEntry activeVersion;
+		ReleaseFamilyEntry activeVersion;
 		try
 		{
 			activeVersion = releaseFamily.getVersionEntry(version);
@@ -114,7 +114,7 @@ public class ReleaseMgr
 		}
 		try
 		{
-			ManifestEntry activeVersion = releaseFamily.getVersionEntry(version);
+			ReleaseFamilyEntry activeVersion = releaseFamily.getVersionEntry(version);
 			return activeVersion.getRoles();
 		}
 		catch(UpdateGuyException ex)

@@ -28,6 +28,13 @@ public class Globals
 		return Integer.valueOf(portString);
 	}
 
+	public static final String RELEASE_FAM_FILE_EXT = "rf";
+	public static final String RELEASE_FAM_GLOB = String.format("glob:**.%s", RELEASE_FAM_FILE_EXT);
+	
+	public static final String buildRelFamFileName(String fileName)
+	{
+		return String.format("%s.%s", fileName, RELEASE_FAM_FILE_EXT);
+	}
 
 
 }

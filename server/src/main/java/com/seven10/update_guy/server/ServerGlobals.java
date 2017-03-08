@@ -5,8 +5,8 @@ import java.nio.file.Path;
 import java.util.Map.Entry;
 
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
+import com.seven10.update_guy.common.release_family.UpdateGuyRole;
 
 public class ServerGlobals
 {
@@ -27,9 +27,9 @@ public class ServerGlobals
 	 */
 	public static final String ACTIVE_VERSIONS_FOLDER_NAME = "activeVersions";
 	/**
-	 * The folder name where the manifests are cached
+	 * The folder name where the release familys are cached
 	 */
-	public static final String MANIFEST_FOLDER_NAME = "manifests";
+	public static final String RELEASE_FAMILY_FOLDER_NAME = "releaseFamilies";
 	
 	/*
 	 * Settings
@@ -40,7 +40,7 @@ public class ServerGlobals
 	public static final String SETTING_REPO_FILENAME = "update-guy.repoFileName";
 	/**
 	 * The path of the local root folder for update-guy. This is the root of the 
-	 * tree where manifests and local caches are stored. 
+	 * tree where release families and local caches are stored. 
 	 */
 	public static final String SETTING_LOCAL_PATH = "update-guy.localPath";
 	/**
@@ -50,7 +50,7 @@ public class ServerGlobals
 	 * @return
 	 * @throws RepositoryException
 	 */
-	public static Path buildDownloadTargetPath(String repoId, ManifestEntry versionEntry, Entry<String, UpdateGuyRole> roleEntry)
+	public static Path buildDownloadTargetPath(String repoId, ReleaseFamilyEntry versionEntry, Entry<String, UpdateGuyRole> roleEntry)
 			throws UpdateGuyException
 	{
 		Path destPath = getFileStorePathForRole(repoId,
@@ -77,9 +77,9 @@ public class ServerGlobals
 	{
 		return getSubRepoRoot(repoId).resolve(releaseFamily).resolve(version).resolve(roleId);
 	}
-	public static Path getManifestStorePath(String repoId)
+	public static Path getReleaseFamilyStorePath(String repoId)
 	{
-		return getSubRepoRoot(repoId).resolve(MANIFEST_FOLDER_NAME);
+		return getSubRepoRoot(repoId).resolve(RELEASE_FAMILY_FOLDER_NAME);
 	}
 	
 	public static Path getActiveVersionStorePath()
@@ -93,6 +93,4 @@ public class ServerGlobals
 		return getRootPath().resolve(repoFileName);
 	}
 	
-
-
 }

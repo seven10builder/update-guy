@@ -22,8 +22,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.google.gson.JsonSyntaxException;
 import com.seven10.update_guy.common.FileFingerPrint;
 import com.seven10.update_guy.common.GsonFactory;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
-import com.seven10.update_guy.common.ManifestEntryHelpers;
+import com.seven10.update_guy.common.ReleaseFamilyEntryHelpers;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
 import com.seven10.update_guy.client.ClientSettings;
 import com.seven10.update_guy.client.local.LocalCacheUtils;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
@@ -162,7 +162,7 @@ public class LocalCacheUtilsTest
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.client.local.LocalCacheUtils#buildTargetPath(com.seven10.update_guy.common.manifest.ManifestEntry)}.
+	 * Test method for {@link com.seven10.update_guy.client.local.LocalCacheUtils#buildTargetPath(com.seven10.update_guy.common.release_family.ReleaseFamilyEntry)}.
 	 * @throws IOException 
 	 * @throws JsonSyntaxException 
 	 * @throws FatalClientException 
@@ -172,7 +172,7 @@ public class LocalCacheUtilsTest
 	{
 		String testName = "buildTargetPath";
 		Path rootFolder = folder.newFolder(testName).toPath();
-		ManifestEntry release = ManifestEntryHelpers.create_valid_manifest_entry(testName, 1, rootFolder);
+		ReleaseFamilyEntry release = ReleaseFamilyEntryHelpers.create_valid_release_family_entry(testName, 1, rootFolder);
 		
 		ClientSettings settings = load_valid_settings();
 		settings.roleName = "role_1";
@@ -183,7 +183,7 @@ public class LocalCacheUtilsTest
 		assertEquals(expected, actual);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.client.local.LocalCacheUtils#buildTargetPath(com.seven10.update_guy.common.manifest.ManifestEntry)}.
+	 * Test method for {@link com.seven10.update_guy.client.local.LocalCacheUtils#buildTargetPath(com.seven10.update_guy.common.release_family.ReleaseFamilyEntry)}.
 	 * @throws IOException 
 	 * @throws JsonSyntaxException 
 	 * @throws FatalClientException 
@@ -193,7 +193,7 @@ public class LocalCacheUtilsTest
 	{
 		String testName = "buildTargetPath";
 		Path rootFolder = folder.newFolder(testName).toPath();
-		ManifestEntry release = ManifestEntryHelpers.create_valid_manifest_entry(testName, 1, rootFolder);
+		ReleaseFamilyEntry release = ReleaseFamilyEntryHelpers.create_valid_release_family_entry(testName, 1, rootFolder);
 		
 		ClientSettings settings = load_valid_settings();
 		settings.roleName = "some_stupid_role";
@@ -202,7 +202,7 @@ public class LocalCacheUtilsTest
 		localCacheUtils.buildTargetPath(release);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.client.local.LocalCacheUtils#buildTargetPath(com.seven10.update_guy.common.manifest.ManifestEntry)}.
+	 * Test method for {@link com.seven10.update_guy.client.local.LocalCacheUtils#buildTargetPath(com.seven10.update_guy.common.release_family.ReleaseFamilyEntry)}.
 	 * @throws IOException 
 	 * @throws JsonSyntaxException 
 	 * @throws FatalClientException 
@@ -210,7 +210,7 @@ public class LocalCacheUtilsTest
 	@Test(expected=IllegalArgumentException.class)
 	public void testBuildTargetPath_null_release() throws JsonSyntaxException, IOException, FatalClientException
 	{
-		ManifestEntry release = null;
+		ReleaseFamilyEntry release = null;
 		
 		ClientSettings settings = load_valid_settings();
 		settings.roleName = "role_1";

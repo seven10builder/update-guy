@@ -1,4 +1,4 @@
-package com.seven10.update_guy.common.manifest;
+package com.seven10.update_guy.common.release_family;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,9 +16,9 @@ import org.apache.logging.log4j.Logger;
 import com.google.gson.annotations.Expose;
 import com.seven10.update_guy.common.GsonFactory;
 
-public class ManifestEntry
+public class ReleaseFamilyEntry
 {
-	private static final Logger logger = LogManager.getFormatterLogger(ManifestEntry.class);
+	private static final Logger logger = LogManager.getFormatterLogger(ReleaseFamilyEntry.class);
 	
 	@Expose
 	protected String version;
@@ -28,7 +28,7 @@ public class ManifestEntry
 	protected final Map<String, UpdateGuyRole> roleMap;
 	@Expose
 	protected String releaseFamily;
-	public ManifestEntry()
+	public ReleaseFamilyEntry()
 	{
 		releaseFamily = "unknown";
 		version = "unknown";
@@ -36,7 +36,7 @@ public class ManifestEntry
 		roleMap = new HashMap<String, UpdateGuyRole>();
 	}
 	
-	public ManifestEntry(ManifestEntry versionEntry)
+	public ReleaseFamilyEntry(ReleaseFamilyEntry versionEntry)
 	{
 		releaseFamily = versionEntry.releaseFamily;
 		version = versionEntry.version;
@@ -85,12 +85,12 @@ public class ManifestEntry
 			logger.debug(".equals(): match = false. other is null");
 			return false;
 		}
-		if (!(obj instanceof ManifestEntry))
+		if (!(obj instanceof ReleaseFamilyEntry))
 		{
-			logger.debug(".equals(): match = false. other is not a ManifestVersionEntry");
+			logger.debug(".equals(): match = false. other is not a ReleaseFamilyVersionEntry");
 			return false;
 		}
-		ManifestEntry other = (ManifestEntry) obj;
+		ReleaseFamilyEntry other = (ReleaseFamilyEntry) obj;
 		if (roleMap.size() != other.roleMap.size())
 		{
 			logger.debug(".equals(): match = false. other size does not match (this = %d, other = %d)", roleMap.size(),

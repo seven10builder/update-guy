@@ -30,13 +30,13 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.seven10.update_guy.common.FileFingerPrint;
 import com.seven10.update_guy.common.GsonFactory;
-import com.seven10.update_guy.common.ManifestHelpers;
+import com.seven10.update_guy.common.ReleaseFamilyHelpers;
 import com.seven10.update_guy.server.helpers.RepoInfoHelpers;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
-import com.seven10.update_guy.common.manifest.Manifest;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
+import com.seven10.update_guy.common.release_family.ReleaseFamily;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
+import com.seven10.update_guy.common.release_family.UpdateGuyRole;
+import com.seven10.update_guy.common.release_family.UpdateGuyRole.ClientRoleInfo;
 import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
@@ -59,7 +59,7 @@ public class ReleaseServletTest extends JerseyTest
 	 * @param resp
 	 * @throws IOException
 	 */
-	private void validateDownloadedFile(String testName, ManifestEntry entry, File downloadPath, String roleName,
+	private void validateDownloadedFile(String testName, ReleaseFamilyEntry entry, File downloadPath, String roleName,
 			Response resp) throws IOException
 	{
 		File actualFile = getFileFromDownload(testName, resp, downloadPath);
@@ -103,11 +103,11 @@ public class ReleaseServletTest extends JerseyTest
 		String testName = "ctor-v";
 		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
-		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
-		for(Manifest manifest: manifestList)
+		List<ReleaseFamily> releaseFamilyList = ReleaseFamilyHelpers.load_releaseFamily_list_from_path(repoInfo.getRemoteReleaseFamilyPath());
+		for(ReleaseFamily releaseFamily: releaseFamilyList)
 		{
-			String releaseFamily = manifest.getReleaseFamily();
-			ReleaseServlet releaseServlet = new ReleaseServlet(repoInfo.getShaHash(), releaseFamily);
+			String relFamilyName = releaseFamily.getReleaseFamily();
+			ReleaseServlet releaseServlet = new ReleaseServlet(repoInfo.getShaHash(), relFamilyName);
 			assertNotNull(releaseServlet);
 		}
 	}
@@ -122,13 +122,13 @@ public class ReleaseServletTest extends JerseyTest
 	{
 		String testName = "repoId-nf";
 		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
-		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
+		List<ReleaseFamily> releaseFamilyList = ReleaseFamilyHelpers.load_releaseFamily_list_from_path(repoInfo.getRemoteReleaseFamilyPath());
 		// calc an invalid repoId
 		String repoId = repoInfo.getShaHash() + "breakrepoid";
 	    
-		Manifest manifest = manifestList.get(0);
-		String releaseFamily = manifest.getReleaseFamily();
-		new ReleaseServlet(repoId, releaseFamily);
+		ReleaseFamily releaseFamily = releaseFamilyList.get(0);
+		String relFamilyName = releaseFamily.getReleaseFamily();
+		new ReleaseServlet(repoId, relFamilyName);
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.release.ReleaseServlet#ReleaseServlet(com.seven10.update_guy.release.CacheManager)}.
@@ -158,18 +158,18 @@ public class ReleaseServletTest extends JerseyTest
 		String testName = "getRoles-v";
 		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
-		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
+		List<ReleaseFamily> releaseFamilyList = ReleaseFamilyHelpers.load_releaseFamily_list_from_path(repoInfo.getRemoteReleaseFamilyPath());
 		String repoId = repoInfo.getShaHash();
 		
-		for(Manifest manifest: manifestList)
+		for(ReleaseFamily releaseFamily: releaseFamilyList)
 		{
-			String releaseFamily = manifest.getReleaseFamily();
-			for(ManifestEntry entry: manifest.getVersionEntries())
+			String relFamilyName = releaseFamily.getReleaseFamily();
+			for(ReleaseFamilyEntry entry: releaseFamily.getVersionEntries())
 			{
 				String version = entry.getVersion();
 				List<String> expectedRoles = entry.getRoles();
 				// do request
-				String path = "/release/"+ repoId + "/" + releaseFamily + "/roles";
+				String path = "/release/"+ repoId + "/" + relFamilyName + "/roles";
 				Response resp = target(path).queryParam("version", version).request().get();
 				
 				assertEquals(Status.OK.getStatusCode(), resp.getStatus());
@@ -179,7 +179,7 @@ public class ReleaseServletTest extends JerseyTest
 				Type collectionType = new TypeToken<List<String>>()
 				{
 				}.getType();
-				List<Manifest> actualRoles = gson.fromJson(json, collectionType);
+				List<ReleaseFamily> actualRoles = gson.fromJson(json, collectionType);
 				assertNotNull(actualRoles);
 				assertNotEquals(0, actualRoles.size());
 				assertTrue(expectedRoles.containsAll(actualRoles));
@@ -202,13 +202,13 @@ public class ReleaseServletTest extends JerseyTest
 		String testName = "getFingerprint-v";
 		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
-		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
+		List<ReleaseFamily> releaseFamilyList = ReleaseFamilyHelpers.load_releaseFamily_list_from_path(repoInfo.getRemoteReleaseFamilyPath());
 		String repoId = repoInfo.getShaHash();
 		
-		for(Manifest manifest: manifestList)
+		for(ReleaseFamily releaseFamily: releaseFamilyList)
 		{
-			String releaseFamily = manifest.getReleaseFamily();
-			for(ManifestEntry entry: manifest.getVersionEntries())
+			String relFamilyName = releaseFamily.getReleaseFamily();
+			for(ReleaseFamilyEntry entry: releaseFamily.getVersionEntries())
 			{
 				String version = entry.getVersion();
 				List<String> expectedRoles = entry.getRoles();
@@ -216,13 +216,13 @@ public class ReleaseServletTest extends JerseyTest
 				for(String roleName: expectedRoles)
 				{
 					String expectedFingerPrint = FileFingerPrint.create(entry.getRoleInfo(roleName).getFilePath());
-					String path = "/release/"+ repoId + "/" + releaseFamily + "/roleInfo/" + roleName;
+					String path = "/release/"+ repoId + "/" + relFamilyName + "/roleInfo/" + roleName;
 					Response resp = target(path).queryParam("version", version).request().get();
 					assertEquals(Status.OK.getStatusCode(), resp.getStatus());
 					String roleInfoString = resp.readEntity(String.class);
 					ClientRoleInfo roleInfo = GsonFactory.getGson().fromJson(roleInfoString, ClientRoleInfo.class);
 					
-					assertEquals("(" + releaseFamily + "," + version + ", " + roleName + ")", 
+					assertEquals("(" + relFamilyName + "," + version + ", " + roleName + ")", 
 							expectedFingerPrint, roleInfo.fingerPrint);
 				}
 			}
@@ -241,21 +241,21 @@ public class ReleaseServletTest extends JerseyTest
 		String testName = "getFiles_v";
 		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
-		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
+		List<ReleaseFamily> releaseFamilyList = ReleaseFamilyHelpers.load_releaseFamily_list_from_path(repoInfo.getRemoteReleaseFamilyPath());
 		String repoId = repoInfo.getShaHash();
 		
-		for(Manifest manifest: manifestList)
+		for(ReleaseFamily releaseFamily: releaseFamilyList)
 		{
-			String releaseFamily = manifest.getReleaseFamily();
-			for(ManifestEntry entry: manifest.getVersionEntries())
+			String relFamilyName = releaseFamily.getReleaseFamily();
+			for(ReleaseFamilyEntry entry: releaseFamily.getVersionEntries())
 			{
 				String version = entry.getVersion();
 				List<String> expectedRoles = entry.getRoles();
 				// do request
-				File downloadPath = folder.newFolder(testName+"-"+releaseFamily + "-" + version);
+				File downloadPath = folder.newFolder(testName+"-"+relFamilyName + "-" + version);
 				for(String roleName: expectedRoles)
 				{
-					String path = "/release/"+ repoId + "/" + releaseFamily + "/download/" + roleName;
+					String path = "/release/"+ repoId + "/" + relFamilyName + "/download/" + roleName;
 					Response resp = target(path).queryParam("version", version).request().get();
 					assertEquals(Status.OK.getStatusCode(), resp.getStatus());
 					
@@ -278,27 +278,27 @@ public class ReleaseServletTest extends JerseyTest
 		String testName = "doUpdate-cache";
 		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		
-		List<Manifest> manifestList = ManifestHelpers.load_manifest_list_from_path(repoInfo.getRemoteManifestPath());
+		List<ReleaseFamily> releaseFamilyList = ReleaseFamilyHelpers.load_releaseFamily_list_from_path(repoInfo.getRemoteReleaseFamilyPath());
 		String repoId = repoInfo.getShaHash();
 		
-		for(Manifest manifest: manifestList)
+		for(ReleaseFamily releaseFamily: releaseFamilyList)
 		{
-			for(ManifestEntry manifestEntry: manifest.getVersionEntries())
+			for(ReleaseFamilyEntry releaseFamilyEntry: releaseFamily.getVersionEntries())
 			{
-				String version = manifestEntry.getVersion();
-				String releaseFamily = manifestEntry.getReleaseFamily();
-				assertNotEquals("unknown", releaseFamily);
-				String path = "/release/"+ repoId + "/" + releaseFamily + "/update-cache";
+				String version = releaseFamilyEntry.getVersion();
+				String relFamilyName = releaseFamilyEntry.getReleaseFamily();
+				assertNotEquals("unknown", relFamilyName);
+				String path = "/release/"+ repoId + "/" + relFamilyName + "/update-cache";
 				Response resp = target(path).queryParam("version", version).request().get();
 				assertEquals(Status.OK.getStatusCode(), resp.getStatus());
 				
 				// now test that each file was downloaded
 				
-				List<Entry<String, UpdateGuyRole>> expectedRoles = manifestEntry.getAllRoleInfos();
+				List<Entry<String, UpdateGuyRole>> expectedRoles = releaseFamilyEntry.getAllRoleInfos();
 				for(Entry<String, UpdateGuyRole> roleEntry: expectedRoles)
 				{
-					Path expectedFile = manifestEntry.getRoleInfo(roleEntry.getKey()).getFilePath(); 
-					Path actualFile = ServerGlobals.buildDownloadTargetPath(repoId, manifestEntry, roleEntry);
+					Path expectedFile = releaseFamilyEntry.getRoleInfo(roleEntry.getKey()).getFilePath(); 
+					Path actualFile = ServerGlobals.buildDownloadTargetPath(repoId, releaseFamilyEntry, roleEntry);
 					FileAssert.assertBinaryEquals(expectedFile.toFile(), actualFile.toFile());
 				}
 			}

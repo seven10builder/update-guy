@@ -1,4 +1,4 @@
-package com.seven10.update_guy.common.manifest;
+package com.seven10.update_guy.common.release_family;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,9 +21,9 @@ import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.exceptions.UpdateGuyNotFoundException;
 
-public class Manifest
+public class ReleaseFamily
 {
-	private static final Logger logger = LogManager.getFormatterLogger(Manifest.class);
+	private static final Logger logger = LogManager.getFormatterLogger(ReleaseFamily.class);
 	@Expose
 	String releaseFamily;
 	@Expose
@@ -31,26 +31,26 @@ public class Manifest
 	@Expose
 	Date retrieved;
 	@Expose
-	Map<String, ManifestEntry> versions;
+	Map<String, ReleaseFamilyEntry> versions;
 
-	public Manifest()
+	public ReleaseFamily()
 	{
 		releaseFamily = "unknown";
 		created = new Date();
 		retrieved = new Date();
-		versions = new HashMap<String, ManifestEntry>();
+		versions = new HashMap<String, ReleaseFamilyEntry>();
 	}
 
-	public Manifest(Manifest newManifest)
+	public ReleaseFamily(ReleaseFamily newReleaseFamily)
 	{
-		if (newManifest == null)
+		if (newReleaseFamily == null)
 		{
-			throw new IllegalArgumentException("newManifest must not be null");
+			throw new IllegalArgumentException("newReleaseFamily must not be null");
 		}
-		this.releaseFamily = newManifest.releaseFamily;
-		this.created = newManifest.created;
-		this.retrieved = newManifest.retrieved;
-		this.versions = new HashMap<String, ManifestEntry>(newManifest.versions);
+		this.releaseFamily = newReleaseFamily.releaseFamily;
+		this.created = newReleaseFamily.created;
+		this.retrieved = newReleaseFamily.retrieved;
+		this.versions = new HashMap<String, ReleaseFamilyEntry>(newReleaseFamily.versions);
 	}
 
 	@Override
@@ -71,9 +71,9 @@ public class Manifest
 			throw new IllegalArgumentException("newReleaseFamily must not be null or empty");
 		}
 		this.releaseFamily = newReleaseFamily;
-		for(ManifestEntry manifestEntry: this.versions.values())
+		for(ReleaseFamilyEntry releaseEntry: this.versions.values())
 		{
-			manifestEntry.setReleaseFamily(newReleaseFamily);
+			releaseEntry.setReleaseFamily(newReleaseFamily);
 		}
 	}
 
@@ -105,7 +105,7 @@ public class Manifest
 		this.retrieved = newRetrieved;
 	}
 
-	public ManifestEntry getVersionEntry(String version) throws UpdateGuyException
+	public ReleaseFamilyEntry getVersionEntry(String version) throws UpdateGuyException
 	{
 		if (version == null || version.isEmpty())
 		{
@@ -113,7 +113,7 @@ public class Manifest
 		}
 		try
 		{
-			ManifestEntry entry = versions.values().stream().filter(ver->ver.getVersion().contentEquals(version)).findFirst().get();
+			ReleaseFamilyEntry entry = versions.values().stream().filter(ver->ver.getVersion().contentEquals(version)).findFirst().get();
 			return entry;
 		}
 		catch(NoSuchElementException ex)
@@ -123,12 +123,12 @@ public class Manifest
 		}
 	}
 
-	public List<ManifestEntry> getVersionEntries()
+	public List<ReleaseFamilyEntry> getVersionEntries()
 	{
-		return new ArrayList<ManifestEntry>(versions.values());
+		return new ArrayList<ReleaseFamilyEntry>(versions.values());
 	}
 	
-	public void addVersionEntry(ManifestEntry versionEntry)
+	public void addVersionEntry(ReleaseFamilyEntry versionEntry)
 	{
 		if (versionEntry == null)
 		{
@@ -138,22 +138,22 @@ public class Manifest
 		versions.put(versionEntry.version, versionEntry);
 	}
 
-	public static void writeToFile(Path filePath, Manifest manifest) throws IOException
+	public static void writeToFile(Path filePath, ReleaseFamily releaseFamily) throws IOException
 	{
 		if (filePath == null)
 		{
 			throw new IllegalArgumentException("filePath must not be null");
 		}
-		if (manifest == null)
+		if (releaseFamily == null)
 		{
-			throw new IllegalArgumentException("manifest must not be null");
+			throw new IllegalArgumentException("releaseFamily must not be null");
 		}
 		Gson gson = GsonFactory.getGson();
-		String json = gson.toJson(manifest);
+		String json = gson.toJson(releaseFamily);
 		FileUtils.writeStringToFile(filePath.toFile(), json, GsonFactory.encodingType);
 	}
 
-	public static Manifest loadFromFile(Path filePath) throws UpdateGuyException
+	public static ReleaseFamily loadFromFile(Path filePath) throws UpdateGuyException
 	{
 		if (filePath == null)
 		{
@@ -161,25 +161,25 @@ public class Manifest
 		}
 		if(Files.exists(filePath) == false)
 		{
-			logger.error(".loadFromFile(): could not locate manifest file '%s'",filePath);
-			throw new UpdateGuyNotFoundException( "The manifest file '%s' was not found", filePath.getFileName().toString());
+			logger.error(".loadFromFile(): could not locate release family file '%s'",filePath);
+			throw new UpdateGuyNotFoundException( "The release family file '%s' was not found", filePath.getFileName().toString());
 		}
 		try
 		{
 			String json = FileUtils.readFileToString(filePath.toFile(), GsonFactory.encodingType);
 			Gson gson = GsonFactory.getGson();
-			Manifest manifest = gson.fromJson(json, Manifest.class);
-			return manifest;
+			ReleaseFamily releaseFamily = gson.fromJson(json, ReleaseFamily.class);
+			return releaseFamily;
 		}
 		catch (IOException ex)
 		{
-			logger.error(".loadFromFile(): could not read manifest file '%s' - %s",filePath.toString(), ex.getMessage());
-			throw new UpdateGuyException("Could not read manifest file '%s'", filePath.getFileName().toString());
+			logger.error(".loadFromFile(): could not read release family file '%s' - %s",filePath.toString(), ex.getMessage());
+			throw new UpdateGuyException("Could not read release family file '%s'", filePath.getFileName().toString());
 		}
 		catch(JsonSyntaxException ex)
 		{
-			logger.error(".loadFromFile(): could not parse manifest file '%s' - %s",filePath.toString(), ex.getMessage());
-			throw new UpdateGuyException("Could not parse manifest file '%s'", filePath.getFileName().toString());
+			logger.error(".loadFromFile(): could not parse release family file '%s' - %s",filePath.toString(), ex.getMessage());
+			throw new UpdateGuyException("Could not parse release family file '%s'", filePath.getFileName().toString());
 		}
 	}
 
@@ -212,11 +212,11 @@ public class Manifest
 		{
 			return false;
 		}
-		if (!(obj instanceof Manifest))
+		if (!(obj instanceof ReleaseFamily))
 		{
 			return false;
 		}
-		Manifest other = (Manifest) obj;
+		ReleaseFamily other = (ReleaseFamily) obj;
 		if (created == null)
 		{
 			if (other.created != null)

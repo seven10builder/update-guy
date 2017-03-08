@@ -1,9 +1,9 @@
 /**
  * 
  */
-package com.seven10.update_guy.server.manifest;
+package com.seven10.update_guy.server.release_family;
 
-import static com.seven10.update_guy.common.ManifestHelpers.*;
+import static com.seven10.update_guy.common.ReleaseFamilyHelpers.*;
 import static com.seven10.update_guy.server.helpers.RepoInfoHelpers.*;
 import static org.junit.Assert.*;
 
@@ -27,12 +27,12 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.server.helpers.RepoInfoHelpers;
+import com.seven10.update_guy.server.release_family.ReleaseFamilyServlet;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
-import com.seven10.update_guy.common.manifest.Manifest;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.release_family.ReleaseFamily;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.RepositoryInfo.RepositoryType;
-import com.seven10.update_guy.server.manifest.ManifestServlet;
 import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 
@@ -40,7 +40,7 @@ import com.seven10.update_guy.server.exceptions.RepositoryException;
  * @author kmm
  *		
  */
-public class ManifestServletTest extends JerseyTest
+public class ReleaseFamilyServletTest extends JerseyTest
 {
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
@@ -48,34 +48,34 @@ public class ManifestServletTest extends JerseyTest
 	@Override
 	protected Application configure()
 	{
-		ResourceConfig resourceConfig = new ResourceConfig(ManifestServlet.class);
+		ResourceConfig resourceConfig = new ResourceConfig(ReleaseFamilyServlet.class);
 		return resourceConfig;
 	}
 	
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.manifest.ManifestServlet#ManifestServlet(com.seven10.update_guy.manifest.ManifestMgr)}
+	 * {@link com.seven10.update_guy.ReleaseFamilyServlet.ReleaseFamilyServlet#ReleaseFamilyServlet(com.seven10.update_guy.release-family.ReleaseFamilyMgr)}
 	 * .
 	 * @throws IOException 
 	 */
 	@Test
-	public void testManifestServlet_valid() throws IOException
+	public void testReleaseFamilyServlet_valid() throws IOException
 	{
 		String repoId = "repoId";
-		ManifestServlet servlet = new ManifestServlet(repoId);
+		ReleaseFamilyServlet servlet = new ReleaseFamilyServlet(repoId);
 		assertNotNull(servlet);
 	}
 		
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.manifest.ManifestServlet#getManifest(java.lang.String)}
+	 * {@link com.seven10.update_guy.ReleaseFamilyServlet.ReleaseFamilyServlet#getReleaseFamily(java.lang.String)}
 	 * .
 	 * @throws RepositoryException 
 	 * @throws IOException 
 	 * @throws UpdateGuyException 
 	 */
 	@Test
-	public void testGetManifest_show_specific_valid() throws IOException, RepositoryException, UpdateGuyException
+	public void testGetReleaseFamily_show_specific_valid() throws IOException, RepositoryException, UpdateGuyException
 	{
 		String testName = "showSpec_v";
 		Path repoPath = RepoInfoHelpers.get_valid_repos_path();
@@ -88,76 +88,76 @@ public class ManifestServletTest extends JerseyTest
 		// set attribute so servlet picks it up
 		System.setProperty(ServerGlobals.SETTING_LOCAL_PATH, rootPath.toString());
 		System.setProperty(ServerGlobals.SETTING_REPO_FILENAME, fileName);
-		List<Manifest> manifestList = load_manifest_list_from_path(get_manifests_path());
-		Path destManifestPath = rootPath.resolve(repoId).resolve("manifests");
-		destManifestPath.toFile().mkdirs();
-		for(Manifest expected: manifestList)
+		List<ReleaseFamily> releaseFamilyList = load_releaseFamily_list_from_path(get_release_family_files_path());
+		Path destReleaseFamilyPath = rootPath.resolve(repoId).resolve("releaseFamilies");
+		destReleaseFamilyPath.toFile().mkdirs();
+		for(ReleaseFamily expected: releaseFamilyList)
 		{
-			Response resp = target("/manifest/"+ repoId + "/show/" + expected.getReleaseFamily())
+			Response resp = target("/release-family/"+ repoId + "/show/" + expected.getReleaseFamily())
 						.request()
 						.get();
 			assertEquals(Status.OK.getStatusCode(), resp.getStatus());
 			String json = resp.readEntity(String.class);
 			Gson gson = GsonFactory.getGson();
-			Manifest actual = gson.fromJson(json, Manifest.class);
+			ReleaseFamily actual = gson.fromJson(json, ReleaseFamily.class);
 			assertEquals(expected, actual);
 		}
 	}
 
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.manifest.ManifestServlet#getManifest(java.lang.String)}
+	 * {@link com.seven10.update_guy.ReleaseFamilyServlet.ReleaseFamilyServlet#getReleaseFamily(java.lang.String)}
 	 * .
 	 * @throws RepositoryException 
 	 * @throws IOException 
 	 */
 	@Test
-	public void testGetManifest_specific_family_not_found() throws IOException, RepositoryException
+	public void testGetReleaseFamily_specific_family_not_found() throws IOException, RepositoryException
 	{
-		String testName = "getManifest-sfnf";
+		String testName = "getReleaseFamily-sfnf";
 		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
-		Response resp = target("/manifest/"+ repoId + "/show" + "/this-doesnt-exist").request().get();
+		Response resp = target("/release-family/"+ repoId + "/show" + "/this-doesnt-exist").request().get();
 		assertEquals(Status.NOT_FOUND.getStatusCode(), resp.getStatus());
 	}
 	
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.manifest.ManifestServlet#getActiveRelease()}.
+	 * {@link com.seven10.update_guy.ReleaseFamilyServlet.ReleaseFamilyServlet#getActiveRelease()}.
 	 * @throws RepositoryException 
 	 * @throws IOException 
 	 * @throws UpdateGuyException 
 	 */
 	@Test
-	public void testGetManifests_show_all_valid() throws IOException, RepositoryException, UpdateGuyException
+	public void testGetReleaseFamilys_show_all_valid() throws IOException, RepositoryException, UpdateGuyException
 	{
 		String testName = "showAll-v";
 		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
 		
-		List<Manifest> expectedManifestList = load_manifest_list_from_path(get_manifests_path());
+		List<ReleaseFamily> expectedReleaseFamilyList = load_releaseFamily_list_from_path(get_release_family_files_path());
 
 		// do request
-		Response resp = target("/manifest/"+ repoId + "/show" + "/").request().get();
+		Response resp = target("/release-family/"+ repoId + "/show" + "/").request().get();
 		
 		assertEquals(Status.OK.getStatusCode(), resp.getStatus());
 		String json = resp.readEntity(String.class);
 		Gson gson = GsonFactory.getGson();
 		
-		Type collectionType = new TypeToken<List<Manifest>>()
+		Type collectionType = new TypeToken<List<ReleaseFamily>>()
 		{
 		}.getType();
-		List<Manifest> actual = gson.fromJson(json, collectionType);
+		List<ReleaseFamily> actual = gson.fromJson(json, collectionType);
 		assertNotNull(actual);
 		assertNotEquals(0, actual.size());
-		assertTrue(expectedManifestList.containsAll(actual));
-		assertTrue(actual.containsAll(expectedManifestList));
+		assertTrue(expectedReleaseFamilyList.containsAll(actual));
+		assertTrue(actual.containsAll(expectedReleaseFamilyList));
 	}
 	
 	
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.manifest.ManifestServlet#getActiveRelease()}.
+	 * {@link com.seven10.update_guy.ReleaseFamilyServlet.ReleaseFamilyServlet#getActiveRelease()}.
 	 * @throws RepositoryException 
 	 * @throws IOException 
 	 * @throws UpdateGuyException 
@@ -176,31 +176,31 @@ public class ManifestServletTest extends JerseyTest
 		// set attribute so servlet picks it up
 		System.setProperty(ServerGlobals.SETTING_LOCAL_PATH, rootPath.toString());
 		System.setProperty(ServerGlobals.SETTING_REPO_FILENAME, fileName);
-		List<Manifest> manifestList = load_manifest_list_from_path(get_manifests_path());
-		Path destManifestPath = rootPath.resolve(repoId).resolve("manifests");
-		destManifestPath.toFile().mkdirs();
+		List<ReleaseFamily> releaseFamilyList = load_releaseFamily_list_from_path(get_release_family_files_path());
+		Path destReleaseFamilyPath = rootPath.resolve(repoId).resolve("releaseFamilies");
+		destReleaseFamilyPath.toFile().mkdirs();
 
 		String activeVersionId = "actVersTest";
 		
-		for (Manifest manifest : manifestList)
+		for (ReleaseFamily releaseFamily : releaseFamilyList)
 		{
-			for (ManifestEntry entry : manifest.getVersionEntries())
+			for (ReleaseFamilyEntry entry : releaseFamily.getVersionEntries())
 			{
 				// set the active version
-				Response resp = target("/manifest/" + repoId + "/active-release/" + manifest.getReleaseFamily() + "/" + activeVersionId)
+				Response resp = target("/release-family/" + repoId + "/active-release/" + releaseFamily.getReleaseFamily() + "/" + activeVersionId)
 						.queryParam("newVersion", entry.getVersion())
 						.request().get();
 				assertEquals(Status.OK.getStatusCode(), resp.getStatus());
 				String json = resp.readEntity(String.class);
-				ManifestEntry actualEntry1 = GsonFactory.getGson().fromJson(json, ManifestEntry.class);
+				ReleaseFamilyEntry actualEntry1 = GsonFactory.getGson().fromJson(json, ReleaseFamilyEntry.class);
 				
 				// get the active version
-				resp = target("/manifest/" + repoId + "/active-release/"  + manifest.getReleaseFamily() + "/" + activeVersionId)
-						.queryParam("releaseFamily", manifest.getReleaseFamily())
+				resp = target("/release-family/" + repoId + "/active-release/"  + releaseFamily.getReleaseFamily() + "/" + activeVersionId)
+						.queryParam("releaseFamily", releaseFamily.getReleaseFamily())
 						.request().get();
 				assertEquals(Status.OK.getStatusCode(), resp.getStatus());
 				json = resp.readEntity(String.class);
-				ManifestEntry actualEntry2 = GsonFactory.getGson().fromJson(json, ManifestEntry.class);
+				ReleaseFamilyEntry actualEntry2 = GsonFactory.getGson().fromJson(json, ReleaseFamilyEntry.class);
 				assertEquals(actualEntry1, actualEntry2);
 			}
 			
@@ -208,7 +208,7 @@ public class ManifestServletTest extends JerseyTest
 	}
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.manifest.ManifestServlet#getActiveRelease()}.
+	 * {@link com.seven10.update_guy.ReleaseFamilyServlet.ReleaseFamilyServlet#getActiveRelease()}.
 	 * @throws RepositoryException 
 	 * @throws IOException 
 	 * @throws UpdateGuyException 
@@ -221,19 +221,19 @@ public class ManifestServletTest extends JerseyTest
 		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
 
-		List<Manifest> manifestList = load_manifest_list_from_path(get_manifests_path());
+		List<ReleaseFamily> releaseFamilyList = load_releaseFamily_list_from_path(get_release_family_files_path());
 	
 		String activeVersionId = "not-found";
 		
-		Manifest manifest = manifestList.stream().findFirst().get();
+		ReleaseFamily releaseFamily = releaseFamilyList.stream().findFirst().get();
 
-		Response resp = target("/manifest/" + repoId + "/active-release/"  + manifest.getReleaseFamily() + "/"+ activeVersionId)
+		Response resp = target("/release-family/" + repoId + "/active-release/"  + releaseFamily.getReleaseFamily() + "/"+ activeVersionId)
 						.request().get();
 		assertEquals(Status.NOT_FOUND.getStatusCode(), resp.getStatus());
 	}
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.manifest.ManifestServlet#getActiveRelease()}.
+	 * {@link com.seven10.update_guy.ReleaseFamilyServlet.ReleaseFamilyServlet#getActiveRelease()}.
 	 * @throws RepositoryException 
 	 * @throws IOException 
 	 * @throws UpdateGuyException 
@@ -250,7 +250,7 @@ public class ManifestServletTest extends JerseyTest
 		String activeVersionId = "not-found";
 		
 		String releaseFamily = "some-fake-release-fam";
-		Response resp = target("/manifest/" + repoId + "/active-release/"  + releaseFamily + "/" + activeVersionId)
+		Response resp = target("/release-family/" + repoId + "/active-release/"  + releaseFamily + "/" + activeVersionId)
 						.request().get();
 		
 		assertEquals(Status.NOT_FOUND.getStatusCode(), resp.getStatus());

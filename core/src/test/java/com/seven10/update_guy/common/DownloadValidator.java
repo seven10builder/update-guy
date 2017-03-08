@@ -1,7 +1,6 @@
 package com.seven10.update_guy.common;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +11,7 @@ import java.nio.file.Path;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.NotImplementedException;
 
-import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
 
 public class DownloadValidator
 {
@@ -31,7 +30,7 @@ public class DownloadValidator
 		assertTrue(FileUtils.contentEquals(srcFile, destFile));
 	}
 
-	public static void validate_downloaded_release(ManifestEntry versionEntry, String repoId) throws Exception
+	public static void validate_downloaded_release(ReleaseFamilyEntry versionEntry, String repoId) throws Exception
 	{
 		/*
 		 versionEntry.getAllRoleInfos().forEach(roleEntry ->

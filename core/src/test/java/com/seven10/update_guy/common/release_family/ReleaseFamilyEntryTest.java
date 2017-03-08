@@ -1,10 +1,10 @@
 /**
  * 
  */
-package com.seven10.update_guy.common.manifest;
+package com.seven10.update_guy.common.release_family;
 
 import static org.junit.Assert.*;
-import static com.seven10.update_guy.common.ManifestEntryHelpers.*;
+import static com.seven10.update_guy.common.ReleaseFamilyEntryHelpers.*;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,31 +25,32 @@ import org.junit.rules.TemporaryFolder;
 import com.google.gson.Gson;
 import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.TestConstants;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
+import com.seven10.update_guy.common.release_family.UpdateGuyRole;
 
 /**
  * @author kmm
  *
  */
-public class ManifestEntryTest
+public class ReleaseFamilyEntryTest
 {
-	private static final Logger logger = LogManager.getFormatterLogger(ManifestEntryTest.class);
+	private static final Logger logger = LogManager.getFormatterLogger(ReleaseFamilyEntryTest.class);
 	
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.Manifest#loadFromFile(java.nio.file.Path)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamily#loadFromFile(java.nio.file.Path)}.
 	 * @throws IOException 
 	 * @throws RepositoryException 
 	 */
 	@Test
-	public void testSerializeManifestEntry() throws IOException
+	public void testSerializeReleaseFamilyEntry() throws IOException
 	{
 		String testName = "serialize-me";
 		
 		Path rootPath = folder.newFolder(testName).toPath();
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		// create roleMap and add to the versionEntry
 		Map<String, UpdateGuyRole> roleMap = create_entry_folder_list(TestConstants.version_entry_count, rootPath);
 		roleMap.forEach((role, path)->versionEntry.addRoleInfo(role, path));
@@ -59,29 +60,29 @@ public class ManifestEntryTest
 		assertNotNull(json);
 		assertFalse(json.isEmpty());
 		
-		ManifestEntry actual = gson.fromJson(json, ManifestEntry.class);	
+		ReleaseFamilyEntry actual = gson.fromJson(json, ReleaseFamilyEntry.class);	
 		assertNotNull(actual);
 		assertEquals(versionEntry, actual);
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#ManifestVersionEntry()}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#ReleaseFamilyVersionEntry()}.
 	 */
 	@Test
-	public void testManifestVersionEntry()
+	public void testReleaseFamilyVersionEntry()
 	{
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		assertNotNull(versionEntry);
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#getVersion()}
-	 * and {@link com.seven10.update_guy.common.manifest.ManifestEntry#setVersion(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#getVersion()}
+	 * and {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#setVersion(java.lang.String)}.
 	 */
 	@Test
 	public void testGetAndSetVersion()
 	{
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		String expected = "getAndSetVersion";
 		versionEntry.setVersion(expected);
 		String actual = versionEntry.getVersion();
@@ -89,53 +90,53 @@ public class ManifestEntryTest
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#setVersion(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#setVersion(java.lang.String)}.
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testSetVersion_null()
 	{
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		String expected = null;
 		versionEntry.setVersion(expected);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#setVersion(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#setVersion(java.lang.String)}.
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testSetVersion_empty()
 	{
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		String expected = "";
 		versionEntry.setVersion(expected);
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#getPublishDate()}
-	 * and {@link com.seven10.update_guy.common.manifest.ManifestEntry#setPublishDate(java.util.Date)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#getPublishDate()}
+	 * and {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#setPublishDate(java.util.Date)}.
 	 */
 	@Test
 	public void testGetAndSetPublishDate()
 	{
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		Date expected = new Date(TestConstants.valid_timestamp);
 		versionEntry.setPublishDate(expected);
 		Date actual = versionEntry.getPublishDate();
 		assertEquals(expected, actual);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#setPublishDate(java.util.Date)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#setPublishDate(java.util.Date)}.
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testSetPublishDate_null()
 	{
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		Date expected = null;
 		versionEntry.setPublishDate(expected);
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#getRoleInfo(java.lang.String)}
-	 * and Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#addRoleInfo(java.lang.String, java.nio.file.Path)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#getRoleInfo(java.lang.String)}
+	 * and Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#addRoleInfo(java.lang.String, java.nio.file.Path)}.
 	 * @throws IOException 
 	 */
 	@Test
@@ -143,7 +144,7 @@ public class ManifestEntryTest
 	{
 		String testName = "testGetAndAddPath";
 		Path rootPath = folder.newFolder(testName).toPath();
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		// create roleMap and add to the versionEntry
 		Map<String, UpdateGuyRole> roleMap = create_entry_folder_list(TestConstants.version_entry_count, rootPath);
 		roleMap.forEach((role, path)->versionEntry.addRoleInfo(role, path));
@@ -156,12 +157,12 @@ public class ManifestEntryTest
 				});
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#getRoleInfo(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#getRoleInfo(java.lang.String)}.
 	 */
 	@Test
 	public void testGetPath_keyNotFound()
 	{
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		String expected = "getPath";
 		// nothing in there
 		UpdateGuyRole actual = versionEntry.getRoleInfo(expected);
@@ -173,45 +174,45 @@ public class ManifestEntryTest
 		assertNull(actual);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#getRoleInfo(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#getRoleInfo(java.lang.String)}.
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testGetPath_key_null()
 	{
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		String expected = null;
 		versionEntry.getRoleInfo(expected);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#getRoleInfo(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#getRoleInfo(java.lang.String)}.
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testGetPath_key_empty()
 	{
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		String expected = "";
 		versionEntry.getRoleInfo(expected);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#addRoleInfo(java.lang.String, java.nio.file.Path)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#addRoleInfo(java.lang.String, java.nio.file.Path)}.
 	 * @throws IOException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testAddPath_key_null() throws IOException
 	{
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		String expected = null;
 		Path expectedPath = folder.newFolder().toPath();
 		versionEntry.addRoleInfo(expected, new UpdateGuyRole(expectedPath, new ArrayList<String>(), "fingerprint"));
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#addRoleInfo(java.lang.String, java.nio.file.Path)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#addRoleInfo(java.lang.String, java.nio.file.Path)}.
 	 * @throws IOException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testAddPath_key_empty() throws IOException
 	{
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		String expected = "";
 		Path expectedPath = folder.newFolder().toPath();
 		versionEntry.addRoleInfo(expected, new UpdateGuyRole(expectedPath, new ArrayList<String>(), "fingerprint"));
@@ -219,7 +220,7 @@ public class ManifestEntryTest
 	
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#getRoles()}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#getRoles()}.
 	 * @throws IOException 
 	 */
 	@Test
@@ -227,7 +228,7 @@ public class ManifestEntryTest
 	{
 		String testName = "testGetRoles";
 		Path rootPath = folder.newFolder(testName).toPath();
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		// create roleMap and add to the versionEntry
 		Map<String, UpdateGuyRole> roleMap = create_entry_folder_list(TestConstants.version_entry_count, rootPath);
 		roleMap.forEach((role, roleInfo)->versionEntry.addRoleInfo(role, roleInfo));
@@ -240,14 +241,14 @@ public class ManifestEntryTest
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#getRolePaths(java.util.Set)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#getRolePaths(java.util.Set)}.
 	 * @throws IOException 
 	 */
 	@Test
 	public void testGetPaths() throws IOException
 	{
 		String testName = "getPaths";
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		
 		Path rootFolder = folder.newFolder(testName).toPath();
 		Map<String, UpdateGuyRole> rolePathList = create_entry_folder_list(TestConstants.version_entry_count, rootFolder);
@@ -276,7 +277,7 @@ public class ManifestEntryTest
 
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#getAllRoleInfos()}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#getAllRoleInfos()}.
 	 * @throws IOException 
 	 */
 	@Test
@@ -284,7 +285,7 @@ public class ManifestEntryTest
 	{
 		String testName = "getAllPaths";
 		Path rootPath = folder.newFolder(testName).toPath();
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		// create roleMap and add to the versionEntry
 		Map<String, UpdateGuyRole> roleMap = create_entry_folder_list(TestConstants.version_entry_count, rootPath);
 		roleMap.forEach((role, path)->versionEntry.addRoleInfo(role, path));
@@ -296,21 +297,21 @@ public class ManifestEntryTest
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#equals(Object)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#equals(Object)}.
 	 * @throws IOException 
 	 * 
 	 */
 	@Test
 	public void testEquals_self() throws IOException
 	{
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		
 		// same should equal
 		boolean actual = versionEntry.equals(versionEntry);
 		assertTrue(actual);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#equals(Object)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#equals(Object)}.
 	 * @throws IOException 
 	 * 
 	 */
@@ -319,17 +320,17 @@ public class ManifestEntryTest
 	{
 		String testName = "testEquals-clone";
 		Path rootPath = folder.newFolder(testName).toPath();
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		// create roleMap and add to the versionEntry
 		Map<String, UpdateGuyRole> roleMap = create_entry_folder_list(TestConstants.version_entry_count, rootPath);
 		roleMap.forEach((role, path)->versionEntry.addRoleInfo(role, path));
 		
 		//clone should be equal
-		ManifestEntry cloneManifest = new ManifestEntry(versionEntry);
-		assertEquals(versionEntry, cloneManifest);
+		ReleaseFamilyEntry cloneReleaseFamily = new ReleaseFamilyEntry(versionEntry);
+		assertEquals(versionEntry, cloneReleaseFamily);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#equals(Object)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#equals(Object)}.
 	 * @throws IOException 
 	 * 
 	 */
@@ -338,19 +339,19 @@ public class ManifestEntryTest
 	{
 		String testName = "testEquals-created";
 		Path rootPath = folder.newFolder(testName).toPath();
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		// create roleMap and add to the versionEntry
 		Map<String, UpdateGuyRole> roleMap = create_entry_folder_list(TestConstants.version_entry_count, rootPath);
 		roleMap.forEach((role, path)->versionEntry.addRoleInfo(role, path));
 		
-		ManifestEntry cloneManifest = new ManifestEntry(versionEntry);
+		ReleaseFamilyEntry cloneReleaseFamily = new ReleaseFamilyEntry(versionEntry);
 		// different object should be different
-		cloneManifest.setVersion("something_else");
-		assertNotEquals(versionEntry, cloneManifest);
+		cloneReleaseFamily.setVersion("something_else");
+		assertNotEquals(versionEntry, cloneReleaseFamily);
 	}
 
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#equals(Object)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#equals(Object)}.
 	 * @throws IOException 
 	 * 
 	 */
@@ -359,19 +360,19 @@ public class ManifestEntryTest
 	{
 		String testName = "testEquals-retr";
 		Path rootPath = folder.newFolder(testName).toPath();
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		// create roleMap and add to the versionEntry
 		Map<String, UpdateGuyRole> roleMap = create_entry_folder_list(TestConstants.version_entry_count, rootPath);
 		roleMap.forEach((role, path)->versionEntry.addRoleInfo(role, path));
 		
-		ManifestEntry cloneManifest = new ManifestEntry(versionEntry);
+		ReleaseFamilyEntry cloneReleaseFamily = new ReleaseFamilyEntry(versionEntry);
 		// different object should be different
-		cloneManifest.setPublishDate(new Date(31337));
+		cloneReleaseFamily.setPublishDate(new Date(31337));
 		
-		assertNotEquals(versionEntry, cloneManifest);
+		assertNotEquals(versionEntry, cloneReleaseFamily);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#equals(Object)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#equals(Object)}.
 	 * @throws IOException 
 	 * 
 	 */
@@ -380,55 +381,55 @@ public class ManifestEntryTest
 	{
 		String testName = "testEquals-retr";
 		Path rootPath = folder.newFolder(testName).toPath();
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		// create roleMap and add to the versionEntry
 		Map<String, UpdateGuyRole> roleMap = create_entry_folder_list(TestConstants.version_entry_count, rootPath);
 		roleMap.forEach((role, path)->versionEntry.addRoleInfo(role, path));
 		
-		ManifestEntry cloneManifest = new ManifestEntry(versionEntry);
-		assertEquals(versionEntry, cloneManifest);
+		ReleaseFamilyEntry cloneReleaseFamily = new ReleaseFamilyEntry(versionEntry);
+		assertEquals(versionEntry, cloneReleaseFamily);
 		// different object should be different
-		cloneManifest.addRoleInfo("some-role", new UpdateGuyRole(folder.newFolder("jibberish").toPath(), new ArrayList<String>(), "fingerprint"));
+		cloneReleaseFamily.addRoleInfo("some-role", new UpdateGuyRole(folder.newFolder("jibberish").toPath(), new ArrayList<String>(), "fingerprint"));
 		
-		assertNotEquals(versionEntry, cloneManifest);
+		assertNotEquals(versionEntry, cloneReleaseFamily);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#equals(Object)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#equals(Object)}.
 	 * @throws IOException 
 	 * 
 	 */
 	@Test
 	public void testEquals_null() throws IOException
 	{
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 
 		boolean isEqual = versionEntry.equals(null);
 		assertFalse(isEqual);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#equals(Object)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#equals(Object)}.
 	 * @throws IOException 
 	 * 
 	 */
 	@Test
 	public void testEquals_diffClass() throws IOException
 	{
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		// different object should be different
-		ManifestEntryTest other =  new ManifestEntryTest();
+		ReleaseFamilyEntryTest other =  new ReleaseFamilyEntryTest();
 		boolean isEqual = versionEntry.equals(other);
 		assertFalse(isEqual);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#getReleaseFamily()}
-	 * and {@link com.seven10.update_guy.common.manifest.ManifestEntry#setReleaseFamily(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#getReleaseFamily()}
+	 * and {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#setReleaseFamily(java.lang.String)}.
 	 * @throws IOException 
 	 * 
 	 */
 	@Test
 	public void testGetSetReleaseFamily() throws IOException
 	{
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		assertEquals("unknown", versionEntry.getReleaseFamily());
 		String expectedReleaseFamily = "some-new-family";
 		versionEntry.setReleaseFamily(expectedReleaseFamily);
@@ -436,26 +437,26 @@ public class ManifestEntryTest
 		assertEquals(expectedReleaseFamily, actualReleaseFamily);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#setReleaseFamily(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#setReleaseFamily(java.lang.String)}.
 	 * @throws IOException 
 	 * 
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testSetReleaseFamily_null() throws IOException
 	{
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		String expectedReleaseFamily = null;
 		versionEntry.setReleaseFamily(expectedReleaseFamily);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.common.manifest.ManifestEntry#setReleaseFamily(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.common.release_family.ReleaseFamilyEntry#setReleaseFamily(java.lang.String)}.
 	 * @throws IOException 
 	 * 
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testSetReleaseFamily_empty() throws IOException
 	{
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		String expectedReleaseFamily = "";
 		versionEntry.setReleaseFamily(expectedReleaseFamily);
 	}

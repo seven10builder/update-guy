@@ -16,8 +16,8 @@ import com.seven10.update_guy.client.exceptions.FatalClientException;
 import com.seven10.update_guy.client.local.JavaLauncher;
 import com.seven10.update_guy.client.local.LocalCacheUtils;
 import com.seven10.update_guy.client.request.RequesterUtils;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
+import com.seven10.update_guy.common.release_family.UpdateGuyRole.ClientRoleInfo;
 
 public class UpdateGuyClient
 {
@@ -120,7 +120,7 @@ public class UpdateGuyClient
 			throw new IllegalArgumentException("launcher must not be null");
 		}
 		// get current active releaseId from server
-		ManifestEntry release = requestUtils.requestActiveRelease(RequesterUtils::getDefaultRequester);
+		ReleaseFamilyEntry release = requestUtils.requestActiveRelease(RequesterUtils::getDefaultRequester);
 		Path jarFilePath = localCacheUtils.buildTargetPath(release);
 		
 		// request checksum for activeRelease->role->file

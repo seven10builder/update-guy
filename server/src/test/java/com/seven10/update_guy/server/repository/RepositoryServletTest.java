@@ -156,7 +156,7 @@ public class RepositoryServletTest extends JerseyTest
 	
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.repository.RepositoryServlet#getManifest(java.lang.String)}
+	 * {@link com.seven10.update_guy.repository.RepositoryServlet#getReleaseFamily(java.lang.String)}
 	 * .
 	 * @throws IOException 
 	 */
@@ -179,7 +179,7 @@ public class RepositoryServletTest extends JerseyTest
 
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.repository.RepositoryServlet#getManifest(java.lang.String)}
+	 * {@link com.seven10.update_guy.repository.RepositoryServlet#getReleaseFamily(java.lang.String)}
 	 * .
 	 * @throws IOException 
 	 */

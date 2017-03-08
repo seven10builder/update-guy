@@ -25,7 +25,7 @@ public class RepositoryInfo
 		try
 		{
 			outputStream.write( description.getBytes() );
-			outputStream.write( manifestPath.getBytes() );
+			outputStream.write( releaseFamilyPath.getBytes() );
 			outputStream.write( password.getBytes() );
 			outputStream.write( repoAddress.getBytes() );
 			outputStream.write( repoType.toString().getBytes() );
@@ -54,7 +54,7 @@ public class RepositoryInfo
     	port = 0;
     	user = "";
     	password = "";
-    	manifestPath = ".";
+    	releaseFamilyPath = ".";
     	repoType = RepositoryType.local;
     	//cachePath = ".";
     	description = "unknown";
@@ -82,10 +82,10 @@ public class RepositoryInfo
 	@Expose
     public String password;
 	/**
-	 * The path on the repo where any manifests are stored
+	 * The path on the repo where any release family files are stored
 	 */
 	@Expose
-    public String manifestPath;
+    public String releaseFamilyPath;
 	/**
 	 * a human readable description
 	 */
@@ -111,7 +111,7 @@ public class RepositoryInfo
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((description == null) ? 0 : description.hashCode());
-		result = prime * result + ((manifestPath == null) ? 0 : manifestPath.hashCode());
+		result = prime * result + ((releaseFamilyPath == null) ? 0 : releaseFamilyPath.hashCode());
 		result = prime * result + ((password == null) ? 0 : password.hashCode());
 		result = prime * result + ((repoAddress == null) ? 0 : repoAddress.hashCode());
 		result = prime * result + ((repoType == null) ? 0 : repoType.hashCode());
@@ -150,14 +150,14 @@ public class RepositoryInfo
 		{
 			return false;
 		}
-		if (manifestPath == null)
+		if (releaseFamilyPath == null)
 		{
-			if (other.manifestPath != null)
+			if (other.releaseFamilyPath != null)
 			{
 				return false;
 			}
 		}
-		else if (!manifestPath.equals(other.manifestPath))
+		else if (!releaseFamilyPath.equals(other.releaseFamilyPath))
 		{
 			return false;
 		}
@@ -224,9 +224,9 @@ public class RepositoryInfo
 		}
 	}
 
-	public Path getRemoteManifestPath()
+	public Path getRemoteReleaseFamilyPath()
 	{
-		return Paths.get(this.manifestPath);
+		return Paths.get(this.releaseFamilyPath);
 	}
 	
 }

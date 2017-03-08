@@ -4,7 +4,7 @@
     "port": 0,
     "user": "",
     "password": "",
-    "manifestPath": "/seven10/update-guy/repos/manifests",
+    "releaseFamilyPath": "/seven10/update-guy/repos/releaseFamilies",
     "description": "This is the default local repo",
     "repoType": "local"
   }

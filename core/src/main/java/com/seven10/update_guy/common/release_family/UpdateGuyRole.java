@@ -1,4 +1,4 @@
-package com.seven10.update_guy.common.manifest;
+package com.seven10.update_guy.common.release_family;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

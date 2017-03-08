@@ -124,16 +124,16 @@ public class RepositoryInfoTest
 	 * @throws IOException 
 	 */
 	@Test
-	public void testEqualsObject_manifestPath() throws IOException
+	public void testEqualsObject_releaseFamilyPath() throws IOException
 	{
 		String testName = "testeEquals-do-dt";
 		Path repoInfoFile = folder.newFolder(testName).toPath().resolve(testName + ".json");
 		FileUtils.copyFile(get_valid_repos_path().toFile(), repoInfoFile.toFile());
 		RepositoryInfo repo1 = RepoInfoHelpers.load_repos_from_file(repoInfoFile).get(0);
 		RepositoryInfo repo2 = RepoInfoHelpers.load_repos_from_file(repoInfoFile).get(0);
-		repo2.manifestPath = Paths.get("new","cache","path").toString();
+		repo2.releaseFamilyPath = Paths.get("new","cache","path").toString();
 		assertFalse(repo1.equals(repo2));
-		repo2.manifestPath = repo1.manifestPath;
+		repo2.releaseFamilyPath = repo1.releaseFamilyPath;
 		assertTrue(repo1.equals(repo2));
 	}
 	/**
@@ -266,7 +266,7 @@ public class RepositoryInfoTest
 	 * @throws RepositoryException 
 	 */
 	@Test
-	public void testGetShaHash_manifestPath() throws IOException, RepositoryException
+	public void testGetShaHash_releaseFamilyPath() throws IOException, RepositoryException
 	{
 		String testName = "testShaHash_mp";
 		Path repoInfoFile = folder.newFolder(testName).toPath().resolve(testName + ".json");
@@ -274,10 +274,10 @@ public class RepositoryInfoTest
 		RepositoryInfo repo1 = RepoInfoHelpers.load_repos_from_file(repoInfoFile).get(0);
 		RepositoryInfo repo2 = RepoInfoHelpers.load_repos_from_file(repoInfoFile).get(0);
 		String firstSha = repo1.getShaHash();
-		repo2.manifestPath = Paths.get("diff","path").toString();
+		repo2.releaseFamilyPath = Paths.get("diff","path").toString();
 		String secondSha = repo2.getShaHash();
 		assertNotEquals(firstSha, secondSha);
-		repo2.manifestPath = repo1.manifestPath;
+		repo2.releaseFamilyPath = repo1.releaseFamilyPath;
 		secondSha = repo2.getShaHash();
 		assertEquals(firstSha, secondSha);
 	}

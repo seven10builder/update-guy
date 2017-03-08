@@ -17,15 +17,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.seven10.update_guy.common.GsonFactory;
-import com.seven10.update_guy.common.manifest.Manifest;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
+import com.seven10.update_guy.common.release_family.ReleaseFamily;
+import com.seven10.update_guy.common.release_family.UpdateGuyRole;
+import com.seven10.update_guy.common.release_family.UpdateGuyRole.ClientRoleInfo;
 import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
+import com.seven10.update_guy.server.release_family.ReleaseFamilyRefresher;
+import com.seven10.update_guy.server.release_family.ReleaseFamilyServlet;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.RepositoryServlet;
-import com.seven10.update_guy.server.manifest.ManifestRefresher;
-import com.seven10.update_guy.server.manifest.ManifestServlet;
 
 
 @Path("/release/{repoId}/{releaseFamily}")
@@ -69,11 +69,11 @@ public class ReleaseServlet
 		logger.info("file '%s' was successfully cached at '%s'", fileName.getFileName(), fileName.getParent());
 	}
 
-	public ReleaseServlet(@PathParam("repoId") String repoId, @PathParam("releaseFamily") String releaseFamily) throws RepositoryException
+	public ReleaseServlet(@PathParam("repoId") String repoId, @PathParam("releaseFamily") String releaseFamilyName) throws RepositoryException
 	{
 		RepositoryInfo repoInfo = RepositoryServlet.getRepoInfoById(repoId);
-		Manifest manifest = ManifestServlet.getManifestById(releaseFamily, repoId, new ManifestRefresher(repoId, ServerGlobals.getManifestStorePath(repoId)));
-		this.releaseMgr = new ReleaseMgr(manifest, repoInfo);
+		ReleaseFamily releaseFamily = ReleaseFamilyServlet.getReleaseFamilyById(releaseFamilyName, repoId, new ReleaseFamilyRefresher(repoId, ServerGlobals.getReleaseFamilyStorePath(repoId)));
+		this.releaseMgr = new ReleaseMgr(releaseFamily, repoInfo);
 	}
 
 	/**

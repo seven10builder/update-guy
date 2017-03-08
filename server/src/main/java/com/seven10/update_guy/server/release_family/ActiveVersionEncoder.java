@@ -1,4 +1,4 @@
-package com.seven10.update_guy.server.manifest;
+package com.seven10.update_guy.server.release_family;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.JsonSyntaxException;
 import com.seven10.update_guy.common.GsonFactory;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
 import com.seven10.update_guy.server.ServerGlobals;
 
 public class ActiveVersionEncoder
@@ -43,18 +43,18 @@ public class ActiveVersionEncoder
 	}
 
 	
-	public ManifestEntry loadVersionEntry(Path fileName) throws IOException, JsonSyntaxException
+	public ReleaseFamilyEntry loadVersionEntry(Path fileName) throws IOException, JsonSyntaxException
 	{
 		if(fileName == null)
 		{
 			throw new IllegalArgumentException("fileName must not be null");
 		}
 		String json = FileUtils.readFileToString(fileName.toFile(), GsonFactory.encodingType);
-		ManifestEntry manifestEntry = GsonFactory.getGson().fromJson(json, ManifestEntry.class);
-		return manifestEntry;
+		ReleaseFamilyEntry releaseFamilyEntry = GsonFactory.getGson().fromJson(json, ReleaseFamilyEntry.class);
+		return releaseFamilyEntry;
 	}
 	
-	public void writeVersionEntry(Path fileName, ManifestEntry entry) throws IOException
+	public void writeVersionEntry(Path fileName, ReleaseFamilyEntry entry) throws IOException
 	{
 		if(fileName == null)
 		{

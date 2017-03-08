@@ -1,10 +1,10 @@
 /**
  * 
  */
-package com.seven10.update_guy.server.manifest;
+package com.seven10.update_guy.server.release_family;
 
 import static org.junit.Assert.*;
-import static com.seven10.update_guy.common.ManifestHelpers.*;
+import static com.seven10.update_guy.common.ReleaseFamilyHelpers.*;
 import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,15 +19,15 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.google.gson.JsonSyntaxException;
-import com.seven10.update_guy.common.ManifestEntryHelpers;
+import com.seven10.update_guy.common.ReleaseFamilyEntryHelpers;
 import com.seven10.update_guy.server.helpers.RepoInfoHelpers;
+import com.seven10.update_guy.server.release_family.ActiveVersionEncoder;
+import com.seven10.update_guy.server.release_family.ReleaseFamilyMgr;
 import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
-import com.seven10.update_guy.common.manifest.Manifest;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
-import com.seven10.update_guy.server.manifest.ActiveVersionEncoder;
-import com.seven10.update_guy.server.manifest.ManifestMgr;
+import com.seven10.update_guy.common.release_family.ReleaseFamily;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.RepositoryInfo.RepositoryType;
 
@@ -35,7 +35,7 @@ import com.seven10.update_guy.server.repository.RepositoryInfo.RepositoryType;
  * @author kmm
  *
  */
-public class ManifestMgrTest
+public class ReleaseFamilyTest
 {
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
@@ -56,12 +56,12 @@ public class ManifestMgrTest
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#ManifestMgr(com.seven10.update_guy.Globals)}.
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#ReleaseFamilyMgr(com.seven10.update_guy.Globals)}.
 	 * @throws IOException 
 	 * @throws RepositoryException 
 	 */
 	@Test
-	public void testManifestMgr_valid_path_not_exists() throws IOException, RepositoryException
+	public void testReleaseFamilyMgr_valid_path_not_exists() throws IOException, RepositoryException
 	{
 		String testName = "valid-pne";
 		Path path = folder.getRoot().toPath().resolve("path-not-exist-yet"); 
@@ -69,202 +69,202 @@ public class ManifestMgrTest
 		
 		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
-		ManifestMgr manifestMgr = new ManifestMgr(path, repoId);
-		assertNotNull(manifestMgr);
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(path, repoId);
+		assertNotNull(releaseFamilyMgr);
 		assertTrue(Files.exists(path));
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#ManifestMgr(com.seven10.update_guy.Globals)}.
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#ReleaseFamilyMgr(com.seven10.update_guy.Globals)}.
 	 * @throws IOException 
 	 */
 	@Test
-	public void testManifestMgr_valid_path_exists() throws IOException
+	public void testReleaseFamilyMgr_valid_path_exists() throws IOException
 	{
 		
 		Path path = folder.newFolder("manmgr").toPath(); 
 		Files.createDirectories(path);
 		assertTrue(Files.exists(path));
 		String repoId = "some-repo-id";
-		ManifestMgr manifestMgr = new ManifestMgr(path, repoId);
-		assertNotNull(manifestMgr);
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(path, repoId);
+		assertNotNull(releaseFamilyMgr);
 		assertTrue(Files.exists(path));
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#ManifestMgr(com.seven10.update_guy.Globals)}.
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#ReleaseFamilyMgr(com.seven10.update_guy.Globals)}.
 	 */
 	@Test(expected=IllegalArgumentException.class)
-	public void testManifestMgr_null_path()
+	public void testReleaseFamilyMgr_null_path()
 	{
 		Path path = null;
 		String repoId = "shoudln't matter";
-		new ManifestMgr(path, repoId);
+		new ReleaseFamilyMgr(path, repoId);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#ManifestMgr(com.seven10.update_guy.Globals)}.
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#ReleaseFamilyMgr(com.seven10.update_guy.Globals)}.
 	 * @throws IOException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
-	public void testManifestMgr_null_repoId() throws IOException
+	public void testReleaseFamilyMgr_null_repoId() throws IOException
 	{
 		Path path = folder.newFolder("manmgr").toPath();
 		String repoId = null;
-		new ManifestMgr(path, repoId);
+		new ReleaseFamilyMgr(path, repoId);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#ManifestMgr(com.seven10.update_guy.Globals)}.
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#ReleaseFamilyMgr(com.seven10.update_guy.Globals)}.
 	 * @throws IOException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
-	public void testManifestMgr_empty_repoId() throws IOException
+	public void testReleaseFamilyMgr_empty_repoId() throws IOException
 	{
 		Path path = folder.newFolder("manmgr").toPath();
 		String repoId = "";
-		new ManifestMgr(path, repoId);
+		new ReleaseFamilyMgr(path, repoId);
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getManifest(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getReleaseFamily(java.lang.String)}.
 	 * @throws IOException 
 	 * @throws RepositoryException 
 	 */
 	@Test
-	public void testGetManifest_valid() throws IOException, RepositoryException
+	public void testGetReleaseFamily_valid() throws IOException, RepositoryException
 	{
-		String testName = "getManifest";
+		String testName = "getReleaseFamily";
 		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
-		Path manifestPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH))
+		Path releaseFamilyPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH))
 				.resolve(repoId)
-				.resolve("manifests");
-		Manifest expected = load_manifest_from_path(get_valid_manifest_file_path());
+				.resolve("releaseFamilies");
+		ReleaseFamily expected = load_release_family_file_from_path(get_valid_release_family_file_path());
 		
-		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);
-		Manifest actual = manifestMgr.getManifest("relfam");
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(releaseFamilyPath, repoId);
+		ReleaseFamily actual = releaseFamilyMgr.getReleaseFamily("relfam");
 		
 		assertEquals(expected, actual);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getManifest(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getReleaseFamily(java.lang.String)}.
 	 * @throws IOException 
 	 * @throws RepositoryException 
 	 */
 	@Test(expected=RepositoryException.class)
-	public void testGetManifest_not_found() throws IOException, RepositoryException
+	public void testGetReleaseFamily_not_found() throws IOException, RepositoryException
 	{
-		String testName = "manifest-nf";
+		String testName = "releaseFamily-nf";
 		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
-		Path manifestPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
-		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);
-		manifestMgr.getManifest(testName);
+		Path releaseFamilyPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("releaseFamilies");
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(releaseFamilyPath, repoId);
+		releaseFamilyMgr.getReleaseFamily(testName);
 		
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getManifest(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getReleaseFamily(java.lang.String)}.
 	 * @throws RepositoryException 
 	 * @throws IOException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
-	public void testGetManifest_null() throws RepositoryException, IOException
+	public void testGetReleaseFamily_null() throws RepositoryException, IOException
 	{
-		String testName = "getmanifest-n";
+		String testName = "getReleaseFamily-n";
 		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
-		Path manifestPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
+		Path releaseFamilyPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("releaseFamilies");
 		
-		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(releaseFamilyPath, repoId);
 		String releaseFamily = null;
-		manifestMgr.getManifest(releaseFamily);
+		releaseFamilyMgr.getReleaseFamily(releaseFamily);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getManifest(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getReleaseFamily(java.lang.String)}.
 	 * @throws RepositoryException 
 	 * @throws IOException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
-	public void testGetManifest_empty() throws RepositoryException, IOException
+	public void testGetReleaseFamily_empty() throws RepositoryException, IOException
 	{
-		String testName = "getmanifest-emp";
+		String testName = "getReleaseFamily-emp";
 		
 		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
-		Path manifestPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
+		Path releaseFamilyPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("releaseFamilies");
 		
-		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(releaseFamilyPath, repoId);
 		String releaseFamily = "";
-		manifestMgr.getManifest(releaseFamily);
+		releaseFamilyMgr.getReleaseFamily(releaseFamily);
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getManifests()}.
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getReleaseFamilies()}.
 	 * @throws RepositoryException 
 	 * @throws IOException 
 	 * @throws UpdateGuyException 
 	 */
 	@Test
-	public void testGetManifests_valid_manifests_only() throws RepositoryException, IOException, UpdateGuyException
+	public void testGetReleaseFamilys_valid_release_family_only() throws RepositoryException, IOException, UpdateGuyException
 	{
-		String testName = "getManifests";
+		String testName = "getReleaseFamilys";
 		
 		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
-		Path manifestPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
-		// create list of valid manifests
-		List<Manifest> expected = load_manifest_list_from_path(get_manifests_path());
+		Path releaseFamilyPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("releaseFamilies");
+		// create list of valid releaseFamilys
+		List<ReleaseFamily> expected = load_releaseFamily_list_from_path(get_release_family_files_path());
 		
 		// create object to test
-		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);		
-		List<Manifest> actual = manifestMgr.getManifests();
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(releaseFamilyPath, repoId);		
+		List<ReleaseFamily> actual = releaseFamilyMgr.getReleaseFamilies();
 		assertEquals(expected.size(), actual.size());
 		assertTrue(expected.containsAll(actual));
 		assertTrue(actual.containsAll(expected));
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getManifests()}.
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getReleaseFamilies()}.
 	 * @throws RepositoryException 
 	 * @throws IOException 
 	 * @throws UpdateGuyException 
 	 */
 	@Test
-	public void testGetManifests_many_files() throws RepositoryException, IOException, UpdateGuyException
+	public void testGetReleaseFamilies_many_files() throws RepositoryException, IOException, UpdateGuyException
 	{
-		String testName = "getManifests";
+		String testName = "getReleaseFamilys";
 		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
-		Path manifestPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("manifests");
+		Path releaseFamilyPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH)).resolve(repoId).resolve("releaseFamilies");
 		
-		// create list of valid manifests
-		List<Manifest> expected = load_manifest_list_from_path(get_manifests_path());
+		// create list of valid releaseFamilys
+		List<ReleaseFamily> expected = load_releaseFamily_list_from_path(get_release_family_files_path());
 
-		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);		
-		List<Manifest> actual = manifestMgr.getManifests();
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(releaseFamilyPath, repoId);		
+		List<ReleaseFamily> actual = releaseFamilyMgr.getReleaseFamilies();
 		// list should still only contain the expected entries.
 		assertTrue(expected.containsAll(actual));
 		assertTrue(actual.containsAll(expected));
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getManifests()}.
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getReleaseFamilies()}.
 	 * @throws RepositoryException 
 	 * @throws IOException 
 	 * @throws UpdateGuyException 
 	 */
 	@Test
-	public void testGetManifests_some_invalid_files() throws RepositoryException, IOException, UpdateGuyException
+	public void testGetReleaseFamilys_some_invalid_files() throws RepositoryException, IOException, UpdateGuyException
 	{
-		String testName = "getManifests";
-		// create list of valid manifests
-		List<Manifest> expected = load_manifest_list_from_path(get_manifests_path());
+		String testName = "getReleaseFamilys";
+		// create list of valid releaseFamilys
+		List<ReleaseFamily> expected = load_releaseFamily_list_from_path(get_release_family_files_path());
 		
 		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
-		Path manifestPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH))
+		Path releaseFamilyPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH))
 				.resolve(repoId)
-				.resolve("manifests");
-		// create a defective manifest file
-		create_invalid_manifest_file(manifestPath);
+				.resolve("releaseFamilies");
+		// create a defective releaseFamily file
+		create_invalid_release_family_file(releaseFamilyPath);
 		// create object to test
-		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);		
-		List<Manifest> actual = manifestMgr.getManifests();
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(releaseFamilyPath, repoId);		
+		List<ReleaseFamily> actual = releaseFamilyMgr.getReleaseFamilies();
 		// list should still only contain the expected (valid) entries.
 		
 		//NOTE: There is a problem with gson at the moment which makes it so it doesn't throw an exception if it 
@@ -275,7 +275,7 @@ public class ManifestMgrTest
 	}
 
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getActiveVersion(String, ActiveVersionEncoder)}
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getActiveVersion(String, ActiveVersionEncoder)}
 	 * @throws IOException 
 	 * @throws JsonSyntaxException
 	 * @throws RepositoryException 
@@ -286,36 +286,36 @@ public class ManifestMgrTest
 		String expectedVersionId = "versionId";
 		Path expectedPath = Paths.get("this","path","isnt","used");
 		String expectedReleaseFamily = "some-release-fam";
-		ManifestEntry expectedManifestEntry = new ManifestEntry();
-		expectedManifestEntry.setReleaseFamily(expectedReleaseFamily);
-		expectedManifestEntry.setVersion("some version");
+		ReleaseFamilyEntry expectedReleaseFamilyEntry = new ReleaseFamilyEntry();
+		expectedReleaseFamilyEntry.setReleaseFamily(expectedReleaseFamily);
+		expectedReleaseFamilyEntry.setVersion("some version");
 		
 		ActiveVersionEncoder encoder = mock(ActiveVersionEncoder.class);
 		createFileNameEncoder(expectedVersionId, expectedPath, encoder, expectedReleaseFamily);
-		when(encoder.loadVersionEntry(any())).thenAnswer(new Answer<ManifestEntry>()
+		when(encoder.loadVersionEntry(any())).thenAnswer(new Answer<ReleaseFamilyEntry>()
 		{
 			@Override
-			public ManifestEntry answer(InvocationOnMock invocation) throws Throwable
+			public ReleaseFamilyEntry answer(InvocationOnMock invocation) throws Throwable
 			{
 				Object[] args = invocation.getArguments();
 				assertEquals(expectedPath, (Path)args[0]);
-				return expectedManifestEntry;
+				return expectedReleaseFamilyEntry;
 			}
 		});
 		
 		String testName = "getActiveVers";
 		RepositoryInfo repoInfo = RepoInfoHelpers.setup_test_repo(testName, folder, RepositoryType.local);
 		String repoId = repoInfo.getShaHash();
-		Path manifestPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH))
+		Path releaseFamilyPath = Paths.get(System.getProperty(ServerGlobals.SETTING_LOCAL_PATH))
 				.resolve(repoId)
-				.resolve("manifests");
-		ManifestMgr manifestMgr = new ManifestMgr(manifestPath, repoId);
+				.resolve("releaseFamilies");
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(releaseFamilyPath, repoId);
 		
-		ManifestEntry actualManifestEntry = manifestMgr.getActiveVersion(expectedVersionId, encoder);
-		assertEquals(expectedManifestEntry, actualManifestEntry);
+		ReleaseFamilyEntry actualReleaseFamilyEntry = releaseFamilyMgr.getActiveVersion(expectedVersionId, encoder);
+		assertEquals(expectedReleaseFamilyEntry, actualReleaseFamilyEntry);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getActiveVersion(String, ActiveVersionEncoder)}
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getActiveVersion(String, ActiveVersionEncoder)}
 	 * @throws IOException 
 	 * @throws JsonSyntaxException
 	 * @throws RepositoryException 
@@ -332,12 +332,12 @@ public class ManifestMgrTest
 		String testName = "getActiveVers-inv";
 		Path rootPath = folder.newFolder(testName).toPath();
 		// create object to test
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(rootPath, repoId);
 		
-		manifestMgr.getActiveVersion(expectedVersionId, encoder);
+		releaseFamilyMgr.getActiveVersion(expectedVersionId, encoder);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getActiveVersion(String, ActiveVersionEncoder)}
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getActiveVersion(String, ActiveVersionEncoder)}
 	 * @throws IOException 
 	 * @throws JsonSyntaxException 
 	 * @throws RepositoryException 
@@ -353,11 +353,11 @@ public class ManifestMgrTest
 		// create object to test
 		String versionId = null;
 		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
-		manifestMgr.getActiveVersion(versionId, encoder);
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(rootPath, repoId);
+		releaseFamilyMgr.getActiveVersion(versionId, encoder);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getActiveVersion(String, ActiveVersionEncoder)}
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getActiveVersion(String, ActiveVersionEncoder)}
 	 * @throws IOException 
 	 * @throws JsonSyntaxException 
 	 * @throws RepositoryException 
@@ -373,11 +373,11 @@ public class ManifestMgrTest
 		// create object to test
 		String versionId = "";
 		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
-		manifestMgr.getActiveVersion(versionId, encoder);
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(rootPath, repoId);
+		releaseFamilyMgr.getActiveVersion(versionId, encoder);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getActiveVersion(String, ActiveVersionEncoder)}
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getActiveVersion(String, ActiveVersionEncoder)}
 	 * @throws IOException 
 	 * @throws JsonSyntaxException
 	 * @throws RepositoryException 
@@ -393,12 +393,12 @@ public class ManifestMgrTest
 		// create object to test
 		String versionId = "some-active-version";
 		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
-		manifestMgr.getActiveVersion(versionId, encoder);
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(rootPath, repoId);
+		releaseFamilyMgr.getActiveVersion(versionId, encoder);
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getActiveVersion(String, ActiveVersionEncoder)}
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getActiveVersion(String, ActiveVersionEncoder)}
 	 * @throws IOException 
 	 * @throws JsonSyntaxException
 	 * @throws RepositoryException 
@@ -408,39 +408,39 @@ public class ManifestMgrTest
 	{
 		String testName = "setActiveVers-v";
 		String expectedVersionId = "versionId";
-		String expectedReleaseFamily = "some-release-fam";
+		String expectedReleaseFamilyName = "some-release-fam";
 		Path expectedPath = Paths.get("this","path","isnt","used");
 		
 		Path rootFolder = folder.newFolder(testName).toPath();
-		List<ManifestEntry> entries = ManifestEntryHelpers.create_valid_manifest_entries(testName, 4, rootFolder);
+		List<ReleaseFamilyEntry> entries = ReleaseFamilyEntryHelpers.create_valid_release_family_entries(testName, 4, rootFolder);
 		
-		Manifest expectedManifest = new Manifest();
-		expectedManifest.setReleaseFamily(expectedReleaseFamily);
-		for(ManifestEntry entry: entries)
+		ReleaseFamily expectedReleaseFamily = new ReleaseFamily();
+		expectedReleaseFamily.setReleaseFamily(expectedReleaseFamilyName);
+		for(ReleaseFamilyEntry entry: entries)
 		{
-			entry.setReleaseFamily(expectedReleaseFamily);
-			expectedManifest.addVersionEntry(entry);
+			entry.setReleaseFamily(expectedReleaseFamilyName);
+			expectedReleaseFamily.addVersionEntry(entry);
 		}
 		
 		ActiveVersionEncoder encoder = mock(ActiveVersionEncoder.class);
 		
-		createFileNameEncoder(expectedVersionId, expectedPath, encoder, expectedReleaseFamily);
+		createFileNameEncoder(expectedVersionId, expectedPath, encoder, expectedReleaseFamilyName);
 		// create object to test
 		
-		ManifestMgr manifestMgr = mock(ManifestMgr.class);
-		when(manifestMgr.getManifest(expectedReleaseFamily)).thenReturn(expectedManifest);
-		doCallRealMethod().when(manifestMgr).setActiveVersion(anyString(), anyString(), any());
+		ReleaseFamilyMgr releaseFamilyMgr = mock(ReleaseFamilyMgr.class);
+		when(releaseFamilyMgr.getReleaseFamily(expectedReleaseFamilyName)).thenReturn(expectedReleaseFamily);
+		doCallRealMethod().when(releaseFamilyMgr).setActiveVersion(anyString(), anyString(), any());
 		
-		for(ManifestEntry expectedEntry: entries)
+		for(ReleaseFamilyEntry expectedEntry: entries)
 		{
 			String newVersion = expectedEntry.getVersion();
-			manifestMgr.setActiveVersion(newVersion, expectedVersionId, encoder);
+			releaseFamilyMgr.setActiveVersion(newVersion, expectedVersionId, encoder);
 			verify(encoder, times(1)).writeVersionEntry(expectedPath, expectedEntry);
 		}
 	}
 
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getActiveVersion(String, ActiveVersionEncoder)}
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getActiveVersion(String, ActiveVersionEncoder)}
 	 * @throws IOException 
 	 * @throws JsonSyntaxException
 	 * @throws RepositoryException 
@@ -451,14 +451,14 @@ public class ManifestMgrTest
 		String testName = "setActiveVers-nnv";
 		Path rootPath = folder.newFolder(testName).toPath();
 		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(rootPath, repoId);
 		String newVersion = null;
 		String expectedVersionId = "versionId";
 		ActiveVersionEncoder encoder = mock(ActiveVersionEncoder.class);
-		manifestMgr.setActiveVersion(newVersion, expectedVersionId, encoder);
+		releaseFamilyMgr.setActiveVersion(newVersion, expectedVersionId, encoder);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getActiveVersion(String, ActiveVersionEncoder)}
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getActiveVersion(String, ActiveVersionEncoder)}
 	 * @throws IOException 
 	 * @throws JsonSyntaxException
 	 * @throws RepositoryException 
@@ -469,14 +469,14 @@ public class ManifestMgrTest
 		String testName = "setActiveVers-env";
 		Path rootPath = folder.newFolder(testName).toPath();
 		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(rootPath, repoId);
 		String newVersion = "";
 		String expectedVersionId = "versionId";
 		ActiveVersionEncoder encoder = mock(ActiveVersionEncoder.class);
-		manifestMgr.setActiveVersion(newVersion, expectedVersionId, encoder);
+		releaseFamilyMgr.setActiveVersion(newVersion, expectedVersionId, encoder);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getActiveVersion(String, ActiveVersionEncoder)}
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getActiveVersion(String, ActiveVersionEncoder)}
 	 * @throws IOException 
 	 * @throws JsonSyntaxException
 	 * @throws RepositoryException 
@@ -484,29 +484,29 @@ public class ManifestMgrTest
 	@Test
 	public void testSetActiveVersion_not_found_newVersion() throws JsonSyntaxException, IOException, RepositoryException
 	{
-		String expectedReleaseFamily = "some-release-fam";
+		String expectedReleaseFamilyName = "some-release-fam";
 		String expectedVersionId = "versionId";
 		Path expectedPath = Paths.get("this","path","isnt","used");
 		
-		ManifestEntry manifestEntry = new ManifestEntry();
-		manifestEntry.setReleaseFamily(expectedReleaseFamily);
-		manifestEntry.setVersion("not-the-one-we-are-looking-for");
+		ReleaseFamilyEntry releaseFamilyEntry = new ReleaseFamilyEntry();
+		releaseFamilyEntry.setReleaseFamily(expectedReleaseFamilyName);
+		releaseFamilyEntry.setVersion("not-the-one-we-are-looking-for");
 		
-		Manifest expectedManifest = new Manifest();
-		expectedManifest.setReleaseFamily(expectedReleaseFamily);
-		expectedManifest.addVersionEntry(manifestEntry);
+		ReleaseFamily expectedReleaseFamily = new ReleaseFamily();
+		expectedReleaseFamily.setReleaseFamily(expectedReleaseFamilyName);
+		expectedReleaseFamily.addVersionEntry(releaseFamilyEntry);
 		
 		ActiveVersionEncoder encoder = mock(ActiveVersionEncoder.class);
 		
-		createFileNameEncoder(expectedVersionId, expectedPath, encoder, expectedReleaseFamily);
+		createFileNameEncoder(expectedVersionId, expectedPath, encoder, expectedReleaseFamilyName);
 		// create object to test
 		
-		ManifestMgr manifestMgr = mock(ManifestMgr.class);
-		when(manifestMgr.getManifest(expectedReleaseFamily)).thenReturn(expectedManifest);
-		doCallRealMethod().when(manifestMgr).setActiveVersion(anyString(), anyString(), any());
+		ReleaseFamilyMgr releaseFamilyMgr = mock(ReleaseFamilyMgr.class);
+		when(releaseFamilyMgr.getReleaseFamily(expectedReleaseFamilyName)).thenReturn(expectedReleaseFamily);
+		doCallRealMethod().when(releaseFamilyMgr).setActiveVersion(anyString(), anyString(), any());
 		try
 		{
-			manifestMgr.setActiveVersion("the-one-we-look-for", expectedVersionId, encoder);
+			releaseFamilyMgr.setActiveVersion("the-one-we-look-for", expectedVersionId, encoder);
 			fail("setActiveVersion should have thrown an exception");
 		}
 		catch(RepositoryException ex)
@@ -515,7 +515,7 @@ public class ManifestMgrTest
 		}
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getActiveVersion(String, ActiveVersionEncoder)}
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getActiveVersion(String, ActiveVersionEncoder)}
 	 * @throws IOException 
 	 * @throws JsonSyntaxException
 	 * @throws RepositoryException 
@@ -526,14 +526,14 @@ public class ManifestMgrTest
 		String testName = "setActiveVers-nvid";
 		Path rootPath = folder.newFolder(testName).toPath();
 		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(rootPath, repoId);
 		String newVersion = "version";
 		String expectedVersionId = null;
 		ActiveVersionEncoder encoder = mock(ActiveVersionEncoder.class);
-		manifestMgr.setActiveVersion(newVersion, expectedVersionId, encoder);
+		releaseFamilyMgr.setActiveVersion(newVersion, expectedVersionId, encoder);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getActiveVersion(String, ActiveVersionEncoder)}
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getActiveVersion(String, ActiveVersionEncoder)}
 	 * @throws IOException 
 	 * @throws JsonSyntaxException
 	 * @throws RepositoryException 
@@ -544,14 +544,14 @@ public class ManifestMgrTest
 		String testName = "setActiveVers-evid";
 		Path rootPath = folder.newFolder(testName).toPath();
 		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(rootPath, repoId);
 		String newVersion = "version";
 		String expectedVersionId = "";
 		ActiveVersionEncoder encoder = mock(ActiveVersionEncoder.class);
-		manifestMgr.setActiveVersion(newVersion, expectedVersionId, encoder);
+		releaseFamilyMgr.setActiveVersion(newVersion, expectedVersionId, encoder);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ManifestMgr#getActiveVersion(String, ActiveVersionEncoder)}
+	 * Test method for {@link com.seven10.update_guy.ReleaseFamilyMgr.ReleaseFamilyMgr#getActiveVersion(String, ActiveVersionEncoder)}
 	 * @throws IOException 
 	 * @throws JsonSyntaxException
 	 * @throws RepositoryException 
@@ -562,10 +562,10 @@ public class ManifestMgrTest
 		String testName = "setActiveVers-ne";
 		Path rootPath = folder.newFolder(testName).toPath();
 		String repoId = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local).getShaHash();
-		ManifestMgr manifestMgr = new ManifestMgr(rootPath, repoId);
+		ReleaseFamilyMgr releaseFamilyMgr = new ReleaseFamilyMgr(rootPath, repoId);
 		String newVersion = "version";
 		String expectedVersionId = "versionId";
 		ActiveVersionEncoder encoder = null;
-		manifestMgr.setActiveVersion(newVersion, expectedVersionId, encoder);
+		releaseFamilyMgr.setActiveVersion(newVersion, expectedVersionId, encoder);
 	}
 }

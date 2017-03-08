@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 import com.seven10.update_guy.client.ClientSettings;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
 import com.seven10.update_guy.common.FileFingerPrint;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
 
 public class LocalCacheUtils
 {
@@ -62,7 +62,7 @@ public class LocalCacheUtils
 		return rval;
 	}
 	
-	public Path buildTargetPath(ManifestEntry release) throws FatalClientException
+	public Path buildTargetPath(ReleaseFamilyEntry release) throws FatalClientException
 	{
 		if(release == null)
 		{

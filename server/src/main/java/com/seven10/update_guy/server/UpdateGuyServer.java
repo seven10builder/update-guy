@@ -10,8 +10,8 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 import com.seven10.update_guy.common.Globals;
-import com.seven10.update_guy.server.manifest.ManifestServlet;
 import com.seven10.update_guy.server.release.ReleaseServlet;
+import com.seven10.update_guy.server.release_family.ReleaseFamilyServlet;
 import com.seven10.update_guy.server.repository.RepositoryServlet;
 
 public class UpdateGuyServer
@@ -21,7 +21,7 @@ public class UpdateGuyServer
 	{
 		List<String> servlets = new ArrayList<String>();
 		servlets.add(RepositoryServlet.class.getCanonicalName());
-		servlets.add(ManifestServlet.class.getCanonicalName());
+		servlets.add(ReleaseFamilyServlet.class.getCanonicalName());
 		servlets.add(ReleaseServlet.class.getCanonicalName());
 		
 		String s = String.join("; ", servlets);

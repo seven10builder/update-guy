@@ -1,6 +1,6 @@
 package com.seven10.update_guy.server.helpers;
 
-import static com.seven10.update_guy.common.ManifestHelpers.*;
+import static com.seven10.update_guy.common.ReleaseFamilyHelpers.*;
 import static com.seven10.update_guy.server.helpers.RepoInfoHelpers.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -24,8 +24,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.TestConstants;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
+import com.seven10.update_guy.common.release_family.UpdateGuyRole;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.RepositoryInfo.RepositoryType;
 
@@ -43,7 +43,7 @@ public class RepoConnectionHelpers
 		return repos;
 	}
 
-	public static void copy_downloads_to_path(ManifestEntry versionEntry, Path cachePath) throws IOException
+	public static void copy_downloads_to_path(ReleaseFamilyEntry versionEntry, Path cachePath) throws IOException
 	{
 		for(Entry<String, UpdateGuyRole> entry: versionEntry.getAllRoleInfos())
 		{
@@ -64,12 +64,12 @@ public class RepoConnectionHelpers
 		return folder.newFolder(String.format("%s_cache", releaseFamily)).toPath();
 	}
 
-	public static ManifestEntry get_manifest_entry_from_file(Path manifestPath) throws IOException
+	public static ReleaseFamilyEntry get_releaseFamily_entry_from_file(Path releaseFamilyPath) throws IOException
 	{		
-		copy_manifest_to_path(TestConstants.valid_manifest_name, manifestPath);
+		copy_release_family_file_to_path(TestConstants.valid_release_family_name, releaseFamilyPath);
 		// grab the first version entry we see
-		ManifestEntry manifestEntry = load_manifest_from_path(manifestPath).getVersionEntries().get(0);
-		return manifestEntry;
+		ReleaseFamilyEntry releaseFamilyEntry = load_release_family_file_from_path(releaseFamilyPath).getVersionEntries().get(0);
+		return releaseFamilyEntry;
 	}
 	
 	public static FTPClient create_mocked_ftp_client() throws IOException

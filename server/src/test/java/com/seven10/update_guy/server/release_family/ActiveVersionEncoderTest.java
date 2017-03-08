@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.seven10.update_guy.server.manifest;
+package com.seven10.update_guy.server.release_family;
 
 import static org.junit.Assert.*;
 
@@ -15,10 +15,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.seven10.update_guy.common.ManifestEntryHelpers;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.ReleaseFamilyEntryHelpers;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
 import com.seven10.update_guy.server.ServerGlobals;
-import com.seven10.update_guy.server.manifest.ActiveVersionEncoder;
+import com.seven10.update_guy.server.release_family.ActiveVersionEncoder;
 
 /**
  * @author kmm
@@ -31,7 +31,7 @@ public class ActiveVersionEncoderTest
 	public TemporaryFolder folder = new TemporaryFolder();
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ActiveVersionEncoder#ActiveVersionEncoder(java.lang.String, java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.release_family.ActiveVersionEncoder#ActiveVersionEncoder(java.lang.String, java.lang.String)}.
 	 */
 	@Test
 	public void testActiveVersionEncoder_valid()
@@ -44,7 +44,7 @@ public class ActiveVersionEncoderTest
 		assertEquals(expectedReleaseFamily, encoder.getReleaseFamily());
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ActiveVersionEncoder#ActiveVersionEncoder(java.lang.String, java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.release_family.ActiveVersionEncoder#ActiveVersionEncoder(java.lang.String, java.lang.String)}.
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testActiveVersionEncoder_nullRepoId()
@@ -55,7 +55,7 @@ public class ActiveVersionEncoderTest
 
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ActiveVersionEncoder#ActiveVersionEncoder(java.lang.String, java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.release_family.ActiveVersionEncoder#ActiveVersionEncoder(java.lang.String, java.lang.String)}.
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testActiveVersionEncoder_empty_repoId()
@@ -65,7 +65,7 @@ public class ActiveVersionEncoderTest
 		new ActiveVersionEncoder(expectedRepoId, expectedReleaseFamily);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ActiveVersionEncoder#ActiveVersionEncoder(java.lang.String, java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.release_family.ActiveVersionEncoder#ActiveVersionEncoder(java.lang.String, java.lang.String)}.
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testActiveVersionEncoder_null_releaseFamily()
@@ -75,7 +75,7 @@ public class ActiveVersionEncoderTest
 		new ActiveVersionEncoder(expectedRepoId, expectedReleaseFamily);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ActiveVersionEncoder#ActiveVersionEncoder(java.lang.String, java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.release_family.ActiveVersionEncoder#ActiveVersionEncoder(java.lang.String, java.lang.String)}.
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testActiveVersionEncoder_empty_releaseFamily()
@@ -86,7 +86,7 @@ public class ActiveVersionEncoderTest
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ActiveVersionEncoder#encodeFileName(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.release_family.ActiveVersionEncoder#encodeFileName(java.lang.String)}.
 	 * @throws IOException 
 	 */
 	@Test
@@ -111,7 +111,7 @@ public class ActiveVersionEncoderTest
 		assertEquals(expectedPath, actualPath);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ActiveVersionEncoder#encodeFileName(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.release_family.ActiveVersionEncoder#encodeFileName(java.lang.String)}.
 	 * @throws IOException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -125,7 +125,7 @@ public class ActiveVersionEncoderTest
 		encoder.encodeFileName(expectedVersionId);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ActiveVersionEncoder#encodeFileName(java.lang.String)}.
+	 * Test method for {@link com.seven10.update_guy.release_family.ActiveVersionEncoder#encodeFileName(java.lang.String)}.
 	 * @throws IOException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -140,8 +140,8 @@ public class ActiveVersionEncoderTest
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ActiveVersionEncoder#loadVersionEntry(java.nio.file.Path)}
-	 * and {@link com.seven10.update_guy.manifest.ActiveVersionEncoder#writeVersionEntry(java.nio.file.Path, com.seven10.update_guy.common.manifest.ManifestEntry)}.
+	 * Test method for {@link com.seven10.update_guy.release_family.ActiveVersionEncoder#loadVersionEntry(java.nio.file.Path)}
+	 * and {@link com.seven10.update_guy.release_family.ActiveVersionEncoder#writeVersionEntry(java.nio.file.Path, com.seven10.update_guy.common.release_family.ReleaseFamilyEntry)}.
 	 * @throws IOException 
 	 */
 	@Test
@@ -151,21 +151,21 @@ public class ActiveVersionEncoderTest
 		Path rootFolder = folder.newFolder(testName).toPath();
 		Path testFile = rootFolder.resolve(testName+".json");
 		
-		List<ManifestEntry> entries = ManifestEntryHelpers.create_valid_manifest_entries(testName, 3, rootFolder);
+		List<ReleaseFamilyEntry> entries = ReleaseFamilyEntryHelpers.create_valid_release_family_entries(testName, 3, rootFolder);
 		// the first time through the file is created because it doesn't exist, after the file is reused
 		
 		String expectedRepoId = "repoId";
 		String expectedReleaseFamily = "releaseFamily";
 		ActiveVersionEncoder encoder = new ActiveVersionEncoder(expectedRepoId, expectedReleaseFamily);
-		for(ManifestEntry expectedEntry: entries)
+		for(ReleaseFamilyEntry expectedEntry: entries)
 		{
 			encoder.writeVersionEntry(testFile, expectedEntry);
-			ManifestEntry actualEntry = encoder.loadVersionEntry(testFile);
+			ReleaseFamilyEntry actualEntry = encoder.loadVersionEntry(testFile);
 			assertEquals(expectedEntry, actualEntry);
 		}
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ActiveVersionEncoder#loadVersionEntry(java.nio.file.Path)}.
+	 * Test method for {@link com.seven10.update_guy.release_family.ActiveVersionEncoder#loadVersionEntry(java.nio.file.Path)}.
 	 * @throws IOException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -178,7 +178,7 @@ public class ActiveVersionEncoderTest
 		encoder.loadVersionEntry(testFile);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ActiveVersionEncoder#loadVersionEntry(java.nio.file.Path)}.
+	 * Test method for {@link com.seven10.update_guy.release_family.ActiveVersionEncoder#loadVersionEntry(java.nio.file.Path)}.
 	 * @throws IOException 
 	 */
 	@Test(expected=FileNotFoundException.class)
@@ -193,7 +193,7 @@ public class ActiveVersionEncoderTest
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ActiveVersionEncoder#writeVersionEntry(java.nio.file.Path, com.seven10.update_guy.common.manifest.ManifestEntry)}.
+	 * Test method for {@link com.seven10.update_guy.release_family.ActiveVersionEncoder#writeVersionEntry(java.nio.file.Path, com.seven10.update_guy.common.release_family.ReleaseFamilyEntry)}.
 	 * @throws IOException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -203,13 +203,13 @@ public class ActiveVersionEncoderTest
 		
 		String expectedRepoId = "repoId";
 		String expectedReleaseFamily = "releaseFamily";
-		ManifestEntry expectedEntry = new ManifestEntry();
+		ReleaseFamilyEntry expectedEntry = new ReleaseFamilyEntry();
 		ActiveVersionEncoder encoder = new ActiveVersionEncoder(expectedRepoId, expectedReleaseFamily);
 		
 		encoder.writeVersionEntry(testFile, expectedEntry);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.manifest.ActiveVersionEncoder#writeVersionEntry(java.nio.file.Path, com.seven10.update_guy.common.manifest.ManifestEntry)}.
+	 * Test method for {@link com.seven10.update_guy.release_family.ActiveVersionEncoder#writeVersionEntry(java.nio.file.Path, com.seven10.update_guy.common.release_family.ReleaseFamilyEntry)}.
 	 * @throws IOException 
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -219,7 +219,7 @@ public class ActiveVersionEncoderTest
 		Path testFile = folder.newFolder(testName).toPath().resolve(testName + ".json");
 		String expectedRepoId = "repoId";
 		String expectedReleaseFamily = "releaseFamily";
-		ManifestEntry expectedEntry = null;
+		ReleaseFamilyEntry expectedEntry = null;
 		ActiveVersionEncoder encoder = new ActiveVersionEncoder(expectedRepoId, expectedReleaseFamily);
 		
 		encoder.writeVersionEntry(testFile, expectedEntry);

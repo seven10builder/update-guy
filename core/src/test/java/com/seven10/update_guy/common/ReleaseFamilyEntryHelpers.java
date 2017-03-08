@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.seven10.update_guy.common.manifest.ManifestEntry;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
+import com.seven10.update_guy.common.release_family.UpdateGuyRole;
 
-public class ManifestEntryHelpers
+public class ReleaseFamilyEntryHelpers
 {
 	public static Map<String, UpdateGuyRole> create_entry_folder_list(int roleCount, Path rootFolder) throws IOException
 	{
@@ -40,9 +40,9 @@ public class ManifestEntryHelpers
 		}
 		return rvalue;
 	}
-	public static ManifestEntry create_valid_manifest_entry(String testName, int index, Path rootFolder) throws IOException
+	public static ReleaseFamilyEntry create_valid_release_family_entry(String testName, int index, Path rootFolder) throws IOException
 	{
-		ManifestEntry mve = new ManifestEntry();
+		ReleaseFamilyEntry mve = new ReleaseFamilyEntry();
 		String version = "v"+ testName + index;
 		mve.setVersion(version);
 		Map<String, UpdateGuyRole> entries = create_entry_folder_list(index, rootFolder);
@@ -50,13 +50,13 @@ public class ManifestEntryHelpers
 		return mve;
 	}
 	
-	public static List<ManifestEntry> create_valid_manifest_entries(String testName, int entryCount,
+	public static List<ReleaseFamilyEntry> create_valid_release_family_entries(String testName, int entryCount,
 			Path rootFolder) throws IOException
 	{
-		List<ManifestEntry> versionEntries = new ArrayList<ManifestEntry>();
+		List<ReleaseFamilyEntry> versionEntries = new ArrayList<ReleaseFamilyEntry>();
 		for (int i = 1; i <= entryCount; i++)
 		{
-			ManifestEntry versionEntry = create_valid_manifest_entry(testName, i, 
+			ReleaseFamilyEntry versionEntry = create_valid_release_family_entry(testName, i, 
 												rootFolder.resolve(String.format("entry_%d_%d", entryCount, i)));
 			versionEntries.add(versionEntry);
 		}

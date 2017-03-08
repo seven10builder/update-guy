@@ -7,8 +7,8 @@ import org.apache.logging.log4j.Logger;
 import com.seven10.update_guy.client.ClientSettings;
 import com.seven10.update_guy.client.FunctionalInterfaces.RequesterFactory;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
+import com.seven10.update_guy.common.release_family.UpdateGuyRole.ClientRoleInfo;
 
 public class RequesterUtils
 {
@@ -45,27 +45,27 @@ public class RequesterUtils
 		return prefix;
 	}
 
-	public String buildManifestReq()
+	public String buildReleaseFamilyReq()
 	{
-		String url = String.format("%s/manifest/%s", buildPrefix(),	settings.repoId);
-		logger.debug(".buildManifestReq(): request url = '%s'", url);
+		String url = String.format("%s/release-family/%s", buildPrefix(),	settings.repoId);
+		logger.debug(".buildReleaseFamilyReq(): request url = '%s'", url);
 		
 		return url;
 	}
 	
-	public ManifestEntry requestActiveRelease(RequesterFactory requesterFactory) throws FatalClientException
+	public ReleaseFamilyEntry requestActiveRelease(RequesterFactory requesterFactory) throws FatalClientException
 	{
 		if(requesterFactory == null)
 		{
 			throw new IllegalArgumentException("requesterFactory must not be null");
 		}
 		String methodName = String.format("active-release/%s/%s", settings.releaseFamily, settings.activeVersionId);
-		String url = buildManifestReq();		
+		String url = buildReleaseFamilyReq();		
 		Requester requester = requesterFactory.getRequester(url, methodName);
 		
-		ManifestEntry activeVersion = requester.get(
+		ReleaseFamilyEntry activeVersion = requester.get(
 				requester::buildRequest,
-				new ResponseEvaluator<ManifestEntry>(ManifestEntry.class));
+				new ResponseEvaluator<ReleaseFamilyEntry>(ReleaseFamilyEntry.class));
 		logger.debug(".requestActiveRelease(): activeVersion = '%s'", activeVersion.getVersion());
 		return activeVersion;
 	}
@@ -80,7 +80,7 @@ public class RequesterUtils
 		return url;
 	}
 	
-	public void requestDownloadRoleFile(ManifestEntry release, Path jarFilePath, RequesterFactory requesterFactory) throws FatalClientException
+	public void requestDownloadRoleFile(ReleaseFamilyEntry release, Path jarFilePath, RequesterFactory requesterFactory) throws FatalClientException
 	{
 		if(release == null)
 		{
@@ -105,7 +105,7 @@ public class RequesterUtils
 				new ResponseEvaluator<ClientRoleInfo>(ClientRoleInfo.class),  Requester::copyFileFromResponse);
 	}
 	
-	public ClientRoleInfo requestRemoteClientRoleInfo(ManifestEntry release, RequesterFactory requesterFactory) throws FatalClientException
+	public ClientRoleInfo requestRemoteClientRoleInfo(ReleaseFamilyEntry release, RequesterFactory requesterFactory) throws FatalClientException
 	{
 		if(release == null)
 		{

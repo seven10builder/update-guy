@@ -24,10 +24,11 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
-import com.seven10.update_guy.common.manifest.Manifest;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole;
+import com.seven10.update_guy.common.release_family.ReleaseFamily;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
+import com.seven10.update_guy.common.release_family.UpdateGuyRole;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
@@ -259,35 +260,35 @@ public class FtpRepoConnection implements RepoConnection
 	}
 
 	@Override
-	public Manifest getManifest(String releaseFamily) throws RepositoryException
+	public ReleaseFamily getReleaseFamily(String releaseFamilyName) throws RepositoryException
 	{
-		if (releaseFamily == null || releaseFamily.isEmpty())
+		if (releaseFamilyName == null || releaseFamilyName.isEmpty())
 		{
-			throw new IllegalArgumentException("releaseFamily cannot be null or empty");
+			throw new IllegalArgumentException("releaseFamilyName cannot be null or empty");
 		}
-		String manifestFileName = String.format("%s.manifest", releaseFamily);
-		Path srcPath = activeRepo.getRemoteManifestPath().resolve(manifestFileName);
+		String releaseFamilyFileName = Globals.buildRelFamFileName(releaseFamilyName);
+		Path srcPath = activeRepo.getRemoteReleaseFamilyPath().resolve(releaseFamilyFileName);
 		String repoId = activeRepo.getShaHash();
-		Path destPath = ServerGlobals.getManifestStorePath(repoId).resolve(manifestFileName);
+		Path destPath = ServerGlobals.getReleaseFamilyStorePath(repoId).resolve(releaseFamilyFileName);
 		// ensure the path exists
 
 		downloadFile(srcPath, destPath);
 		try
 		{
-			return Manifest.loadFromFile(destPath);
+			return ReleaseFamily.loadFromFile(destPath);
 		}
 		catch (UpdateGuyException ex)
 		{
-			logger.error(".getManifest(): could not load manifest from path '%s'. Reason: %s", destPath.toString(), ex.getMessage());
-			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "could not load manifest '%s'", destPath.getFileName().toString());
+			logger.error(".getReleaseFamily(): could not load release family from path '%s'. Reason: %s", destPath.toString(), ex.getMessage());
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "could not load release family '%s'", destPath.getFileName().toString());
 		}
 	}
 
 	/**
-	 * @see com.seven10.update_guy.repository.connection.RepoConnection#downloadRelease(com.seven10.update_guy.repository.ManifestEntry)
+	 * @see com.seven10.update_guy.repository.connection.RepoConnection#downloadRelease(com.seven10.update_guy.ReleaseFamilyEntry.ReleaseFamilyEntry)
 	 */
 	@Override
-	public void downloadRelease(ManifestEntry versionEntry, Consumer<Path> onFileComplete) throws RepositoryException
+	public void downloadRelease(ReleaseFamilyEntry versionEntry, Consumer<Path> onFileComplete) throws RepositoryException
 	{
 		if (versionEntry == null)
 		{
@@ -301,7 +302,7 @@ public class FtpRepoConnection implements RepoConnection
 		if(roleInfos.size() == 0)
 		{
 			logger.error(".downloadRelease(): could not find any role infos for version '%s'", versionEntry.getVersion());
-			throw new RepositoryException(Status.NOT_FOUND, "No manifests found");
+			throw new RepositoryException(Status.NOT_FOUND, "No release families found");
 		}
 		for (Entry<String, UpdateGuyRole> entry : roleInfos) // get all the  paths
 		{
@@ -324,7 +325,7 @@ public class FtpRepoConnection implements RepoConnection
 	@Override
 	public List<String> getFileNames() throws RepositoryException
 	{
-		Path targetDir = activeRepo.getRemoteManifestPath();
+		Path targetDir = activeRepo.getRemoteReleaseFamilyPath();
 		try
 		{
 			logger.info(".getFileNames(): attempting to walk path '%s'", targetDir.toString());

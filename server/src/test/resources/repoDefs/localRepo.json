@@ -4,7 +4,7 @@
     "port": 0,
     "user": "",
     "password": "",
-    "manifestPath": "src/test/resources/remote_repo/local/2f4be34b3680b5a2556b1830f3c24232/manifests/",
+    "releaseFamilyPath": "src/test/resources/remote_repo/local/2f4be34b3680b5a2556b1830f3c24232/releaseFamilies/",
     "description": "This is a regular local repo",
     "repoType": "local"
   }

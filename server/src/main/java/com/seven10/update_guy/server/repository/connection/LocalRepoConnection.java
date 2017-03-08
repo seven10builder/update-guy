@@ -15,11 +15,12 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.seven10.update_guy.common.Globals;
 import com.seven10.update_guy.common.exceptions.UpdateGuyException;
 import com.seven10.update_guy.common.exceptions.UpdateGuyNotFoundException;
-import com.seven10.update_guy.common.manifest.Manifest;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole;
+import com.seven10.update_guy.common.release_family.ReleaseFamily;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
+import com.seven10.update_guy.common.release_family.UpdateGuyRole;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.ServerGlobals;
 import com.seven10.update_guy.server.exceptions.RepositoryException;
@@ -27,7 +28,7 @@ import com.seven10.update_guy.server.exceptions.RepositoryException;
 class LocalRepoConnection implements RepoConnection
 {
 	private static final Logger logger = LogManager.getFormatterLogger(LocalRepoConnection.class);
-	private final Path manifestPath;
+	private final Path releaseFamilyPath;
 	private final String repoId;
 	
 	private void copyFileToPath(Path srcPath, Path destPath) throws RepositoryException
@@ -44,7 +45,7 @@ class LocalRepoConnection implements RepoConnection
 	}
 	public LocalRepoConnection(RepositoryInfo activeRepo) throws RepositoryException
 	{
-		manifestPath = activeRepo.getRemoteManifestPath();
+		releaseFamilyPath = activeRepo.getRemoteReleaseFamilyPath();
 		repoId = activeRepo.getShaHash();
 	}
 	@Override
@@ -58,29 +59,29 @@ class LocalRepoConnection implements RepoConnection
 		return;// no need to disconnect!
 	}
 	@Override
-	public Manifest getManifest(String releaseFamily) throws RepositoryException
+	public ReleaseFamily getReleaseFamily(String releaseFamilyName) throws RepositoryException
 	{
-		if(releaseFamily==null || releaseFamily.isEmpty())
+		if(releaseFamilyName==null || releaseFamilyName.isEmpty())
 		{
 			throw new IllegalArgumentException("releaseFamily must not be null or empty");
 		}
-		Path filePath = manifestPath.resolve(String.format("%s.manifest", releaseFamily));
+		Path filePath = releaseFamilyPath.resolve(Globals.buildRelFamFileName(releaseFamilyName));
 		try
 		{
-			Manifest manifest = Manifest.loadFromFile(filePath);
-			return manifest;
+			ReleaseFamily releaseFamily = ReleaseFamily.loadFromFile(filePath);
+			return releaseFamily;
 		}
 		
 		catch(UpdateGuyException ex)
 		{
-			logger.error(".getManifest(): could not load Manifest from path '%s'. Reason: %s", filePath, ex.getMessage());
+			logger.error(".getReleaseFamily(): could not load release family from path '%s'. Reason: %s", filePath, ex.getMessage());
 			
 			Status errorCode = (ex instanceof UpdateGuyNotFoundException) ? Status.NOT_FOUND : Status.INTERNAL_SERVER_ERROR;
-			throw new RepositoryException(errorCode, "could not load manifest '%s'", filePath.getFileName().toString());
+			throw new RepositoryException(errorCode, "could not load release family '%s'", filePath.getFileName().toString());
 		}
 	}
 	@Override
-	public void downloadRelease(ManifestEntry versionEntry, Consumer<Path> onFileComplete) throws RepositoryException
+	public void downloadRelease(ReleaseFamilyEntry versionEntry, Consumer<Path> onFileComplete) throws RepositoryException
 	{
 		if(versionEntry==null)
 		{
@@ -100,7 +101,7 @@ class LocalRepoConnection implements RepoConnection
 			}
 			catch(UpdateGuyException ex)
 			{
-				logger.error(".getManifest(): could not build target download path. Reason: %s", ex.getMessage());
+				logger.error(".getReleaseFamily(): could not build target download path. Reason: %s", ex.getMessage());
 				throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "could not build target download path");
 			}
 			
@@ -112,24 +113,24 @@ class LocalRepoConnection implements RepoConnection
 	@Override
 	public List<String> getFileNames() throws RepositoryException
 	{
-		if(Files.exists(manifestPath) == false)
+		if(Files.exists(releaseFamilyPath) == false)
 		{
-			logger.error(".getFileNames(): target directory '%s' does not exist", manifestPath.toString());
+			logger.error(".getFileNames(): target directory '%s' does not exist", releaseFamilyPath.toString());
 			throw new RepositoryException(Status.NOT_FOUND, "Could not find target directory");
 		}
 		try
 		{
-			logger.info(".getFileNames(): attempting to walk path '%s'", manifestPath);
-			List<String> files = Files.walk(manifestPath).filter(Files::isRegularFile)
+			logger.info(".getFileNames(): attempting to walk path '%s'", releaseFamilyPath);
+			List<String> files = Files.walk(releaseFamilyPath).filter(Files::isRegularFile)
 					.filter(Objects::nonNull)
 					.map(file->file.getFileName().toString())
 					.collect(Collectors.toList());
-			logger.debug(".getFileNames(): results from walk of path '%s' - %s", manifestPath, String.join(", ", files) );
+			logger.debug(".getFileNames(): results from walk of path '%s' - %s", releaseFamilyPath, String.join(", ", files) );
 			return files;
 		}
 		catch (IOException ex)
 		{
-			logger.error(".getFileNames(): could not walk directory '%s' - %s", manifestPath.toString(), ex.getMessage() );
+			logger.error(".getFileNames(): could not walk directory '%s' - %s", releaseFamilyPath.toString(), ex.getMessage() );
 			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "could not walk remote repo directory");
 		}
 	}
@@ -143,7 +144,7 @@ class LocalRepoConnection implements RepoConnection
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((repoId == null) ? 0 : repoId.hashCode());
-		result = prime * result + ((manifestPath == null) ? 0 : manifestPath.hashCode());
+		result = prime * result + ((releaseFamilyPath == null) ? 0 : releaseFamilyPath.hashCode());
 		return result;
 	}
 	/* (non-Javadoc)
@@ -176,14 +177,14 @@ class LocalRepoConnection implements RepoConnection
 		{
 			return false;
 		}
-		if (manifestPath == null)
+		if (releaseFamilyPath == null)
 		{
-			if (other.manifestPath != null)
+			if (other.releaseFamilyPath != null)
 			{
 				return false;
 			}
 		}
-		else if (!manifestPath.equals(other.manifestPath))
+		else if (!releaseFamilyPath.equals(other.releaseFamilyPath))
 		{
 			return false;
 		}

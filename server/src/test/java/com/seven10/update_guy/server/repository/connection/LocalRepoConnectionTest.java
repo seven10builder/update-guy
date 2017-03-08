@@ -3,7 +3,7 @@
  */
 package com.seven10.update_guy.server.repository.connection;
 
-import static com.seven10.update_guy.common.ManifestHelpers.*;
+import static com.seven10.update_guy.common.ReleaseFamilyHelpers.*;
 import static com.seven10.update_guy.server.helpers.RepoConnectionHelpers.*;
 import static com.seven10.update_guy.server.helpers.RepoInfoHelpers.*;
 import static org.junit.Assert.*;
@@ -27,9 +27,9 @@ import org.junit.rules.TemporaryFolder;
 
 import com.seven10.update_guy.server.helpers.RepoInfoHelpers;
 import com.seven10.update_guy.common.DownloadValidator;
-import com.seven10.update_guy.common.ManifestHelpers;
-import com.seven10.update_guy.common.manifest.Manifest;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
+import com.seven10.update_guy.common.ReleaseFamilyHelpers;
+import com.seven10.update_guy.common.release_family.ReleaseFamily;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
 import com.seven10.update_guy.server.repository.SpyablePathConsumer;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.RepositoryInfo.RepositoryType;
@@ -61,16 +61,16 @@ public class LocalRepoConnectionTest
 	
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadManifest(java.lang.String)}
+	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadReleaseFamily(java.lang.String)}
 	 * .
 	 * @throws Exception 
 	 */
 	@Test
-	public void testgetManifest_valid() throws Exception
+	public void testgetReleaseFamily_valid() throws Exception
 	{
 		String releaseFamily = "relfam";
 	
-		Manifest expected = load_manifest_from_path(get_valid_manifest_file_path());
+		ReleaseFamily expected = load_release_family_file_from_path(get_valid_release_family_file_path());
 		
 		// set up our local repo
 		List<RepositoryInfo> repos = load_repos_from_file(get_valid_repos_path());
@@ -78,63 +78,63 @@ public class LocalRepoConnectionTest
 		
 		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
 	
-		Manifest actual = repoConnection.getManifest(releaseFamily);
+		ReleaseFamily actual = repoConnection.getReleaseFamily(releaseFamily);
 		
 		assertEquals(expected, actual);
 	}
 	
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadManifest(java.lang.String)}
+	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadReleaseFamily(java.lang.String)}
 	 * .
 	 * 
 	 * @throws IOException
 	 * @throws RepositoryException
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void testgetManifest_null() throws IOException, RepositoryException
+	public void testgetReleaseFamily_null() throws IOException, RepositoryException
 	{
 		RepositoryInfo repo = new RepositoryInfo();
 		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
 		String expected = null;
-		repoConnection.getManifest(expected);
+		repoConnection.getReleaseFamily(expected);
 	}
 	
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadManifest(java.lang.String)}
+	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadReleaseFamily(java.lang.String)}
 	 * .
 	 * 
 	 * @throws IOException
 	 * @throws RepositoryException
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void testgetManifest_empty() throws IOException, RepositoryException
+	public void testgetReleaseFamily_empty() throws IOException, RepositoryException
 	{
 		RepositoryInfo repo = new RepositoryInfo();
 		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
 		String expected = "";
-		repoConnection.getManifest(expected);
+		repoConnection.getReleaseFamily(expected);
 	}
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadManifest(java.lang.String)}
+	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadReleaseFamily(java.lang.String)}
 	 * .
 	 * 
 	 * @throws IOException
 	 * @throws RepositoryException
 	 */
 	@Test(expected = RepositoryException.class)
-	public void testgetManifest_notFound() throws IOException, RepositoryException
+	public void testgetReleaseFamily_notFound() throws IOException, RepositoryException
 	{
 		RepositoryInfo repo = new RepositoryInfo();
 		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
 		String expected = "weKnowThisAintThere";
-		repoConnection.getManifest(expected);
+		repoConnection.getReleaseFamily(expected);
 	}
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadRelease(com.seven10.update_guy.repository.Manifest.VersionEntry)}
+	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadRelease(com.seven10.update_guy.ReleaseFamily.ReleaseFamily.VersionEntry)}
 	 * .
 	 * @throws Exception 
 	 */
@@ -151,9 +151,9 @@ public class LocalRepoConnectionTest
 		// point repo at our test cache
 		//Path cachePath = build_cache_path_by_testname(releaseFamily, folder);
 		
-		// setup a manifest entry to get
-		Path manifestPath = build_manifest_path_by_testname(releaseFamily, folder);
-		ManifestEntry entry = get_manifest_entry_from_file(manifestPath);
+		// setup a release family entry to get
+		Path releaseFamilyPath = build_release_family_file_path_by_testname(releaseFamily, folder);
+		ReleaseFamilyEntry entry = get_releaseFamily_entry_from_file(releaseFamilyPath);
 		int roleCount = entry.getRoles().size();
 		
 		//copy_downloads_to_path(entry, cachePath);
@@ -167,7 +167,7 @@ public class LocalRepoConnectionTest
 	}
 		/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadRelease(com.seven10.update_guy.repository.Manifest.VersionEntry)}
+	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadRelease(com.seven10.update_guy.ReleaseFamily.ReleaseFamily.VersionEntry)}
 	 * .
 	 * @throws Exception 
 	 */
@@ -177,7 +177,7 @@ public class LocalRepoConnectionTest
 		RepositoryInfo repo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local);
 		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
 		
-		ManifestEntry versionEntry = null;
+		ReleaseFamilyEntry versionEntry = null;
 		Consumer<Path> spiedOnFileComplete = spy(new SpyablePathConsumer());
 		try
 		{
@@ -192,7 +192,7 @@ public class LocalRepoConnectionTest
 	}
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadRelease(com.seven10.update_guy.repository.Manifest.VersionEntry)}
+	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadRelease(com.seven10.update_guy.ReleaseFamily.ReleaseFamily.VersionEntry)}
 	 * .
 	 * @throws Exception 
 	 */
@@ -202,21 +202,21 @@ public class LocalRepoConnectionTest
 		RepositoryInfo repo = RepoInfoHelpers.load_valid_repo_info(RepositoryType.local);
 		LocalRepoConnection repoConnection = new LocalRepoConnection(repo);
 		
-		ManifestEntry versionEntry = new ManifestEntry();
+		ReleaseFamilyEntry versionEntry = new ReleaseFamilyEntry();
 		Consumer<Path> spiedOnFileComplete = null;
 		repoConnection.downloadRelease(versionEntry, spiedOnFileComplete );
 	}
 	
 	/**
 	 * Test method for
-	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadRelease(com.seven10.update_guy.repository.Manifest.VersionEntry)}
+	 * {@link com.seven10.update_guy.repository.connection.LocalRepoConnection#downloadRelease(com.seven10.update_guy.ReleaseFamily.ReleaseFamily.VersionEntry)}
 	 * .
 	 * @throws Exception 
 	 */
 	@Test
 	public void testGetFileNames_valid() throws Exception
 	{
-		Path targetDir = ManifestHelpers.get_manifests_path();
+		Path targetDir = ReleaseFamilyHelpers.get_release_family_files_path();
 		List<String> expectedFiles = Files.walk(targetDir).filter(Files::isRegularFile)
 				.filter(Objects::nonNull)
 				.map(file->file.getFileName().toString())

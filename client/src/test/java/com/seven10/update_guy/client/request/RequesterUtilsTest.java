@@ -15,9 +15,9 @@ import org.junit.rules.TemporaryFolder;
 import com.seven10.update_guy.client.ClientSettings;
 import com.seven10.update_guy.client.FunctionalInterfaces;
 import com.seven10.update_guy.client.exceptions.FatalClientException;
-import com.seven10.update_guy.common.ManifestEntryHelpers;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
+import com.seven10.update_guy.common.ReleaseFamilyEntryHelpers;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
+import com.seven10.update_guy.common.release_family.UpdateGuyRole.ClientRoleInfo;
 
 /**
  * @author kmm
@@ -71,12 +71,12 @@ public class RequesterUtilsTest
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#buildManifestReq()}.
+	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#buildReleaseFamilyReq()}.
 	 */
 	@Test
-	public void testBuildManifestReq()
+	public void testBuildReleaseFamilyReq()
 	{
-		String expected = String.format("%s://%s:%d/manifest/%s", Requester.defaultProtocol, serverAddress, serverPort, repoId);
+		String expected = String.format("%s://%s:%d/release-family/%s", Requester.defaultProtocol, serverAddress, serverPort, repoId);
 		
 		ClientSettings settings = new ClientSettings();
 		settings.setServerAddress(serverAddress);
@@ -84,7 +84,7 @@ public class RequesterUtilsTest
 		settings.setRepoId(repoId);
 		
 		RequesterUtils requesterUtils = new RequesterUtils(settings);
-		String actual = requesterUtils.buildManifestReq();
+		String actual = requesterUtils.buildReleaseFamilyReq();
 		assertEquals(expected, actual);
 	}
 	
@@ -106,11 +106,11 @@ public class RequesterUtilsTest
 		RequesterUtils requesterUtils = new RequesterUtils(settings);
 		Requester requester = mock(Requester.class);
 		
-		ManifestEntry expectedManifest = ManifestEntryHelpers.create_valid_manifest_entry(testName, 1, rootFolder);
-		doReturn(expectedManifest).when(requester).get(any(), any());
+		ReleaseFamilyEntry expectedReleaseFamily = ReleaseFamilyEntryHelpers.create_valid_release_family_entry(testName, 1, rootFolder);
+		doReturn(expectedReleaseFamily).when(requester).get(any(), any());
 		
-		ManifestEntry actualManifest = requesterUtils.requestActiveRelease((url, methodName)->requester);
-		assertEquals(expectedManifest, actualManifest);
+		ReleaseFamilyEntry actualReleaseFamily = requesterUtils.requestActiveRelease((url, methodName)->requester);
+		assertEquals(expectedReleaseFamily, actualReleaseFamily);
 	}
 	/**
 	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestActiveRelease()}.
@@ -152,7 +152,7 @@ public class RequesterUtilsTest
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestDownloadRoleFile(com.seven10.update_guy.manifest.ManifestEntry, java.nio.file.Path)}.
+	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestDownloadRoleFile(com.seven10.update_guy.ReleaseFamilyEntry.ReleaseFamilyEntry, java.nio.file.Path)}.
 	 * @throws IOException 
 	 * @throws FatalClientException 
 	 */
@@ -170,7 +170,7 @@ public class RequesterUtilsTest
 		Path rootFolder = folder.newFolder(testName).toPath();
 		RequesterUtils requesterUtils = new RequesterUtils(settings);
 		Requester requester = mock(Requester.class);
-		ManifestEntry release = ManifestEntryHelpers.create_valid_manifest_entry(testName, 1, rootFolder);
+		ReleaseFamilyEntry release = ReleaseFamilyEntryHelpers.create_valid_release_family_entry(testName, 1, rootFolder);
 		
 		Path jarFilePath = Paths.get("some", "valid", "path");
 		requesterUtils.requestDownloadRoleFile(release, jarFilePath, (url, methodName)->requester);
@@ -178,7 +178,7 @@ public class RequesterUtilsTest
 		verify(requester, times(1)).getFile(any(), any(), any(), any());
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestDownloadRoleFile(com.seven10.update_guy.manifest.ManifestEntry, java.nio.file.Path)}.
+	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestDownloadRoleFile(com.seven10.update_guy.ReleaseFamilyEntry.ReleaseFamilyEntry, java.nio.file.Path)}.
 	 * @throws IOException 
 	 * @throws FatalClientException 
 	 */
@@ -188,7 +188,7 @@ public class RequesterUtilsTest
 		ClientSettings settings = new ClientSettings();
 		
 		Requester requester = mock(Requester.class);
-		ManifestEntry release = null;		
+		ReleaseFamilyEntry release = null;		
 		Path jarFilePath = Paths.get("some", "valid", "path");
 		FunctionalInterfaces.RequesterFactory requestorFactory = (url, methodName)->requester;
 		
@@ -196,7 +196,7 @@ public class RequesterUtilsTest
 		requesterUtils.requestDownloadRoleFile(release, jarFilePath, requestorFactory);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestDownloadRoleFile(com.seven10.update_guy.manifest.ManifestEntry, java.nio.file.Path)}.
+	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestDownloadRoleFile(com.seven10.update_guy.ReleaseFamilyEntry.ReleaseFamilyEntry, java.nio.file.Path)}.
 	 * @throws IOException 
 	 * @throws FatalClientException 
 	 */
@@ -206,7 +206,7 @@ public class RequesterUtilsTest
 		ClientSettings settings = new ClientSettings();
 		
 		Requester requester = mock(Requester.class);
-		ManifestEntry release = new ManifestEntry();		
+		ReleaseFamilyEntry release = new ReleaseFamilyEntry();		
 		Path jarFilePath = null;
 		FunctionalInterfaces.RequesterFactory requestorFactory = (url, methodName)->requester;
 		
@@ -214,7 +214,7 @@ public class RequesterUtilsTest
 		requesterUtils.requestDownloadRoleFile(release, jarFilePath, requestorFactory);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestDownloadRoleFile(com.seven10.update_guy.manifest.ManifestEntry, java.nio.file.Path)}.
+	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestDownloadRoleFile(com.seven10.update_guy.ReleaseFamilyEntry.ReleaseFamilyEntry, java.nio.file.Path)}.
 	 * @throws IOException 
 	 * @throws FatalClientException 
 	 */
@@ -223,7 +223,7 @@ public class RequesterUtilsTest
 	{
 		ClientSettings settings = new ClientSettings();
 		
-		ManifestEntry release = new ManifestEntry();		
+		ReleaseFamilyEntry release = new ReleaseFamilyEntry();		
 		Path jarFilePath = Paths.get("some", "valid", "path");
 		FunctionalInterfaces.RequesterFactory requestorFactory = null;
 		
@@ -232,7 +232,7 @@ public class RequesterUtilsTest
 	}
 	
 	/**
-	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestRemoteRoleInfo(com.seven10.update_guy.manifest.ManifestEntry)}.
+	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestRemoteRoleInfo(com.seven10.update_guy.ReleaseFamilyEntry.ReleaseFamilyEntry)}.
 	 * @throws IOException 
 	 * @throws FatalClientException 
 	 */
@@ -256,7 +256,7 @@ public class RequesterUtilsTest
 		Requester requester = mock(Requester.class);
 		doReturn(expectedInfo).when(requester).get(any(), any());		
 		
-		ManifestEntry release = ManifestEntryHelpers.create_valid_manifest_entry(testName, 1, rootFolder);
+		ReleaseFamilyEntry release = ReleaseFamilyEntryHelpers.create_valid_release_family_entry(testName, 1, rootFolder);
 		
 		ClientRoleInfo actualRoleInfo = requesterUtils.requestRemoteClientRoleInfo(release, (url, methodName)->requester);
 		assertEquals(expectedFingerPrint, actualRoleInfo.fingerPrint);
@@ -264,7 +264,7 @@ public class RequesterUtilsTest
 		verify(requester,times(1)).get(any(), any());
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestRemoteRoleInfo(com.seven10.update_guy.manifest.ManifestEntry)}.
+	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestRemoteRoleInfo(com.seven10.update_guy.ReleaseFamilyEntry.ReleaseFamilyEntry)}.
 	 * @throws IOException 
 	 * @throws FatalClientException 
 	 */
@@ -273,12 +273,12 @@ public class RequesterUtilsTest
 	{
 		ClientSettings settings = new ClientSettings();
 		RequesterUtils requesterUtils = new RequesterUtils(settings);
-		ManifestEntry release = null;
+		ReleaseFamilyEntry release = null;
 		FunctionalInterfaces.RequesterFactory requesterFactory = (url, methodName)->mock(Requester.class);
 		requesterUtils.requestRemoteClientRoleInfo(release, requesterFactory);
 	}
 	/**
-	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestRemoteRoleInfo(com.seven10.update_guy.manifest.ManifestEntry)}.
+	 * Test method for {@link com.seven10.update_guy.client.request.RequesterUtils#requestRemoteRoleInfo(com.seven10.update_guy.ReleaseFamilyEntry.ReleaseFamilyEntry)}.
 	 * @throws IOException 
 	 * @throws FatalClientException 
 	 */
@@ -287,7 +287,7 @@ public class RequesterUtilsTest
 	{
 		ClientSettings settings = new ClientSettings();
 		RequesterUtils requesterUtils = new RequesterUtils(settings);
-		ManifestEntry release = new ManifestEntry();
+		ReleaseFamilyEntry release = new ReleaseFamilyEntry();
 		FunctionalInterfaces.RequesterFactory requesterFactory = null;
 		requesterUtils.requestRemoteClientRoleInfo(release, requesterFactory);
 	}

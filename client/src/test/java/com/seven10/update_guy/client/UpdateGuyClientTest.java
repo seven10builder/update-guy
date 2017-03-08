@@ -23,8 +23,8 @@ import com.seven10.update_guy.client.exceptions.FatalClientException;
 import com.seven10.update_guy.client.local.JavaLauncher;
 import com.seven10.update_guy.client.local.LocalCacheUtils;
 import com.seven10.update_guy.client.request.RequesterUtils;
-import com.seven10.update_guy.common.manifest.ManifestEntry;
-import com.seven10.update_guy.common.manifest.UpdateGuyRole.ClientRoleInfo;
+import com.seven10.update_guy.common.release_family.ReleaseFamilyEntry;
+import com.seven10.update_guy.common.release_family.UpdateGuyRole.ClientRoleInfo;
 
 /**
  * @author kmm
@@ -36,36 +36,36 @@ public class UpdateGuyClientTest
 	private static final String expectedChecksum = "some-checksum";
 	
 	@Mock
-	public ManifestEntry mockedManifestEntry;
+	public ReleaseFamilyEntry mockedReleaseFamilyEntry;
 	
 	private static final String[] expectedParams = new String[]{"param1", "param2"};
 	/**
 	 * @param expectedChecksum
-	 * @param mockedManifestEntry
+	 * @param mockedReleaseFamilyEntry
 	 * @return
 	 * @throws FatalClientException
 	 */
-	private RequesterUtils createMockedRequesterUtils(String expectedChecksum, ManifestEntry mockedManifestEntry)
+	private RequesterUtils createMockedRequesterUtils(String expectedChecksum, ReleaseFamilyEntry mockedReleaseFamilyEntry)
 			throws FatalClientException
 	{
 		ClientRoleInfo clientRoleInfo = new ClientRoleInfo(expectedChecksum, Arrays.asList(expectedParams));
 		RequesterUtils mockedRequestUtils = mock(RequesterUtils.class);
-		doReturn(mockedManifestEntry).when(mockedRequestUtils).requestActiveRelease(any());
-		doReturn(clientRoleInfo).when(mockedRequestUtils).requestRemoteClientRoleInfo(eq(mockedManifestEntry), any());
+		doReturn(mockedReleaseFamilyEntry).when(mockedRequestUtils).requestActiveRelease(any());
+		doReturn(clientRoleInfo).when(mockedRequestUtils).requestRemoteClientRoleInfo(eq(mockedReleaseFamilyEntry), any());
 		return mockedRequestUtils;
 	}
 	/**
 	 * @param localChecksum
 	 * @param jarFilePath
-	 * @param mockedManifestEntry
+	 * @param mockedReleaseFamilyEntry
 	 * @return
 	 * @throws FatalClientException
 	 */
 	private LocalCacheUtils createMockedLocalCacheUtils(String localChecksum, Path jarFilePath,
-			ManifestEntry mockedManifestEntry) throws FatalClientException
+			ReleaseFamilyEntry mockedReleaseFamilyEntry) throws FatalClientException
 	{
 		LocalCacheUtils mockedLocalCacheUtils = mock(LocalCacheUtils.class);
-		doReturn(jarFilePath).when(mockedLocalCacheUtils).buildTargetPath(mockedManifestEntry);
+		doReturn(jarFilePath).when(mockedLocalCacheUtils).buildTargetPath(mockedReleaseFamilyEntry);
 		doReturn(localChecksum).when(mockedLocalCacheUtils).getLocalChecksum(jarFilePath);
 		return mockedLocalCacheUtils;
 	}
@@ -220,12 +220,12 @@ public class UpdateGuyClientTest
 		boolean expected = true;
 		Path jarFilePath = Paths.get("this", "is", "the", "one", "true", "path");
 		
-		ManifestEntry mockedManifestEntry = mock(ManifestEntry.class);
+		ReleaseFamilyEntry mockedReleaseFamilyEntry = mock(ReleaseFamilyEntry.class);
 		
-		RequesterUtils mockedRequestUtils = createMockedRequesterUtils(expectedChecksum, mockedManifestEntry);
+		RequesterUtils mockedRequestUtils = createMockedRequesterUtils(expectedChecksum, mockedReleaseFamilyEntry);
 		
 		LocalCacheUtils mockedLocalCacheUtils = createMockedLocalCacheUtils(expectedChecksum, jarFilePath,
-				mockedManifestEntry);
+				mockedReleaseFamilyEntry);
 
 		ProcessBuilder processBuilder = new ProcessBuilder();
 		JavaLauncher mockedLauncher = createMockedLauncher(expected, processBuilder);
@@ -234,7 +234,7 @@ public class UpdateGuyClientTest
 		UpdateGuyClient client = new UpdateGuyClient(expectedParams);
 		boolean actual = client.executeClientLoop(mockedRequestUtils, mockedLocalCacheUtils, mockedLauncher);
 		
-		verify(mockedRequestUtils, times(0)).requestDownloadRoleFile(eq(mockedManifestEntry), eq(jarFilePath), any());		
+		verify(mockedRequestUtils, times(0)).requestDownloadRoleFile(eq(mockedReleaseFamilyEntry), eq(jarFilePath), any());		
 		verify(mockedLauncher, times(1)).launchExecutable(processBuilder);
 		assertTrue(actual);
 	}
@@ -250,17 +250,17 @@ public class UpdateGuyClientTest
 		boolean expected = true;
 		Path jarFilePath = Paths.get("this", "is", "the", "one", "true", "path");
 		
-		RequesterUtils mockedRequestUtils = createMockedRequesterUtils(expectedChecksum, mockedManifestEntry);
+		RequesterUtils mockedRequestUtils = createMockedRequesterUtils(expectedChecksum, mockedReleaseFamilyEntry);
 		
 		LocalCacheUtils mockedLocalCacheUtils = createMockedLocalCacheUtils(localChecksum, jarFilePath,
-				mockedManifestEntry);
+				mockedReleaseFamilyEntry);
 
 		ProcessBuilder processBuilder = new ProcessBuilder();
 		JavaLauncher mockedLauncher = createMockedLauncher(expected, processBuilder);
 		
 		UpdateGuyClient client = new UpdateGuyClient(expectedParams);
 		boolean actual = client.executeClientLoop(mockedRequestUtils, mockedLocalCacheUtils, mockedLauncher);
-		verify(mockedRequestUtils, times(1)).requestDownloadRoleFile(eq(mockedManifestEntry), eq(jarFilePath), any());		
+		verify(mockedRequestUtils, times(1)).requestDownloadRoleFile(eq(mockedReleaseFamilyEntry), eq(jarFilePath), any());		
 		verify(mockedLauncher, times(1)).launchExecutable(processBuilder);
 		assertTrue(actual);
 	}
