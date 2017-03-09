@@ -163,7 +163,7 @@ public class ReleaseServlet
 		try
 		{
 			UpdateGuyRole roleInfo = releaseMgr.getRoleInfoForRole(version, roleName);
-			String uploadedFileLocation = roleInfo.getFilePath() + fileDetail.getFileName();
+			java.nio.file.Path uploadedFileLocation = roleInfo.getFilePath();
 
 			// save it
 			releaseMgr.uploadFile(uploadedInputStream, uploadedFileLocation);

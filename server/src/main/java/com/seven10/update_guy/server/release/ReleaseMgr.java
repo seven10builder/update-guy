@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
@@ -163,9 +164,9 @@ public class ReleaseMgr
 
 	}
 
-	public void uploadFile(InputStream uploadedInputStream, String uploadedFileLocation) throws RepositoryException
+	public void uploadFile(InputStream uploadedInputStream, Path uploadedFileLocation) throws RepositoryException
 	{
-		try(OutputStream out = new FileOutputStream(new File(uploadedFileLocation)))
+		try(OutputStream out = new FileOutputStream(uploadedFileLocation.toFile()))
 		{
 			Util.copyStream(uploadedInputStream, out);
 			out.flush();
