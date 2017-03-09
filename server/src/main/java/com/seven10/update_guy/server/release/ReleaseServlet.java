@@ -1,5 +1,6 @@
 package com.seven10.update_guy.server.release;
 
+import java.io.InputStream;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -18,6 +19,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.release_family.ReleaseFamily;
@@ -29,7 +32,6 @@ import com.seven10.update_guy.server.release_family.ReleaseFamilyRefresher;
 import com.seven10.update_guy.server.release_family.ReleaseFamilyServlet;
 import com.seven10.update_guy.server.repository.RepositoryInfo;
 import com.seven10.update_guy.server.repository.RepositoryServlet;
-
 
 @Path("/release/{repoId}/{releaseFamily}")
 public class ReleaseServlet
@@ -150,11 +152,34 @@ public class ReleaseServlet
 		}
 		return resp.build();
 	}
+	@POST
+	@Path("/roleInfo/{version}/upload/{roleName}")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response uploadFileForRole(@QueryParam("version") String version, @PathParam("roleName") String roleName, 
+									@FormDataParam("file") InputStream uploadedInputStream,
+									@FormDataParam("file") FormDataContentDisposition fileDetail)
+	{
+		ResponseBuilder resp;
+		try
+		{
+			UpdateGuyRole roleInfo = releaseMgr.getRoleInfoForRole(version, roleName);
+			String uploadedFileLocation = roleInfo.getFilePath() + fileDetail.getFileName();
+
+			// save it
+			releaseMgr.uploadFile(uploadedInputStream, uploadedFileLocation);
+			resp = Response.ok();
+		}
+		catch(RepositoryException ex)
+		{
+			resp = Response.status(ex.getStatusCode()).entity(String.format("{\"error\": \"%s\"", ex.getMessage()));
+		}
+		return resp.build();
+	}
 	
 	@GET
-	@Path("/download/{roleName}")
+	@Path("/roleInfo/{version}/download/{roleName}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response getFile(@PathParam("roleName") String roleName, @QueryParam("version") String version)
+	public Response getFile(@PathParam("version") String version, @PathParam("roleName") String roleName)
 	{
 		ResponseBuilder resp = null;
 		try
