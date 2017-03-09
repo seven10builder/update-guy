@@ -1,7 +1,10 @@
 package com.seven10.update_guy.server.release;
 
 import java.util.List;
+
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -75,7 +78,23 @@ public class ReleaseServlet
 		ReleaseFamily releaseFamily = ReleaseFamilyServlet.getReleaseFamilyById(releaseFamilyName, repoId, new ReleaseFamilyRefresher(repoId, ServerGlobals.getReleaseFamilyStorePath(repoId)));
 		this.releaseMgr = new ReleaseMgr(releaseFamily, repoInfo);
 	}
-
+	
+	@GET
+	@Path("/create")
+	public Response createReleaseFamily(@QueryParam("version") final String version)
+	{
+		ResponseBuilder resp;
+		try
+		{
+			releaseMgr.addRelease(version);
+			resp = Response.ok();
+		}
+		catch(RepositoryException ex)
+		{
+			resp = Response.status(ex.getStatusCode()).entity(String.format("{\"error\": \"%s\"", ex.getMessage()));
+		}
+		return resp.build();
+	}
 	/**
 	 * Gets the list of roles that the active version entry provides files for
 	 * 
@@ -96,8 +115,8 @@ public class ReleaseServlet
 	}
 	
 	@GET
-	@Path("/roleInfo/{roleName}")
-	public Response getRoleInfo(@PathParam("roleName") String roleName, @QueryParam("version") String version)
+	@Path("/roleInfo/{version}/show/{roleName}")
+	public Response getRoleInfo(@PathParam("version") String version, @PathParam("roleName") String roleName)
 	{
 		ResponseBuilder resp = null;
 		try
@@ -114,6 +133,23 @@ public class ReleaseServlet
 		return resp.build();
 	}
 	
+	@POST
+	@Path("/roleInfo/{version}/create/{roleName}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response createRoleInfo(@QueryParam("version") String version, @PathParam("roleName") String roleName, final UpdateGuyRole updateGuyRole)
+	{
+		ResponseBuilder resp;
+		try
+		{
+			releaseMgr.addRoleInfo(version, roleName, updateGuyRole);
+			resp = Response.ok();
+		}
+		catch(RepositoryException ex)
+		{
+			resp = Response.status(ex.getStatusCode()).entity(String.format("{\"error\": \"%s\"", ex.getMessage()));
+		}
+		return resp.build();
+	}
 	
 	@GET
 	@Path("/download/{roleName}")

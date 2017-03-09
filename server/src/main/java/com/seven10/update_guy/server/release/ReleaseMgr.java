@@ -1,6 +1,8 @@
 package com.seven10.update_guy.server.release;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.ws.rs.core.Response.Status;
@@ -122,6 +124,38 @@ public class ReleaseMgr
 			logger.error(".getAllRoles(): could not get version entry '%s'. Reason: %s", version, ex.getMessage());
 			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "could not get version Entry '%s'", version);
 		}
+	}
+
+	public void addRelease(String version) throws RepositoryException
+	{
+		boolean releaseExists = releaseFamily.getVersionEntries()
+								.stream()
+								.anyMatch(ve->ve.getVersion().compareTo(version) == 0);
+		if(releaseExists)
+		{
+			// already exists, throw an error
+			logger.error(".addRelease(): version entry '%s' cannot be added. Already exists", version);
+			throw new RepositoryException(Status.INTERNAL_SERVER_ERROR, "could not add version Entry '%s'", version);
+		}
+		ReleaseFamilyEntry releaseFamilyEntry = new ReleaseFamilyEntry();
+		releaseFamilyEntry.setVersion(version);
+		releaseFamilyEntry.setReleaseFamily(releaseFamily.getReleaseFamily());
+		releaseFamilyEntry.setPublishDate(new Date());
+		releaseFamily.addVersionEntry(releaseFamilyEntry);
+		
+	}
+
+
+	public void addRoleInfo(String version, String roleName, UpdateGuyRole updateGuyRole) throws RepositoryException
+	{
+		  ReleaseFamilyEntry versionEntry = releaseFamily.getVersionEntries()
+											.stream()
+											.filter(ve->ve.getVersion().compareTo(version) == 0)
+											.distinct()
+											.findFirst()
+											.get();
+		  versionEntry.addRoleInfo(roleName, updateGuyRole);
+		
 	}
 
 }
