@@ -21,6 +21,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.server.ResourceConfig;
 
 import com.seven10.update_guy.common.GsonFactory;
 import com.seven10.update_guy.common.release_family.ReleaseFamily;
@@ -81,6 +83,7 @@ public class ReleaseServlet
 		RepositoryInfo repoInfo = RepositoryServlet.getRepoInfoById(repoId);
 		ReleaseFamily releaseFamily = ReleaseFamilyServlet.getReleaseFamilyById(releaseFamilyName, repoId, new ReleaseFamilyRefresher(repoId, ServerGlobals.getReleaseFamilyStorePath(repoId)));
 		this.releaseMgr = new ReleaseMgr(releaseFamily, repoInfo);
+		new ResourceConfig().register(MultiPartFeature.class);
 	}
 	
 	@GET
@@ -137,15 +140,7 @@ public class ReleaseServlet
 		return resp.build();
 	}
 	
-	@GET
-	@Path("/roleInfo/{version}/createRole")
-	@Produces({MediaType.TEXT_HTML})
-	public Viewable showUploadPage()
-	{
-	        return new Viewable(FILE_UPLOAD_PATH, Integer.toString(patientId));
 		
-	}
-	
 	@POST
 	@Path("/roleInfo/{version}/create/{roleName}")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -164,11 +159,11 @@ public class ReleaseServlet
 		return resp.build();
 	}
 	
-	
+	/*
 	@POST
 	@Path("/roleInfo/{version}/upload/{roleName}")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadFileForRole(@QueryParam("version") String version, @PathParam("roleName") String roleName, 
+	public Response uploadFileForRole(@PathParam("version") String version, @PathParam("roleName") String roleName, 
 									@FormDataParam("file") InputStream uploadedInputStream,
 									@FormDataParam("file") FormDataContentDisposition fileDetail)
 	{
@@ -188,7 +183,7 @@ public class ReleaseServlet
 		}
 		return resp.build();
 	}
-	
+	*/
 	@GET
 	@Path("/roleInfo/{version}/download/{roleName}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)

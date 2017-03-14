@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.annotation.XmlElement;
@@ -227,6 +228,18 @@ public class RepositoryInfo
 	public Path getRemoteReleaseFamilyPath()
 	{
 		return Paths.get(this.releaseFamilyPath);
+	}
+	
+	public void setToMap(Map<String, String> targetMap)
+	{
+		targetMap.put("repoType", repoType.toString());
+		targetMap.put("repoDesc", this.description);
+		targetMap.put("repoAddress", this.repoAddress);
+		targetMap.put("repoPort", String.valueOf(this.port));
+		targetMap.put("repoUser", this.user);
+		targetMap.put("repoPass", this.password);
+		targetMap.put("repoRelFamilyPath", this.releaseFamilyPath);
+		targetMap.put("repoPriority", String.valueOf(this.priority));
 	}
 	
 }

@@ -1,5 +1,6 @@
 package com.seven10.update_guy.server.repository;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -18,6 +19,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.glassfish.jersey.server.mvc.Viewable;
 
 import com.google.gson.Gson;
 import com.seven10.update_guy.common.GsonFactory;
@@ -99,14 +101,30 @@ public class RepositoryServlet
 		else
 		{
 			logger.info(".showRepo(): found repo identified by '%s'", repoId);
-			String repoMapJson = GsonFactory.getGson().toJson(repoInfo);
-			resp = Response.ok().entity(repoMapJson);	
+			
+		    Map<String, String> model = new HashMap<>();
+		    repoInfo.setToMap(model);		    
+			resp = Response.ok().entity(new Viewable("repoInfo-show.jsp", model));	
 		}
 		return resp.build();
 	}
 	
-	@POST
+	@GET
 	@Path("/create")
+	@Produces(MediaType.TEXT_HTML)
+	public Response showCreatePage()
+	{
+		logger.trace(".showRepo(): start createRepo");
+		ResponseBuilder resp = null;
+		String jsp = getClass().getResource("repoInfo-create.jsp").getFile();
+		resp = Response.ok().entity(new Viewable(jsp));	
+		
+		return resp.build();
+	}
+	
+	
+	@POST
+	@Path("/create-do")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response createRepository(final RepositoryInfo repoInfo)
 	{
