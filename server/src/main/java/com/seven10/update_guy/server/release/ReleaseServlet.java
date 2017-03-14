@@ -37,6 +37,8 @@ import com.seven10.update_guy.server.repository.RepositoryServlet;
 public class ReleaseServlet
 {
 	private static final Logger logger = LogManager.getFormatterLogger(ReleaseServlet.class);
+	private static final String FILE_UPLOAD_PATH = "fileUpload.html";
+	
 	private final ReleaseMgr releaseMgr;
 
 	private static class CacheFileRunnable implements Runnable
@@ -135,10 +137,19 @@ public class ReleaseServlet
 		return resp.build();
 	}
 	
+	@GET
+	@Path("/roleInfo/{version}/createRole")
+	@Produces({MediaType.TEXT_HTML})
+	public Viewable showUploadPage()
+	{
+	        return new Viewable(FILE_UPLOAD_PATH, Integer.toString(patientId));
+		
+	}
+	
 	@POST
 	@Path("/roleInfo/{version}/create/{roleName}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response createRoleInfo(@QueryParam("version") String version, @PathParam("roleName") String roleName, final UpdateGuyRole updateGuyRole)
+	public Response createRoleInfo(@PathParam("version") String version, @PathParam("roleName") String roleName, final UpdateGuyRole updateGuyRole)
 	{
 		ResponseBuilder resp;
 		try
@@ -152,6 +163,8 @@ public class ReleaseServlet
 		}
 		return resp.build();
 	}
+	
+	
 	@POST
 	@Path("/roleInfo/{version}/upload/{roleName}")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
