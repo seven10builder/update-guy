@@ -1,5 +1,6 @@
 package com.seven10.update_guy.server.repository;
 
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,7 @@ public class RepositoryServlet
 		java.nio.file.Path repoFilePath = ServerGlobals.getRepoFile();
 		logger.info(".ctor(): repo config file path = %s", repoFilePath.toString());
 		this.repoInfoMgr = new RepositoryInfoMgr(repoFilePath);
+
 		logger.trace(".ctor(): created repository servlet");
 	}
 	
@@ -116,7 +118,8 @@ public class RepositoryServlet
 	{
 		logger.trace(".showRepo(): start createRepo");
 		ResponseBuilder resp = null;
-		String jsp = getClass().getResource("repoInfo-create.jsp").getFile();
+		URL resource = getClass().getResource("/repoInfo-create.jsp");
+		String jsp = resource.getFile();
 		resp = Response.ok().entity(new Viewable(jsp));	
 		
 		return resp.build();
